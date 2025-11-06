@@ -29,6 +29,7 @@ import { useAuth } from "@/provider/AuthProvider";
 import { useQuery } from "@tanstack/react-query";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import useGetDifference from "@/hooks/useGetDifference";
+import NotificationIcon from "@/components/icons/NotificationIcon";
 
 // Menu and Bottom items
 const menuItems = [
@@ -40,7 +41,7 @@ const menuItems = [
   {
     href: "/dashboard/content-management",
     icon: <Content className="w-[18px] h-[18px]" />,
-    label: "Content Management",
+    label: "Film Management",
   },
   {
     href: "/dashboard/categories",
@@ -50,18 +51,18 @@ const menuItems = [
   {
     href: "/dashboard/users",
     icon: <Users className="w-[18px] h-[18px]" />,
-    label: "Users",
+    label: "User Management",
   },
   {
     href: "/dashboard/subscriptions",
     icon: <Subscription className="w-[18px] h-[18px]" />,
-    label: "Subscription",
+    label: "Live TV",
   },
-  {
-    href: "/dashboard/help-support",
-    icon: <MessageCircleQuestionMark className="w-[18px] h-[18px]" />,
-    label: "Help & Support",
-  },
+  // {
+  //   href: "/dashboard/help-support",
+  //   icon: <MessageCircleQuestionMark className="w-[18px] h-[18px]" />,
+  //   label: "Help & Support",
+  // },
   {
     href: "/dashboard/setting",
     icon: <Setting className="w-[18px] h-[18px]" />,
@@ -87,7 +88,7 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
   // Fake user data (since we're not fetching real data)
   const user = {
     data: {
-      avatar_url: "/images/user-profile.svg",
+      avatar_url: "/dashboard/profile.png",
       name: "John Doe",
       email: "john.doe@example.com",
     },
@@ -142,27 +143,27 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
 
   const TopBar = () => {
     return (
-      <div className="lg:p-4 flex items-center justify-between">
+      <div className="lg:p-4 flex items-center justify-between bg-[#0D121E]">
         <div className="font-semibold text-2xl hidden lg:block">
           {"Welcome, Admin"}
         </div>
 
         <div className="flex items-center ">
-          <div className="relative mr-8 hidden sm:block">
+          {/* <div className="relative mr-8 hidden sm:block">
             <Input
               className="flex w-auto lg:w-[330px] justify-between items-center border border-[color:var(--Line-Color,#1B202C)] px-4 py-[9px] rounded-lg border-solid h-[44px] shadow-none outline-none focus-visible:ring-0 focus-visible:border-primary-color"
               placeholder="Search"
             />
             <SearchIcon className="absolute bottom-[12.5px] right-4" />
-          </div>
+          </div> */}
           <div className="mr-4 relative">
             {/* Notification */}
             <DropdownMenu>
               <DropdownMenuTrigger className="shadow-none outline-0 cursor-pointer">
-                <div className="relative flex w-12 h-12 items-center gap-2.5 bg-[#7A24BC33] justify-center rounded-3xl cursor-pointer">
-                  <BellIcon />
+                <div className="relative flex w-12 h-12 items-center gap-2.5  justify-center rounded-3xl cursor-pointer">
+                  <NotificationIcon />
                   {isNotification && (
-                    <div className="absolute top-3 right-3 h-[8px] w-[8px] rounded-full bg-red-600"></div>
+                    <div className="absolute top-3 right-3 h-[8px] w-[8px] rounded-full "></div>
                   )}
                 </div>
               </DropdownMenuTrigger>
@@ -198,7 +199,7 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
                 <div className="p-4">
                   <Link
                     href="/dashboard/setting/notification"
-                    className="bg-primary-color text-sm font-medium py-3 px-3 rounded w-full block text-center"
+                    className="bg-[#2D9DFF] text-sm font-medium py-3 px-3 rounded w-full block text-center"
                   >
                     View All Notifications
                   </Link>
@@ -213,11 +214,12 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
               <div>
                 <div className="flex-shrink-0 rounded-full">
                   <Image
-                    className="w-12 h-12 rounded-full"
-                    src={user?.data?.avatar_url || "/images/user-profile.svg"}
+                    className="w-12 h-12 rounded-full object-cover"
+                    src={user?.data?.avatar_url || "/dashboard/profile.png"}
                     width={48}
                     height={48}
                     alt="User"
+
                   />
                 </div>
               </div>
@@ -248,19 +250,18 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
 
       {/* Sidebar */}
       <div
-        className={`fixed z-30 h-screen w-64 transform bg-[#131824]  transition-transform duration-300 ease-in-out text-white ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0`}
+        className={`fixed z-30 h-screen w-64 transform bg-[#131824]  transition-transform duration-300 ease-in-out text-[#FFF] ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } lg:translate-x-0`}
       >
         {/* Logo */}
         <div className="flex items-center py-8 pl-12">
           <Link href="/dashboard">
             <Image
-              src={logo}
+              src="/dashboard/dashboardlgo.png"
               alt="logo"
               width={100}
-              height={100}
-              className="w-full"
+              height={155}
+              className="w-full "
             />
           </Link>
         </div>
@@ -278,11 +279,10 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
               <div className="mb-2" key={index}>
                 <Link
                   href={item.href}
-                  className={`flex items-center text-base font-medium px-4 py-3 rounded-md gap-1 ${
-                    isActive
-                      ? "bg-[#7A24BC] primary-text font-medium"
-                      : "text-[#A5A5AB] hover:bg-[#7A24BC]/50"
-                  }`}
+                  className={`flex items-center text-base font-medium px-4 py-3 rounded-md gap-1 ${isActive
+                    ? "bg-[#2D9DFF] primary-text font-medium"
+                    : "text-[#FFF] hover:bg-[#7A24BC]/10"
+                    }`}
                 >
                   {item.icon}
                   {item.label}
@@ -297,14 +297,13 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
           {bottomMenu.map((item, index) => {
             const isActive = pathname === item.href;
             return (
-              <div className="px-2 py-1" key={index}>
+              <div className="px-4 py-1" key={index}>
                 <button
                   onClick={handleLogout}
-                  className={`cursor-pointer w-full flex items-center text-base font-medium px-4 py-3 rounded-md gap-1 ${
-                    isActive
-                      ? "bg-[#7A24BC] primary-text font-medium"
-                      : "text-[#A5A5AB] hover:bg-[#7A24BC]/50"
-                  }`}
+                  className={`cursor-pointer  w-full flex items-center justify-center text-base font-medium px-4 py-3 rounded-full gap-1  ${isActive
+                    ? " primary-text font-medium "
+                    : "text-[#FFFFFF] font-sans font-normal text-[20px] leading-[120%] align-middle bg-red-600"
+                    }`}
                 >
                   {item.icon}
                   {item.label}
