@@ -30,6 +30,8 @@ import { useQuery } from "@tanstack/react-query";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import useGetDifference from "@/hooks/useGetDifference";
 import NotificationIcon from "@/components/icons/NotificationIcon";
+import FilmManagement from "@/components/icons/FilmManagement";
+import LiveTbIcon from "@/components/icons/LiveTvIcon";
 
 // Menu and Bottom items
 const menuItems = [
@@ -40,7 +42,7 @@ const menuItems = [
   },
   {
     href: "/dashboard/content-management",
-    icon: <Content className="w-[18px] h-[18px]" />,
+    icon: <FilmManagement className="w-[18px] h-[18px]" />,
     label: "Film Management",
   },
   {
@@ -55,7 +57,7 @@ const menuItems = [
   },
   {
     href: "/dashboard/subscriptions",
-    icon: <Subscription className="w-[18px] h-[18px]" />,
+    icon: <LiveTbIcon className="w-[18px] h-[18px]" />,
     label: "Live TV",
   },
   // {
@@ -276,10 +278,10 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
               return pathname.startsWith(item.href);
             })();
             return (
-              <div className="mb-2" key={index}>
+              <div className="mb-2" key={index} >
                 <Link
                   href={item.href}
-                  className={`flex items-center text-base font-medium px-4 py-3 rounded-md gap-1 ${isActive
+                  className={`flex items-center text-base font-medium px-4 py-3 rounded-md gap-2 ${isActive
                     ? "bg-[#2D9DFF] primary-text font-medium"
                     : "text-[#FFF] hover:bg-[#7A24BC]/10"
                     }`}

@@ -1,4 +1,5 @@
 import { privateAxios } from "@/components/axiosInstance/axios";
+import DeleteIcon from "@/components/icons/DeleteIcon";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -74,56 +75,34 @@ export default function DeleteAccount() {
                     <button className="bg-primary-color text-white px-5 py-[10px] rounded text-sm font-normal cursor-pointer">Delete</button>
                 </DialogTrigger>
 
-                <DialogContent className="sm:max-w-[530px] bg-gray3-bg border-gray3-border settingDialog" >
+                <DialogContent className="sm:max-w-[530px] bg-gray3-bg border-gray3-border settingDialog flex justify-center items-center mx-auto" >
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <DialogHeader className="pb-4 border-b border-[#222733]">
-                            <DialogTitle className="text-base font-semibold  text-white">Delet Account</DialogTitle>
                         </DialogHeader>
-                        <DialogDescription>
-                            <div className='mt-4'>
-                                {/* timeline */}
-                                <div className="mb-4">
-                                    <Label className="font-base font-medium mb-3 text-white">Choose Time Period<span className="text-red-500">*</span></Label>
-
-                                    <Controller
-                                        name="deactivationPeriod"
-                                        control={control}
-                                        defaultValue=""
-                                        rules={{
-                                            validate: (value) =>
-                                                value !== "" || "Time period is required",
-                                        }}
-                                        render={({ field }) => (
-                                            <Select
-                                                {...field}
-                                                onValueChange={field.onChange}
-                                                value={field.value}
-                                            >
-                                                <SelectTrigger className="h-[40px] w-full px-4 py-3 text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color text-white">
-                                                    <SelectValue placeholder="Select business type" />
-                                                </SelectTrigger>
-                                                <SelectContent className="bg-secondary-bg text-white border border-slate-700 rounded">
-                                                    <SelectItem value="3">3 Days</SelectItem>
-                                                    <SelectItem value="7">7 Days</SelectItem>
-                                                    <SelectItem value="30">30 Days</SelectItem>
-                                                    <SelectItem value="365">365 Days</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        )}
-                                    />
-
-
-                                    {errors.deactivationPeriod && (
-                                        <p className="error-msg">{errors.deactivationPeriod.message}</p>
-                                    )}
+                        <DialogDescription className="">
+                            <div className="flex flex-col items-center justify-center space-y-3 text-center">
+                                {/* Delete Icon */}
+                                <div className="flex justify-center items-center w-12 h-12 bg-white rounded-lg">
+                                    <DeleteIcon className="text-[#E70D0D] w-6 h-6 " />
                                 </div>
+
+                                {/* Title */}
+                                <p className="text-white text-lg font-semibold mt-3">Confirm Delete</p>
+
+                                {/* Description */}
+                                <p className="text-gray-300 text-sm max-w-sm">
+                                    You want to delete all the marked items. This cant be undone once you delete.
+                                </p>
                             </div>
+
                         </DialogDescription>
-                        <DialogFooter>
-                            <DialogClose asChild>
-                                <Button type='button' variant="outline" className="py-3 px-4 bg-transparent border border-primary-color text-white font-sm font-medium cursor-pointer hover:bg-primary-color hover:text-white rounded">Cancel</Button>
-                            </DialogClose>
-                            <Button type="submit" className="py-3 px-4 bg-primary-color text-white font-sm font-medium cursor-pointer hover:bg-primary-color rounded">Submit</Button>
+                        <DialogFooter className="">
+                            <div className="flex justify-center items-center mx-auto gap-4 mt-6">
+                                <DialogClose asChild>
+                                    <Button type='button' variant="outline" className="py-3 px-4 bg-[#202632]   text-white font-sm font-medium cursor-pointer hover:bg-[#E70D0D] hover:text-white rounded-md ">Cancel</Button>
+                                </DialogClose>
+                                <Button type="submit" className="py-3 px-4 bg-[#202632]  text-white font-sm font-medium cursor-pointer hover:bg-[#E70D0D] rounded-md">Delete</Button>
+                            </div>
                         </DialogFooter>
                     </form>
                 </DialogContent>
@@ -136,8 +115,8 @@ export default function DeleteAccount() {
     return (
         <div className="py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#1B202C]">
             <div className="w-full sm:w-[60%]">
-                <h6 className="text-base font-medium text-white mb-4">Deactivate Account</h6>
-                <p className="text-sm font-normal text-[#A5A5AB]">This will shutdown your account. Your account will be reactive when you sign in again</p>
+                <h6 className="text-base font-medium text-white mb-4">Delete Account</h6>
+                <p className="text-sm font-normal text-[#A5A5AB]">Your account will be permanently deleted</p>
             </div>
             {handleDeactiveAdmin()}
         </div>

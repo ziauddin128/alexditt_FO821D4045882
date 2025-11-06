@@ -19,6 +19,7 @@ import { useAuth } from "@/provider/AuthProvider";
 import { useForm } from "react-hook-form";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import { toast } from "sonner";
+import Calendar from "@/components/icons/Calendar";
 
 interface CityData {
   label: string,
@@ -241,13 +242,26 @@ export default function Setting() {
             </div>
             {/* Date of Birth */}
             <div>
-              <Label className="text-base font-mediumd mb-3">Date of Birth</Label>
+              <Label className="text-base font-medium mb-3">Date of Birth</Label>
               <div className="relative">
-                <div>
-                  <Input {...register("date_of_birth")} type="date" defaultValue={formattedDate} className="block h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color" id="datepicker" />
-                </div>
+                <Input
+                  {...register("date_of_birth")}
+                  type="text"
+                  placeholder="1 Feb, 1990"
+                  onFocus={(e) => (e.target.type = "date")}
+                  onBlur={(e) => {
+                    if (!e.target.value) e.target.type = "text";
+                  }}
+                  defaultValue={formattedDate}
+                  className="block h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color appearance-none"
+                  id="datepicker"
+                />
+
+                {/* Calendar Icon */}
+                <Calendar className="absolute right-3 top-1/4  w-5 h-5 text-gray-400 pointer-events-none" />
               </div>
             </div>
+
 
           </div>
           {/* Email */}
