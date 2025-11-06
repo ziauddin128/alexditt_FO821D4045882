@@ -7,7 +7,6 @@ import { ColumnDef } from "@tanstack/react-table";
 import React, { useState } from "react";
 
 export default function Dashboard() {
-
   return (
     <div className="space-y-8">
       <div>

@@ -1,8 +1,9 @@
 // src/lib/axios.js
-import axios from 'axios';
-import { storage } from '../../lib/storage';
+import axios from "axios";
+import { storage } from "../../lib/storage";
 
-const apiBaseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const apiBaseURL =
+  process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Public Axios instance (no auth)
 export const publicAxios = axios.create({
@@ -11,7 +12,6 @@ export const publicAxios = axios.create({
     // 'Content-Type': 'application/json',
   },
 });
-
 
 // Private Axios instance (with auth)
 export const privateAxios = axios.create({
@@ -24,7 +24,7 @@ export const privateAxios = axios.create({
 // Add interceptor to attach auth token to privateAxios requests
 privateAxios.interceptors.request.use(
   (config) => {
-    const token = storage.getItem('authToken');
+    const token = storage.getItem("authToken");
     // console.log(token)
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -42,7 +42,6 @@ privateAxios.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // storage.removeItem('authToken');
-      
       //window.location.href = '/auth/login';
     }
     return Promise.reject(error);

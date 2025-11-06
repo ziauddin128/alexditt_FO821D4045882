@@ -1,12 +1,19 @@
 "use client";
- 
+
 import { privateAxios, publicAxios } from "@/components/axiosInstance/axios";
 import { storage } from "@/lib/storage";
 import Link from "next/link";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { io } from "socket.io-client";
- 
+
 interface AuthContextType {
   user: any;
   isLoading: boolean;
@@ -15,7 +22,7 @@ interface AuthContextType {
   login: (credential: { email: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
 }
- 
+
 // Default value for context (used by createContext)
 const defaultAuthContext: AuthContextType = {
   user: null,
@@ -25,10 +32,10 @@ const defaultAuthContext: AuthContextType = {
   login: async () => {},
   logout: async () => {},
 };
- 
+
 //   create context
 const AuthContext = createContext<AuthContextType>(defaultAuthContext);
- 
+
 // custom hook to access the auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -37,14 +44,14 @@ export const useAuth = () => {
   }
   return context;
 };
- 
+
 // provider component
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isNotification, setIsNotification] = useState<any>(null);
- 
+
   // console.log("Inside auth context", user);
   useEffect(() => {
     const checkUser = async () => {
@@ -55,15 +62,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const { data } = await privateAxios.get("/users/get-me");
 
-          if(data?.data?.role == "admin")
-          {
+          if (data?.data?.role == "admin") {
             setUser(data?.data);
-          }
-          else 
-          {
+          } else {
             storage.removeItem("authToken");
           }
-
         } catch (error) {
           // storage.removeItem("authToken");
           setUser(null);
@@ -76,35 +79,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkUser();
   }, []);
 
- 
   // Login method
   const login = async (credentials: { email: string; password: string }) => {
     // console.log("Logging from context:", credentials);
     setIsLoading(true);
     try {
       const response = await publicAxios.post("/users/login", credentials);
- 
+
       const authorization = response.data;
       storage.setItem("authToken", authorization.token);
       setUser(authorization?.user);
       return authorization;
-      
     } catch (error: any) {
-
       let errorRes = error?.response?.data?.message;
 
-      if(errorRes === "deactivated")
-      {
+      if (errorRes === "deactivated") {
         errorRes = (
           <>
-          Your account is deactivated. Please activate your account to log in.{" "}
-          <Link href='/auth/active-account' className="text-blue-400 underline">Activate your account</Link>
+            Your account is deactivated. Please activate your account to log in.{" "}
+            <Link
+              href="/auth/active-account"
+              className="text-blue-400 underline"
+            >
+              Activate your account
+            </Link>
           </>
-        ) 
+        );
       }
-      setError(
-          (errorRes || "Unknown error")
-      );
+      setError(errorRes || "Unknown error");
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -120,24 +122,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const handleNotification = useCallback( async (payload: any) => {
+  const handleNotification = useCallback(async (payload: any) => {
     console.log(payload);
-    setIsNotification(payload)
-  },  [])
-  
+    setIsNotification(payload);
+  }, []);
+
   useEffect(() => {
     socket.on("notification", handleNotification);
 
     /* socket.on("connect", () => {
       console.log("Connect");
     }); */
-    
-    return () =>{
-      socket.off('notification',  handleNotification)
-    }
+
+    return () => {
+      socket.off("notification", handleNotification);
+    };
   }, [socket]);
 
-       
   const logout = async () => {
     setIsLoading(true);
     try {
@@ -150,7 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
     }
   };
- 
+
   // auth info
   const authInfo: AuthContextType = {
     user,
@@ -160,7 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     logout,
   };
- 
+
   return (
     <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
   );
