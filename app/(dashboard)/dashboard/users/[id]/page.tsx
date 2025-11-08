@@ -45,11 +45,10 @@ export default function UserDetails({ params }: { params: any }) {
                 key={index}
                 value={tab.value}
                 onClick={() => setActiveTab(tab.value)}
-                className={`text-xs sm:text-sm font-medium whitespace-nowrap border-0 border-b transition-all duration-300 text-white cursor-pointer ${
-                  activeTab === tab.value
-                    ? "border-primary-color"
-                    : "border-transparent"
-                }`}
+                className={`text-xs sm:text-sm font-medium whitespace-nowrap border-0 border-b transition-all duration-300 text-white cursor-pointer ${activeTab === tab.value
+                  ? "border-primary-color"
+                  : "border-transparent"
+                  }`}
                 style={{ padding: "10px 16px", borderRadius: "0" }}
               >
                 {tab.name}

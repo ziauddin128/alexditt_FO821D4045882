@@ -56,7 +56,7 @@ const menuItems = [
     label: "User Management",
   },
   {
-    href: "/dashboard/subscriptions",
+    href: "/dashboard/liveTv",
     icon: <LiveTbIcon className="w-[18px] h-[18px]" />,
     label: "Live TV",
   },
@@ -256,12 +256,12 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
           } lg:translate-x-0`}
       >
         {/* Logo */}
-        <div className="flex items-center py-8 pl-12">
+        <div className="flex items-center ">
           <Link href="/dashboard">
             <Image
               src="/dashboard/dashboardlgo.png"
               alt="logo"
-              width={100}
+              width={182}
               height={155}
               className="w-full "
             />
