@@ -41,7 +41,7 @@ const menuItems = [
     label: "Dashboard",
   },
   {
-    href: "/dashboard/content-management",
+    href: "/dashboard/film-management",
     icon: <FilmManagement className="w-[18px] h-[18px]" />,
     label: "Film Management",
   },
