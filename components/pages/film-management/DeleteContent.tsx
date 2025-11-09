@@ -5,13 +5,17 @@ import { DiamondMinus } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-export default function DeleteContent({ categoryId }: { categoryId: string }) {
+export default function DeleteContent({
+  categoryId,
+}: {
+  categoryId: string | number;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const dialogRef = useRef<HTMLDivElement>(null);
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (id: string | number) => {
       try {
         await privateAxios.delete(`/contents/${id}`);
       } catch (error: any) {
@@ -51,9 +55,9 @@ export default function DeleteContent({ categoryId }: { categoryId: string }) {
     <div>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="cursor-pointer hover:text-red-500"
+        className="cursor-pointer h-6 w-6 bg-[#111] hover:bg-secondary-color flex items-center justify-center rounded-[2px]"
       >
-        <DeleteIcon />
+        <DeleteIcon className="text-white h-4 w-4 " />
       </button>
       {isOpen && (
         <>

@@ -33,7 +33,7 @@ export function Paginations({
     }
   };
 
-  if (!page ) return null;
+  if (!page) return null;
   return (
     <Pagination className="flex items-center justify-center">
       <PaginationContent>
