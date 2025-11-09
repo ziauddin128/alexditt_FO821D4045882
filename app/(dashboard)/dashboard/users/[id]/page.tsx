@@ -28,7 +28,7 @@ export default function UserDetails({ params }: { params: any }) {
   //     return res.data;
   //   },
   // });
-  const userDet = { "id": 1, "email": "", "status": "success" }
+  const userDet = { "id": 1, "name": "", "email": "" }
   const isLoading = false;
   const tabs = [
     { name: "Personal Info", value: "personal-info" },

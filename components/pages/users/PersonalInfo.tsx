@@ -5,7 +5,6 @@ import { useForm, SubmitHandler } from "react-hook-form";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import Calendar from "@/components/icons/Calendar";
 import convertDateStr from "@/hooks/convertDateStr";
 
@@ -32,13 +31,11 @@ export default function PersonalInfo({ userDet }: PersonalInfoProps) {
     defaultValues: {
       name: userDet?.name || "",
       email: userDet?.email || "",
-      address: userDet?.address || "",
       phone_number: userDet?.phone_number || "",
       gender: userDet?.gender || "",
       description: userDet?.description || "",
-      create_date: userDet?.create_date
-        ? convertDateStr(userDet.create_date)
-        : "",
+      create_date: convertDateStr(userDet?.create_date ?? ""),
+
     },
   });
 
@@ -47,31 +44,26 @@ export default function PersonalInfo({ userDet }: PersonalInfoProps) {
   };
 
   return (
-    <div className="bg-secondary-bg p-2 md:p-4 rounded-sm">
-      <h1 className="text-base font-medium mb-4">Basic Information</h1>
-      <div className="bg-gray3-bg my-4 h-[1px]"></div>
-
+    <div className="p-2 md:p-4 rounded-sm">
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="bg-[#131824] p-4 rounded-[8px] mt-4">
           <div className="grid sm:grid-cols-2 gap-5">
-            {/* Name */}
             <div>
-              <Label className="text-base font-medium mb-3">Name</Label>
+              <Label className="text-white font-inter text-[16px] font-medium leading-[160%] pb-3"
+              >Name</Label>
               <Input
                 {...register("name", { required: "Name is required" })}
                 placeholder="Cameron Williamson"
                 className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
               />
               {errors.name && (
-                <p className="error-msg text-red-500 mt-1 text-sm">
-                  {errors.name.message}
-                </p>
+                <p className="text-red-500 mt-1 text-sm">{errors.name.message}</p>
               )}
             </div>
 
-            {/* Email */}
             <div>
-              <Label className="text-base font-medium mb-3">Email</Label>
+              <Label className="text-white font-inter text-[16px] font-medium leading-[160%] pb-3"
+              >Email</Label>
               <Input
                 {...register("email", {
                   required: "Email is required",
@@ -84,17 +76,15 @@ export default function PersonalInfo({ userDet }: PersonalInfoProps) {
                 className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
               />
               {errors.email && (
-                <p className="error-msg text-red-500 mt-1 text-sm">
-                  {errors.email.message}
-                </p>
+                <p className="text-red-500 mt-1 text-sm">{errors.email.message}</p>
               )}
             </div>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-5 mt-4">
-            {/* create date */}
             <div>
-              <Label className="text-base font-medium mb-3">Create Date</Label>
+              <Label className="text-white font-inter text-[16px] font-medium leading-[160%] pb-3"
+              >Create Date</Label>
               <div className="relative">
                 <Input
                   {...register("create_date")}
@@ -104,9 +94,10 @@ export default function PersonalInfo({ userDet }: PersonalInfoProps) {
                 <Calendar className="absolute right-3 top-1/4 w-5 h-5 text-gray-400 pointer-events-none" />
               </div>
             </div>
-            {/* Phone */}
+
             <div>
-              <Label className="text-base font-medium mb-3">Phone</Label>
+              <Label className="text-white font-inter text-[16px] font-medium leading-[160%] pb-3"
+              >Phone</Label>
               <Input
                 {...register("phone_number")}
                 placeholder="(704) 555-0127"
@@ -116,29 +107,26 @@ export default function PersonalInfo({ userDet }: PersonalInfoProps) {
           </div>
 
           <div className="grid sm:grid-cols-2 gap-5 mt-4">
-            {/* Gender */}
             <div>
-              <Label className="text-base font-medium mb-3">Gender</Label>
+              <Label className="text-white font-inter text-[16px] font-medium leading-[160%] pb-3"
+              >Gender</Label>
               <Input
                 {...register("gender")}
-                placeholder="Male "
+                placeholder="Male"
                 className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
               />
             </div>
 
-            {/* Description */}
-            <div className="">
-              <Label className="text-base font-medium mb-3">Description</Label>
+            <div>
+              <Label className="text-white font-inter text-[16px] font-medium leading-[160%] pb-3"
+              >Description</Label>
               <Input
                 {...register("description")}
                 placeholder="Write a description about yourself"
                 className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
               />
             </div>
-
           </div>
-
-
 
           <div className="mt-8 flex justify-center">
             <button
@@ -151,10 +139,9 @@ export default function PersonalInfo({ userDet }: PersonalInfoProps) {
         </div>
       </form>
     </div>
-
-
-  )
+  );
 }
+
 
 {/* <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
           <p className="text-sm">Username: <span className="font-medium">{userDet.name}</span></p>

@@ -209,8 +209,8 @@ export default function Upcoming() {
         <div>
             {/* vedio grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 w-full mt-4 space-y-4 gap-4">
-                {vedio.map((item) => (
-                    <div key={item.id} className="w-full">
+                {vedio.map((item, index) => (
+                    <div key={index} className="w-full">
                         <Image
                             src={item.vedio}
                             alt="vedio"
@@ -223,9 +223,9 @@ export default function Upcoming() {
                                 <Image
                                     src={item.pfofile}
                                     alt="profile"
-                                    height={100}
-                                    width={100}
-                                    className="h-16 w-16 rounded-full object-cover"
+                                    height={36}
+                                    width={36}
+                                    className="h-8 w-8 rounded-full object-cover"
                                 />
                             </div>
                             <div className="flex justify-center items-center">

@@ -144,7 +144,7 @@ export default function UserManagementTable() {
       header: "ID",
       cell: ({ row }) => {
         const serialNumber = (page - 1) * pageSize + (row.index + 1);
-        return <span>{serialNumber.toString().padStart(2, "0")}</span>;
+        return <span className="">{serialNumber.toString().padStart(2, "0")}</span>;
       },
     },
     {
@@ -218,6 +218,7 @@ export default function UserManagementTable() {
   return (
     <div>
       <div className="py-8 px-5">
+
         <button className="flex gap-2 bg-[#2D9DFF] text-white font-roboto text-[16px] font-normal leading-[150%] px-5 py-[10px] rounded-md">
           <PlusIcon className="mt-1" /> Add New User
         </button>
@@ -238,10 +239,10 @@ export default function UserManagementTable() {
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
+            <SelectContent className="bg-black text-white ">
+              <SelectItem className=" focus:bg-[#2473BB]" value="all">All</SelectItem>
+              <SelectItem className=" focus:bg-[#2473BB]" value="active">Active</SelectItem>
+              <SelectItem className=" focus:bg-[#2473BB]" value="inactive">Inactive</SelectItem>
             </SelectContent>
           </Select>
         </div>

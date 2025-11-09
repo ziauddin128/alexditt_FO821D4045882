@@ -64,9 +64,8 @@ const columns: ColumnDef<Category>[] = [
     header: "Status",
     cell: ({ row }) => (
       <span
-        className={`${
-          row.original.status === 1 ? "text-green-500/90" : "text-red-500/90"
-        } `}
+        className={`${row.original.status === 1 ? "text-green-500/90" : "text-red-500/90"
+          } `}
       >
         {row.original.status === 1 ? "Active" : "Deactive"}
       </span>
@@ -81,7 +80,7 @@ const columns: ColumnDef<Category>[] = [
           {/* <EditIcon className=" cursor-pointer" /> */}
           <AddCategories category={row.original} />
 
-          <DeleteCategory categoryId={row.original.id}/>
+          <DeleteCategory categoryId={row.original.id} />
         </div>
       </span>
     ),

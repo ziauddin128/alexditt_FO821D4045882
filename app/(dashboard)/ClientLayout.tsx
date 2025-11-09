@@ -349,7 +349,7 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
         <div className="hidden lg:block mx-4 px-0 border-b border-[#1B202C]">
           <TopBar />
         </div>
-        <div className="p-4 ">{children}</div>
+        <div className="px-4 ">{children}</div>
       </div>
     </div>
   );

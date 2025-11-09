@@ -103,7 +103,7 @@ export function DataTable<TData, TValue>({
                     return (
                       <TableHead
                         key={header.id}
-                        className="font-semibold  p-4 text-[#fff] "
+                        className="font-semibold   p-4 text-[#fff] "
                       >
                         {header.isPlaceholder
                           ? null
