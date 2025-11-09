@@ -1,10 +1,10 @@
-import React from 'react'
-import UpcomingTable from './upcomingTable'
+import React from "react";
+import UpcomingTable from "./upcomingTable";
 
 export default function UpcomingPage() {
-    return (
-        <div>
-            <UpcomingTable />
-        </div>
-    )
+  return (
+    <div>
+      <UpcomingTable />
+    </div>
+  );
 }

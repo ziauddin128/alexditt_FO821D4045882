@@ -15,8 +15,8 @@ export default function DashboardContent() {
           <RevenueChart />
         </div>
         <div className="w-full md:w-[37%]">
-          <SubscriptionGrowthChart/>
-          <LatestUploadsTable/>
+          <SubscriptionGrowthChart />
+          <LatestUploadsTable />
         </div>
       </div>
 

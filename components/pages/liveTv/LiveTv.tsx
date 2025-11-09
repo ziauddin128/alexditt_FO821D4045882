@@ -11,182 +11,179 @@ const vedio = [
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 2,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 1,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 2,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 1,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 2,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 1,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 2,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 1,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 2,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 1,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 2,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 1,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 2,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 1,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 2,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 1,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 2,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 1,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 2,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 1,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 2,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 1,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
   {
     id: 2,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
-    flower: "12k Followers"
+    flower: "12k Followers",
   },
-
-
-]
+];
 
 export default function LiveTvPage() {
-
   // total subscriber
   const { data: totalSubscriber } = useQuery({
     queryKey: ["totalSubscriber"],
     queryFn: async () => {
       const res = await privateAxios.get("/payments/totalSubscribers");
       return res.data;
-    }
+    },
   });
 
   // active subscription
@@ -195,7 +192,7 @@ export default function LiveTvPage() {
     queryFn: async () => {
       const res = await privateAxios.get("/payments/totalActiveSubscribers");
       return res.data;
-    }
+    },
   });
 
   // monthly revenue
@@ -204,7 +201,7 @@ export default function LiveTvPage() {
     queryFn: async () => {
       const res = await privateAxios.get("/payments/totalMonthlyRevenue");
       return res.data;
-    }
+    },
   });
 
   // average subscription value
@@ -213,24 +210,38 @@ export default function LiveTvPage() {
     queryFn: async () => {
       const res = await privateAxios.get("/payments/totalAvgSubValue");
       return res.data;
-    }
+    },
   });
-
 
   return (
     <>
       {/* Stats */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsCard title="Active Streams" count={totalSubscriber?.totalSubscribers.toLocaleString()} description="+2 from yesterday" />
-        <StatsCard title="Current Viewers" count={totalActiveSubscription?.message} description="Peak: 5,200" />
-        <StatsCard title="Avg. Watch Time" count={monthlyRevenue?.message} description="Engagement: 68%" />
-        <StatsCard title="Scheduled Events" count={totalAvgSubValue?.message} description="Next: Movie Premiere" />
+        <StatsCard
+          title="Active Streams"
+          count={totalSubscriber?.totalSubscribers.toLocaleString()}
+          description="+2 from yesterday"
+        />
+        <StatsCard
+          title="Current Viewers"
+          count={totalActiveSubscription?.message}
+          description="Peak: 5,200"
+        />
+        <StatsCard
+          title="Avg. Watch Time"
+          count={monthlyRevenue?.message}
+          description="Engagement: 68%"
+        />
+        <StatsCard
+          title="Scheduled Events"
+          count={totalAvgSubValue?.message}
+          description="Next: Movie Premiere"
+        />
       </section>
 
       <div>
         <Tabcreate />
       </div>
-
     </>
-  )
-}     
+  );
+}

@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Roboto } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/provider/AuthProvider";
 import QueryClientWrapper from "@/components/QueryClientWrapper";
 import { Toaster } from "@/components/ui/sonner";
 
-const inter = Inter({
+const roboto = Roboto({
   subsets: ["latin"],
-  display: "swap", // avoids flash of unstyled text
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
-  title: "Dashboard | Streamly",
-  description: "Dashboard | Streamly",
+  title: "Dashboard | Project Name",
+  description: "Dashboard | Project Name",
 };
 
 export default function RootLayout({
@@ -22,7 +22,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased`}>
+      <body className={`${roboto.className} antialiased`}>
         <QueryClientWrapper>
           {/* <AuthProvider>{children}</AuthProvider> */}
           {children}

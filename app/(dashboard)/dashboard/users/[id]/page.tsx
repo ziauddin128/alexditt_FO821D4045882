@@ -15,13 +15,20 @@ import { privateAxios } from "@/components/axiosInstance/axios";
 
 export default function UserDetails({ params }: { params: any }) {
   const id = params?.id;
-  const { data: userDet, isLoading } = useQuery({
+  /* const { data: userDet, isLoading } = useQuery({
     queryKey: ["userDet", id],
     queryFn: async () => {
       const res = await privateAxios.get(`/admin/user/users/${id}`);
       return res.data;
     },
-  });
+  }); */
+
+  const userDet = {
+    id: 1,
+    name: "zia uddin",
+    status: "success",
+  };
+  const isLoading = false;
 
   const tabs = [
     { name: "Personal Info", value: "personal-info" },
@@ -45,10 +52,11 @@ export default function UserDetails({ params }: { params: any }) {
                 key={index}
                 value={tab.value}
                 onClick={() => setActiveTab(tab.value)}
-                className={`text-xs sm:text-sm font-medium whitespace-nowrap border-0 border-b transition-all duration-300 text-white cursor-pointer ${activeTab === tab.value
-                  ? "border-primary-color"
-                  : "border-transparent"
-                  }`}
+                className={`text-xs sm:text-sm font-medium whitespace-nowrap border-0 border-b transition-all duration-300 text-white cursor-pointer ${
+                  activeTab === tab.value
+                    ? "border-primary-color"
+                    : "border-transparent"
+                }`}
                 style={{ padding: "10px 16px", borderRadius: "0" }}
               >
                 {tab.name}
