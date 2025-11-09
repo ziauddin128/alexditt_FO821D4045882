@@ -37,7 +37,7 @@ interface DataTableProps<TData, TValue> {
   open?: boolean;
 }
 
-export function   DataTable<TData, TValue>({
+export function DataTable<TData, TValue>({
   children,
   tableBar,
   tableTitle,
@@ -108,9 +108,9 @@ export function   DataTable<TData, TValue>({
                         {header.isPlaceholder
                           ? null
                           : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
                       </TableHead>
                     );
                   })}

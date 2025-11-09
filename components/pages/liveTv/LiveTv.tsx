@@ -3,6 +3,7 @@ import { privateAxios } from "@/components/axiosInstance/axios";
 import StatsCard from "@/components/reusable/StatsCard";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
+import Tabcreate from "./tabcreate";
 
 const vedio = [
   {
@@ -226,27 +227,10 @@ export default function LiveTvPage() {
         <StatsCard title="Scheduled Events" count={totalAvgSubValue?.message} description="Next: Movie Premiere" />
       </section>
 
-      {/* vedio */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8  w-full  mt-4 space-y-4 gap-4 ">
-        {
-          vedio.map((index) => {
-            return <div key={index.id} className="w-full  ">
-              <Image src={index.vedio} alt="vedio" height={172} width={172} className="h-[172px] w-[185px] md:w-[172px]  object-cover"></Image>
-              <div className="flex mt-2 gap-2 ">
-                <div><Image src={index.pfofile} alt="vedio" height={100} width={100} className="h-16 w-16 rounded-full object-cover"></Image></div>
-                <div className="flex justify-center items-center">
-                  <div>
-                    <p className="text-white font-inter text-[14px] font-medium leading-[16px]"
-                    >{index.title}</p>
-                    <p className="mt-1 text-white/60 font-inter text-[12px] font-light leading-[16px]">{index.flower}</p>
-                  </div>
-
-                </div>
-              </div>
-            </div>
-          })
-        }
+      <div>
+        <Tabcreate />
       </div>
+
     </>
   )
 }     
