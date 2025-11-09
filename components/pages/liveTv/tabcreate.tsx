@@ -1,8 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import LivePage from "./livePage";
-import UpcomingPage from "./upcomingPage";
 import { Pagination } from "@/components/ui/pagination";
+import UpcomingTable from "./upcomingTable";
 
 export default function Tabcreate() {
     const [activeTab, setActiveTab] = useState<"live" | "upcoming">("live");
@@ -34,7 +34,7 @@ export default function Tabcreate() {
 
             {/* ---------- Conditional Render ---------- */}
             {activeTab === "live" && <LivePage />}
-            {activeTab === "upcoming" && <UpcomingPage />}
+            {activeTab === "upcoming" && <UpcomingTable />}
 
 
         </div>

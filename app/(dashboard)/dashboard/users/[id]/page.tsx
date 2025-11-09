@@ -12,17 +12,24 @@ import { privateAxios } from "@/components/axiosInstance/axios";
 // interface UserDetailsProps {
 //   id: string;
 // }
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 
 export default function UserDetails({ params }: { params: any }) {
-  const id = params?.id;
-  const { data: userDet, isLoading } = useQuery({
-    queryKey: ["userDet", id],
-    queryFn: async () => {
-      const res = await privateAxios.get(`/admin/user/users/${id}`);
-      return res.data;
-    },
-  });
+  const id = 1;
+  // const { id } = await params;
 
+
+  // const { data: userDet, isLoading } = useQuery({
+  //   queryKey: ["userDet", id],
+  //   queryFn: async () => {
+  //     const res = await privateAxios.get(`/admin/user/users/${id}`);
+  //     return res.data;
+  //   },
+  // });
+  const userDet = { "id": 1, "email": "", "status": "success" }
+  const isLoading = false;
   const tabs = [
     { name: "Personal Info", value: "personal-info" },
     { name: "Subscription", value: "subscription" },
