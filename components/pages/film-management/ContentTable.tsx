@@ -183,11 +183,20 @@ export default function ContentTable() {
       header: "Type",
       cell: ({ row }) => <span className="">{row.original.type}</span>,
     },
-
+    {
+      accessorKey: "duration",
+      header: "Duration",
+      cell: ({ row }) => <span className="">{row.original.duration}</span>,
+    },
     {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => <span className="">{row.original.status}</span>,
+    },
+    {
+      accessorKey: "uploaded",
+      header: "Uploaded",
+      cell: ({ row }) => <span className="">{row.original.uploaded}</span>,
     },
     {
       id: "actions",

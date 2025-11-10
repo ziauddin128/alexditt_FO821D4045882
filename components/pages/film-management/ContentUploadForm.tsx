@@ -17,7 +17,8 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import { fetchCategoris } from "../categories/CategoriesTable";
-
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 type Inputs = {
   title: string;
@@ -25,8 +26,11 @@ type Inputs = {
   description: string;
   contentCategory: string;
   contentType: string;
+  director_name: string;
+  director_img: string;
   file: File | null;
   thumbnailImg: File | null;
+  trailer: File | null;
 };
 
 export function ContentUploadForm() {
@@ -42,18 +46,20 @@ export function ContentUploadForm() {
   } = useForm<Inputs>({
     defaultValues: {
       title: "",
-      genre: "comedy",
+      genre: "",
       description: "",
-      contentCategory: "movie",
+      contentCategory: "",
       contentType: "published",
       file: null,
       thumbnailImg: null,
+      trailer: null,
     },
   });
 
   const genre = watch("genre");
   const contentCategory = watch("contentCategory");
   const contentType = watch("contentType");
+  const trailer = watch("trailer");
   const thumbnail = watch("thumbnailImg");
   const vidFile = watch("file");
 
@@ -93,17 +99,18 @@ export function ContentUploadForm() {
       }
     },
   });
+
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     console.log(data);
     uploadContent.mutate(data, {
       onSuccess: () => {
-        console.log("UPdate done")
+        console.log("UPdate done");
         // toast.success("Content Updated Successfully!");
         // Optional: Reset form or redirect
       },
       onError: (error: Error) => {
         // toast.error(error.message || "Failed to upload content");
-        console.log("Error form update content")
+        console.log("Error form update content");
       },
     });
   };
@@ -135,6 +142,12 @@ export function ContentUploadForm() {
 
     setValue("thumbnailImg", file, { shouldValidate: true, shouldDirty: true });
   };
+
+  const handleTrailerPick: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const vidFile = e.target.files?.[0] ?? null;
+    setValue("trailer", vidFile, { shouldValidate: true, shouldDirty: true });
+  };
+
   const handleVideoPick: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const vidFile = e.target.files?.[0] ?? null;
 
@@ -150,14 +163,14 @@ export function ContentUploadForm() {
     <div>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-1 lg:grid-cols-3 lg:gap-8 sm:h-[580px]"
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
       >
         {/* Upload Area */}
-        <div className="space-y-6 overflow-hidden  h-76 md:h-[340px] lg:h-full">
+        <div className="space-y-6 h-fit">
           <div
-            className={`border border-dashed flex flex-col items-center justify-between h-full rounded-lg p-8 text-center transition-colors bg-[#131824] ${
+            className={`border border-dashed flex flex-col items-center justify-between h-fit rounded-lg p-8 text-center transition-colors bg-[#131824] ${
               dragActive
-                ? "border-purple-500 bg-purple-500/10"
+                ? "border-primary-color bg-primary-color/5"
                 : "border-slate-700 hover:border-slate-600"
             }`}
             onDragEnter={handleDrag}
@@ -165,22 +178,20 @@ export function ContentUploadForm() {
             onDragOver={handleDrag}
             onDrop={handleDrop}
           >
-            <div className="h-40" />
-
             <div className="flex flex-col items-center space-y-4">
               <div className="flex md:w-[134px] md:h-[134px] justify-center items-center gap-2.5 bg-[#0D121E] p-[35px] rounded-full">
-                <Upload className="w-12 h-12 text-slate-400" />
+                <Upload className="w-12 h-12 text-white" />
               </div>
               <div className="space-y-2">
-                <p className="text-slate-300 font-medium">
+                <p className="text-lg font-medium">
                   Drag and drop video files to upload
                 </p>
-                <p className="text-[#A5A5AB] text-sm">
+                <p className="text-gray-black-200 text-base">
                   Your videos will be private until <br /> you publish them.
                 </p>
               </div>
 
-              <label className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded cursor-pointer">
+              <label className="bg-primary-color text-white px-6 py-3 rounded cursor-pointer">
                 Select files
                 <input
                   type="file"
@@ -191,9 +202,8 @@ export function ContentUploadForm() {
               </label>
 
               {vidFile && (
-                <p className="text-xs text-slate-400">
-                  Selected:{" "}
-                  <span className="text-slate-200">{vidFile.name}</span>
+                <p className="text-sm text-gray-black-200">
+                  Selected: <span className="text-white">{vidFile.name}</span>
                 </p>
               )}
               {errors.file && (
@@ -203,14 +213,14 @@ export function ContentUploadForm() {
               )}
             </div>
 
-            <div className="text-xs text-slate-500 leading-relaxed mt-18">
+            <div className="text-sm text-gray-black-200 mt-18">
               By submitting your videos to streaming app, you acknowledge that
               you agree to streaming{" "}
-              <span className="text-purple-400 underline cursor-pointer">
+              <span className="text-primary-color hover:underline cursor-pointer">
                 Terms of Service
               </span>{" "}
               and{" "}
-              <span className="text-purple-400 underline cursor-pointer">
+              <span className="text-primary-color hover:underline cursor-pointer">
                 Community Guidelines
               </span>
               .
@@ -222,13 +232,11 @@ export function ContentUploadForm() {
         <div className="space-y-6 md:col-span-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Title */}
-            <div className="space-y-3">
-              <label className="text-base font-medium text-slate-300 block">
-                Title
-              </label>
+            <div>
+              <label className="text-base font-medium block mb-2">Title</label>
               <Input
                 placeholder="Type your movie name"
-                className="bg-[#131824] border-[#1B202C] rounded text-slate-100 placeholder:text-slate-500"
+                className="custom-content-input"
                 {...register("title", { required: "Title is required" })}
               />
               {errors.title && (
@@ -236,52 +244,57 @@ export function ContentUploadForm() {
               )}
             </div>
 
-            {/* Genre (Select bridged via hidden input) */}
-            <div className="space-y-3 w-full">
-              <label className="text-base font-medium text-slate-300 block">
-                Genre
-              </label>
-              <Select
-                value={genre}
-                onValueChange={(val) =>
-                  setValue("genre", val, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  })
-                }
-              >
-                <SelectTrigger className="bg-[#131824] border-[#1B202C] rounded text-slate-100 w-full">
+            {/* Genre */}
+            <div>
+              <label className="text-base font-medium block mb-2">Genre</label>
+              <Select value={genre}>
+                <SelectTrigger className="custom-content-input cursor-pointer">
                   <SelectValue placeholder="Select genre" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#131824] border-slate-700 text-white">
-                  <SelectItem value="comedy">Comedy</SelectItem>
-                  <SelectItem value="drama">Drama</SelectItem>
-                  <SelectItem value="action">Action</SelectItem>
-                  <SelectItem value="horror">Horror</SelectItem>
-                  <SelectItem value="romance">Romance</SelectItem>
+                <SelectContent className="bg-secondary-bg border-gray3-bg text-white">
+                  <SelectItem value="comedy" className="cursor-pointer">
+                    Comedy
+                  </SelectItem>
+                  <SelectItem value="drama" className="cursor-pointer">
+                    Drama
+                  </SelectItem>
+                  <SelectItem value="action" className="cursor-pointer">
+                    Action
+                  </SelectItem>
+                  <SelectItem value="horror" className="cursor-pointer">
+                    Horror
+                  </SelectItem>
+                  <SelectItem value="romance" className="cursor-pointer">
+                    Romance
+                  </SelectItem>
                 </SelectContent>
               </Select>
-              {/* Registered hidden input to enable RHF validation & submission */}
-              <input
-                type="hidden"
-                {...register("genre", { required: "Genre is required" })}
-                value={genre}
-                readOnly
-              />
               {errors.genre && (
                 <p className="text-sm text-red-500">{errors.genre.message}</p>
               )}
             </div>
           </div>
 
+          {/* Kids Mode */}
+          <Label
+            htmlFor="kids_mode"
+            className="text-base flex items-center justify-between gap-3 border-gray3-bg bg-secondary-bg rounded px-4 py-5 cursor-pointer w-full"
+          >
+            <span> Kids Mode</span>
+            <Checkbox
+              id="kids_mode"
+              className="data-[state=checked]:bg-primary-color data-[state=checked]:border-primary-color rounded-full h-5 w-5"
+            />
+          </Label>
+
           {/* Description */}
-          <div className="space-y-2">
-            <label className="text-base font-medium text-slate-300">
+          <div>
+            <label className="text-base font-medium block mb-2">
               Description
             </label>
             <Textarea
               placeholder="Enter a short description"
-              className="flex h-[100px] items-start gap-2.5 self-stretch rounded border border-[#1B202C] bg-[#131824] px-4 py-3"
+              className="custom-content-input"
               {...register("description", {
                 required: "Description is required",
                 minLength: { value: 10, message: "Min 10 characters" },
@@ -294,10 +307,11 @@ export function ContentUploadForm() {
             )}
           </div>
 
+          {/* Content Type */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Content Type */}
-            <div className="space-y-3 w-full">
-              <label className="text-base font-medium text-slate-300 block">
+            <div>
+              <label className="text-base font-medium text-white block mb-2">
                 Content Category
               </label>
               <Select
@@ -309,12 +323,16 @@ export function ContentUploadForm() {
                   })
                 }
               >
-                <SelectTrigger className="bg-[#131824] border-[#1B202C] rounded text-slate-100 w-full">
+                <SelectTrigger className="custom-content-input cursor-pointer">
                   <SelectValue placeholder="Select content type" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#131824] border-slate-700 text-white">
+                <SelectContent className="border-gray3-bg bg-secondary-bg text-white">
                   {categoriesList?.data?.map((cat: any) => (
-                    <SelectItem key={cat.id} value={cat.id}>
+                    <SelectItem
+                      key={cat.id}
+                      value={cat.id}
+                      className="cursor-pointer"
+                    >
                       {cat.name}
                     </SelectItem>
                   ))}
@@ -329,15 +347,15 @@ export function ContentUploadForm() {
                 readOnly
               />
               {errors.contentCategory && (
-                <p className="text-sm text-red-500">
+                <p className="mt-1 text-sm text-red-500">
                   {errors.contentCategory.message}
                 </p>
               )}
             </div>
 
             {/* Content Status */}
-            <div className="space-y-3">
-              <label className="text-base font-medium text-slate-300 block">
+            <div>
+              <label className="text-base font-medium text-white block mb-2">
                 Content Status
               </label>
               <Select
@@ -349,14 +367,22 @@ export function ContentUploadForm() {
                   })
                 }
               >
-                <SelectTrigger className="bg-[#131824] border-[#1B202C] rounded text-slate-100 w-full">
+                <SelectTrigger className="custom-content-input cursor-pointer">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#131824] border-slate-700 text-white">
-                  <SelectItem value="published">Published</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="private">Private</SelectItem>
-                  <SelectItem value="scheduled">Scheduled</SelectItem>
+                <SelectContent className="border-gray3-bg bg-secondary-bg text-white">
+                  <SelectItem value="published" className="cursor-pointer">
+                    Published
+                  </SelectItem>
+                  <SelectItem value="draft" className="cursor-pointer">
+                    Draft
+                  </SelectItem>
+                  <SelectItem value="private" className="cursor-pointer">
+                    Private
+                  </SelectItem>
+                  <SelectItem value="scheduled" className="cursor-pointer">
+                    Scheduled
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <input
@@ -368,16 +394,100 @@ export function ContentUploadForm() {
                 readOnly
               />
               {errors.contentType && (
-                <p className="text-sm text-red-500">
+                <p className="mt-1 text-sm text-red-500">
                   {errors.contentType.message}
                 </p>
               )}
             </div>
           </div>
 
-          {/* Thumbnail Image (registered via setValue) */}
-          <div className="space-y-3">
-            <label className="text-base block font-medium text-slate-300">
+          {/* Director */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-base font-medium block mb-2">
+                Director Name
+              </label>
+              <Input
+                placeholder="Director name"
+                className="custom-content-input"
+                {...register("director_name", {
+                  required: "Director name is required",
+                })}
+              />
+              {errors.director_name && (
+                <p className="text-sm text-red-500">
+                  {errors.director_name.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-base font-medium block mb-2">
+                Director Name
+              </label>
+              <div>
+                <input
+                  type="file"
+                  className="custom-content-input file:!h-auto !p-2.5 cursor-pointer  file:bg-primary-color file:text-white  file:px-2"
+                  {...register("director_img", {
+                    required: "Director image is required",
+                  })}
+                />
+              </div>
+              {errors.director_img && (
+                <p className="text-sm text-red-500">
+                  {errors.director_img.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Trailer */}
+          <div>
+            <label className="text-base block font-medium text-white mb-2">
+              Trailer File
+            </label>
+            <div className="flex items-center space-x-3">
+              <div className="flex-1">
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="video/*"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={handleTrailerPick}
+                  />
+                  <div className="flex flex-col justify-center items-center gap-2.5 rounded border border-gray3-bg bg-secondary-bg px-4 py-5">
+                    <div className="flex justify-center items-center  bg-dark-bg rounded-full h-[64px] w-[64px]">
+                      <Upload className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex gap-2">
+                      <span className="text-black font-sans text-sm flex items-center gap-2 bg-white px-2 py-1 rounded">
+                        Choose File
+                      </span>
+                      <span className="text-white">
+                        {trailer ? trailer.name : "No file chosen"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <input
+                  type="hidden"
+                  {...register("trailer", {
+                    required: "Trailer is required",
+                  })}
+                />
+                {errors.trailer && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {errors.trailer.message as string}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Thumbnail Image */}
+          <div>
+            <label className="text-base block font-medium text-white mb-2">
               Thumbnail Image
             </label>
             <div className="flex items-center space-x-3">
@@ -389,17 +499,20 @@ export function ContentUploadForm() {
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     onChange={handleFilePick}
                   />
-                  <div className="flex h-[141px] justify-center items-center gap-2.5 rounded border border-[#1B202C] bg-[#131824] px-4 py-3">
-                    <span className="text-black font-sans text-sm flex items-center gap-2 bg-white px-2 py-1 rounded">
-                      Choose File
-                    </span>
-                    <span className="text-slate-400">
-                      {thumbnail ? thumbnail.name : "No file chosen"}
-                    </span>
+                  <div className="flex flex-col justify-center items-center gap-2.5 rounded border border-gray3-bg bg-secondary-bg px-4 py-5">
+                    <div className="flex justify-center items-center  bg-dark-bg rounded-full h-[64px] w-[64px]">
+                      <Upload className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex gap-2">
+                      <span className="text-black font-sans text-sm flex items-center gap-2 bg-white px-2 py-1 rounded">
+                        Choose File
+                      </span>
+                      <span className="text-white">
+                        {thumbnail ? thumbnail.name : "No file chosen"}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                {/* A hidden input is not required here because file inputs cannot have programmatic value set.
-                    We're storing the File directly in RHF via setValue. To validate, we register the field once: */}
                 <input
                   type="hidden"
                   {...register("thumbnailImg", {
@@ -407,7 +520,7 @@ export function ContentUploadForm() {
                   })}
                 />
                 {errors.thumbnailImg && (
-                  <p className="text-sm text-red-500">
+                  <p className="mt-1 text-sm text-red-500">
                     {errors.thumbnailImg.message as string}
                   </p>
                 )}
@@ -418,18 +531,18 @@ export function ContentUploadForm() {
           <div>
             <Button
               type="submit"
-              className={`w-full px-6 py-[13px] ${
+              className={`w-full px-6 py-6 ${
                 uploadContent.isError
                   ? "bg-red-600 hover:bg-red-700"
-                  : "bg-[#7A24BC] hover:bg-[#7A24A1]"
-              } cursor-pointer`}
+                  : "bg-primary-color hover:bg-primary-color"
+              } cursor-pointer rounded text-base font-medium`}
               disabled={uploadContent.isPending}
             >
               {uploadContent.isPending
                 ? "Uploading..."
                 : uploadContent.isError
                 ? "Try Again"
-                : "Upload"}
+                : "Submit"}
             </Button>
           </div>
         </div>

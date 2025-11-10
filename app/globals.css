@@ -8,6 +8,7 @@
   --color-secondary-color: #eb3d4d;
   --color-gray-black-50: #e9e9ea;
   --color-gray-black-100: #d2d2d5;
+  --color-gray-black-200: #a5a5ab;
 
   --color-btn-secondary-bg: #7a24bc33;
   --color-secondary-bg: #131824;
@@ -227,4 +228,9 @@ body {
 
 .primary-btn {
   @apply flex justify-center items-center gap-2.5 bg-[#7A24BC] px-5 py-2.5 rounded-lg cursor-pointer hover:bg-[#9B2BB9];
+}
+
+/* Content Input */
+.custom-content-input {
+  @apply h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-gray3-bg bg-secondary-bg rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color;
 }

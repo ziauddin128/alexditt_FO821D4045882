@@ -1,5 +1,5 @@
-import { ContentUploadForm } from "@/components/pages/film-management/ContentUploadForm";
 import React from "react";
+import { ContentUploadForm } from "@/components/pages/film-management/ContentUploadForm";
 
 export default function page() {
   return (
