@@ -62,7 +62,6 @@ export default function UserDetails({ params }: { params: any }) {
               </TabsTrigger>
             ))}
           </TabsList>
-
           <div className="mt-2">
             <TabsContent value="personal-info" className="space-y-4">
               <PersonalInfo userDet={userDet} />

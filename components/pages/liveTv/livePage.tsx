@@ -216,7 +216,7 @@ export default function Upcoming() {
                             alt="vedio"
                             height={172}
                             width={172}
-                            className="h-[172px] w-[185px] md:w-[172px] object-cover"
+                            className="h-[172px] w-full object-cover rounded-md"
                         />
                         <div className="flex mt-2 gap-2">
                             <div>

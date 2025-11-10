@@ -21,56 +21,56 @@ const vedio = [
     flower: "12k Followers"
   },
   {
-    id: 1,
+    id: 3,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 2,
+    id: 4,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 1,
+    id: 5,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 2,
+    id: 6,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 1,
+    id: 7,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 2,
+    id: 8,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 1,
+    id: 9,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 2,
+    id: 10,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
@@ -186,6 +186,7 @@ export default function LiveTvPage() {
     queryFn: async () => {
       const res = await privateAxios.get("/payments/totalSubscribers");
       return res.data;
+
     }
   });
 
@@ -220,7 +221,7 @@ export default function LiveTvPage() {
   return (
     <>
       {/* Stats */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-5 mt-8">
         <StatsCard title="Active Streams" count={totalSubscriber?.totalSubscribers.toLocaleString()} description="+2 from yesterday" />
         <StatsCard title="Current Viewers" count={totalActiveSubscription?.message} description="Peak: 5,200" />
         <StatsCard title="Avg. Watch Time" count={monthlyRevenue?.message} description="Engagement: 68%" />

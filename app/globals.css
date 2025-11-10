@@ -226,3 +226,10 @@ body {
 .primary-btn {
   @apply flex justify-center items-center gap-2.5 bg-[#7A24BC] px-5 py-2.5 rounded-lg cursor-pointer hover:bg-[#9B2BB9];
 }
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 12px;
+  cursor: pointer;
+  color:red;
+}

@@ -14,7 +14,7 @@ export default function Tabcreate() {
                 <button
                     onClick={() => setActiveTab("live")}
                     className={`py-[10px] px-5 rounded ${activeTab === "live"
-                        ? ""
+                        ? "bg-[#7A24BC]"
                         : ""
                         }`}
                 >
@@ -24,7 +24,7 @@ export default function Tabcreate() {
                 <button
                     onClick={() => setActiveTab("upcoming")}
                     className={`py-[10px] px-5 rounded ${activeTab === "upcoming"
-                        ? ""
+                        ? "bg-[#7A24BC]"
                         : ""
                         }`}
                 >

@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectTrigger, SelectItem, SelectValue } from '@
 import Link from "next/link";
 
 interface UserDetail {
-  id: number;
+  id: number | number;
   name: string;
   email: string;
   Subscription: string;
@@ -21,7 +21,9 @@ interface UserDetail {
   status: string;
 }
 
+
 export default function UserManagementTable() {
+
   const [userDetails, setUserDetails] = useState<UserDetail[]>([
     {
       id: 1,
@@ -219,9 +221,16 @@ export default function UserManagementTable() {
     <div>
       <div className="py-8 px-5">
 
-        <button className="flex gap-2 bg-[#2D9DFF] text-white font-roboto text-[16px] font-normal leading-[150%] px-5 py-[10px] rounded-md">
-          <PlusIcon className="mt-1" /> Add New User
-        </button>
+        <Link href={`/dashboard/users/create-user`}>
+          <button className="flex gap-2 bg-[#2D9DFF] text-white font-roboto text-[16px] font-normal leading-[150%] px-5 py-[10px] rounded-md">
+            <PlusIcon className="mt-1" /> Add New User
+          </button>
+        </Link>
+
+
+
+
+
       </div>
       <div className="bg-[#131824]">
         <div className="px-8 py-4 flex items-center justify-between">
