@@ -24,7 +24,7 @@ export type Category = {
   // slug: string;
 
   // updated_at: string;
-  status: string;
+  status: number;
   categoryName: string;
   description: string;
   content: number;
@@ -36,21 +36,21 @@ const fakeCategories: Category[] = [
     categoryName: "Action",
     description: "Movies with a lot of action and stunts",
     content: 248,
-    status: "Active",
+    status: 0,
   },
   {
     id: 2,
     categoryName: "Comedy",
     description: "Funny movies to make you laugh",
     content: 176,
-    status: "Active",
+    status: 0,
   },
   {
     id: 3,
     categoryName: "Drama",
     description: "Movies with a lot of action and stunts",
     content: 215,
-    status: "Deactive",
+    status: 1,
   },
 ];
 
@@ -92,14 +92,12 @@ const columns: ColumnDef<Category>[] = [
     // ),
     cell: ({ row }) => (
       <span
-        className={`${row.original.status === "Active"
-          ? "text-green-500/90"
-          : "text-red-500/90"
-          }`}
+        className={row.original.status === 1 ? "text-green-500/90" : "text-red-500/90"}
       >
-        {row.original.status}
+        {row.original.status === 1 ? "Active" : "Deactive"}
       </span>
     ),
+
 
 
   },
@@ -111,8 +109,10 @@ const columns: ColumnDef<Category>[] = [
         <div className="flex gap-3.5">
           {/* <EditIcon className=" cursor-pointer" /> */}
           <AddCategories category={row.original} />
+          <DeleteCategory categoryId={String(row.original.id)} />
 
-          <DeleteCategory categoryId={row.original.id} />
+
+          {/* <DeleteCategory categoryId={row.original.id} /> */}
         </div>
       </span>
     ),
@@ -148,7 +148,8 @@ export default function CategoriesTable() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
+  const [filterStatus, setFilterStatus] = useState<number | "">("");
+
 
   const total = fakeCategories.length;
 
@@ -230,12 +231,15 @@ export default function CategoriesTable() {
                 <select
                   className="h-[45px] w-full px-6 py-[14px] text-sm font-normal border border-[#1B202C] bg-[#131824] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color mb-6"
                   value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
+                  onChange={(e) =>
+                    setFilterStatus(e.target.value === "" ? "" : Number(e.target.value))
+                  }
                 >
                   <option value="">All</option>
-                  <option value="Active">Active</option>
-                  <option value="Deactive">Deactive</option>
+                  <option value={1}>Active</option>
+                  <option value={0}>Deactive</option>
                 </select>
+
               </div>
 
               <div className="border-2 border-[#1B202C] px-5 py-[10px] mb-6">

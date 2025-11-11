@@ -221,7 +221,7 @@ export default function LiveTvPage() {
   return (
     <>
       {/* Stats */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-5 mt-8">
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-5 mt-4">
         <StatsCard title="Active Streams" count={totalSubscriber?.totalSubscribers.toLocaleString()} description="+2 from yesterday" />
         <StatsCard title="Current Viewers" count={totalActiveSubscription?.message} description="Peak: 5,200" />
         <StatsCard title="Avg. Watch Time" count={monthlyRevenue?.message} description="Engagement: 68%" />

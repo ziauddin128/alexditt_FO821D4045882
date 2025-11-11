@@ -36,7 +36,7 @@ export default function PersonalInfo({ userDet }: PersonalInfoProps) {
   };
 
   return (
-    <div className="p-2 md:p-4 rounded-sm">
+    <div className=" rounded-sm">
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="bg-[#131824] p-4 rounded-[8px] mt-4">
           <div className="grid sm:grid-cols-2 gap-5">

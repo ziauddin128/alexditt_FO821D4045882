@@ -17,10 +17,10 @@ export default function Tabs() {
     //   name: 'Billings',
     //   href: '/dashboard/setting/billing',
     // },
-    {
-      name: 'Notification',
-      href: '/dashboard/setting/notification',
-    }
+    // {
+    //   name: 'Notification',
+    //   href: '/dashboard/setting/notification',
+    // }
   ]
 
   return (

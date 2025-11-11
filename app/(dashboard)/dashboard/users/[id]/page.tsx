@@ -44,7 +44,11 @@ export default function UserDetails({ params }: { params: any }) {
     <>
       <UserDetTop id={id} userDet={userDet} />
 
-      <div className="my-4">
+      <div>
+        <PersonalInfo userDet={userDet} />
+      </div>
+
+      {/* <div className="my-4">
         <Tabs defaultValue="personal-info" className="usersTab">
           <TabsList className="bg-transparent w-full sm:w-fit overflow-x-auto tabs_wrapper">
             {tabs.map((tab, index) => (
@@ -74,7 +78,7 @@ export default function UserDetails({ params }: { params: any }) {
             </TabsContent>
           </div>
         </Tabs>
-      </div>
+      </div> */}
     </>
   );
 }

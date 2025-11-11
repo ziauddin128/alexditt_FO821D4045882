@@ -219,7 +219,7 @@ export default function UserManagementTable() {
 
   return (
     <div>
-      <div className="py-8 px-5">
+      <div className="pb-8 pt-4 px-5">
 
         <Link href={`/dashboard/users/create-user`}>
           <button className="flex gap-2 bg-[#2D9DFF] text-white font-roboto text-[16px] font-normal leading-[150%] px-5 py-[10px] rounded-md">

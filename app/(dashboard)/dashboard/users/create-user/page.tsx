@@ -34,7 +34,7 @@ export default function CreateUser() {
     };
 
     return (
-        <div className="p-2 md:p-4 rounded-sm">
+        <div className=" rounded-sm">
             <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="bg-[#131824] p-4 rounded-[8px] mt-4">
                     <div className="grid sm:grid-cols-2 gap-5">
@@ -146,7 +146,7 @@ export default function CreateUser() {
                     <div className="mt-8 flex justify-center">
                         <button
                             type="submit"
-                            className="bg-[#2D9DFF] rounded-full text-white px-[150px] md:px-[206px] py-[14px] text-sm font-normal cursor-pointer flex justify-center items-center border border-white"
+                            className="bg-[#2D9DFF] rounded-full text-white px-[100px] md:px-[206px] py-[14px] text-sm font-normal cursor-pointer  border border-white "
                         >
                             Creating a new user
                         </button>

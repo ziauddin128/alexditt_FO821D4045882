@@ -38,7 +38,7 @@ export default function UserDetTop({ id, userDet }: UserDetTopProps) {
     <>
       {/* Header */}
       <div className="flex flex-wrap gap-4 items-center justify-between mb-4">
-        <h1 className="text-base font-medium">User Details</h1>
+        <h1 className="text-base font-medium">Personal Info</h1>
 
         <div className="flex flex-wrap items-center gap-4 mt-[42px]">
           {/* ✅ Clicking this toggles edit form */}
