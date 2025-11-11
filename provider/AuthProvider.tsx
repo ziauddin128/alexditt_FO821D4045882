@@ -29,8 +29,8 @@ const defaultAuthContext: AuthContextType = {
   isLoading: true,
   isNotification: null,
   error: null,
-  login: async () => {},
-  logout: async () => {},
+  login: async () => { },
+  logout: async () => { },
 };
 
 //   create context
