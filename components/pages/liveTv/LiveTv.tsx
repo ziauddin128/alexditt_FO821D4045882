@@ -77,98 +77,98 @@ const vedio = [
     flower: "12k Followers"
   },
   {
-    id: 1,
+    id: 11,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 2,
+    id: 12,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 1,
+    id: 13,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 2,
+    id: 14,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 1,
+    id: 15,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 2,
+    id: 16,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 1,
+    id: 17,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 2,
+    id: 18,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 1,
+    id: 19,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 2,
+    id: 20,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 1,
+    id: 21,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 2,
+    id: 22,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 1,
+    id: 23,
     vedio: "/dashboard/livetv/LorriWarf.png",
     pfofile: "/dashboard/livetv/lorriProfile.png",
     title: "Lorri Warf",
     flower: "12k Followers"
   },
   {
-    id: 2,
+    id: 24,
     vedio: "/dashboard/livetv/BradleyLawlor.png",
     pfofile: "/dashboard/livetv/bradleyProfile.png",
     title: "Lorri Warf",

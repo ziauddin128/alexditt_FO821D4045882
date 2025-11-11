@@ -7,7 +7,7 @@ import { DataTable } from "@/components/reusable/data-table";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 
-// ✅ Define type for table data
+//  Define type for table data
 interface UserDetail {
     id: number;
     name: string;
@@ -17,7 +17,7 @@ interface UserDetail {
     status: string;
 }
 
-// ✅ Component
+// Component
 export default function UpcomingTable() {
     const [userDetails, setUserDetails] = useState<UserDetail[]>([
         {
@@ -62,7 +62,7 @@ export default function UpcomingTable() {
         },
     ]);
 
-    // ✅ Delete handler
+    //  Delete handler
     const handleDeleteLocation = (id: number) => {
         const updatedList = userDetails.filter((item) => item.id !== id);
         setUserDetails(updatedList);
@@ -73,7 +73,7 @@ export default function UpcomingTable() {
     const pageSize = 5;
     const total = userDetails.length;
 
-    // ✅ Simple pagination logic
+    //  Simple pagination logic
     const paginatedData = userDetails.slice((page - 1) * pageSize, page * pageSize);
 
     const columns: ColumnDef<UserDetail>[] = [
