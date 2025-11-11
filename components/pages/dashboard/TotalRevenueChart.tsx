@@ -115,7 +115,7 @@ export function RevenueChart() {
                 domain={[0, 250]}
                 ticks={[0, 25, 50, 100, 150, 200, 250]}
               />
-              <ChartTooltip/>
+              <ChartTooltip />
               <Area
                 dataKey="expenses"
                 type="monotone"
