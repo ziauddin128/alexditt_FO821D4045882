@@ -103,7 +103,7 @@ export function DataTable<TData, TValue>({
                     return (
                       <TableHead
                         key={header.id}
-                        className="font-semibold  p-4 text-[#fff] "
+                        className="font-semibold   p-4 text-[#fff] "
                       >
                         {header.isPlaceholder
                           ? null
@@ -149,14 +149,16 @@ export function DataTable<TData, TValue>({
           </Table>
         </div>
       </div>
-      <div className="my-6 pb-4">
-        <Paginations
-          page={page}
-          pageSize={pageSize}
-          total={total}
-          onPageChange={onPageChange}
-        />
-      </div>
+      {pageSize && (
+        <div className="my-6 pb-4">
+          <Paginations
+            page={page}
+            pageSize={pageSize}
+            total={total}
+            onPageChange={onPageChange}
+          />
+        </div>
+      )}
     </div>
   );
 }

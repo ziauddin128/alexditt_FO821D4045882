@@ -37,32 +37,32 @@ import LiveTbIcon from "@/components/icons/LiveTvIcon";
 const menuItems = [
   {
     href: "/dashboard",
-    icon: <Dashboard className="w-[18px] h-[18px]" />,
+    icon: <Dashboard className="w-5 h-5 text-white" />,
     label: "Dashboard",
   },
   {
     href: "/dashboard/film-management",
-    icon: <FilmManagement className="w-[18px] h-[18px]" />,
+    icon: <FilmManagement className="w-5 h-5 text-white" />,
     label: "Film Management",
   },
   {
     href: "/dashboard/categories",
-    icon: <Categories className="w-[18px] h-[18px]" />,
+    icon: <Categories className="w-5 h-5 text-white" />,
     label: "Categories",
   },
   {
     href: "/dashboard/users",
-    icon: <Users className="w-[18px] h-[18px]" />,
+    icon: <Users className="w-5 h-5 text-white" />,
     label: "User Management",
   },
   {
     href: "/dashboard/liveTv",
-    icon: <LiveTbIcon className="w-[18px] h-[18px]" />,
+    icon: <LiveTbIcon className="w-5 h-5 text-white" />,
     label: "Live TV",
   },
   {
     href: "/dashboard/setting",
-    icon: <Setting className="w-[18px] h-[18px]" />,
+    icon: <Setting className="w-5 h-5 text-white" />,
     label: "Setting",
   },
 ];
@@ -70,7 +70,7 @@ const menuItems = [
 const bottomMenu = [
   {
     href: "/logout",
-    icon: <Logout className="w-[18px] h-[18px]" />,
+    icon: <Logout className="w-6 h-6 text-white" />,
     label: "Log out",
   },
 ];
@@ -247,7 +247,7 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
 
       {/* Sidebar */}
       <div
-        className={`fixed z-30 h-screen w-64 transform bg-[#131824]  transition-transform duration-300 ease-in-out text-[#FFF] ${
+        className={`fixed z-30 h-screen w-64 flex flex-col transform bg-[#131824]  transition-transform duration-300 ease-in-out text-[#FFF] ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0`}
       >
@@ -263,7 +263,7 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
         </div>
 
         {/* Menu Items */}
-        <nav className="mt-[30px] px-4">
+        <nav className="pt-[30px] pb-10 px-4 flex-1 max-h-[700px] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {menuItems.map((item, index) => {
             const isActive = (() => {
               if (item.href === "/dashboard") {
@@ -333,7 +333,7 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
         <div className="p-4 lg:hidden flex justify-between">
           <button
             onClick={toggleSidebar}
-            className="text-main focus:outline-none"
+            className="text-main focus:outline-none cursor-pointer"
           >
             <Menu />
           </button>

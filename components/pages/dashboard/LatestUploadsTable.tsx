@@ -68,7 +68,7 @@ const columns: ColumnDef<VideoDetails>[] = [
 export default function LatestUploadsTable() {
   return (
     <div className="rounded-lg mt-4 ">
-      <DataTable columns={columns} data={videoData}>
+      <DataTable columns={columns} data={videoData} >
         <div className="flex items-center justify-between">
           <h2 className="text-base font-medium leading-[160%]">
             Latest Uploads

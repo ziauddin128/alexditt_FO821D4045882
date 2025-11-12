@@ -12,8 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload } from "lucide-react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { Plus, Trash2, Upload } from "lucide-react";
+import {
+  SubmitHandler,
+  useForm,
+  useFieldArray,
+  Controller,
+} from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import { fetchCategoris } from "../categories/CategoriesTable";
@@ -23,6 +28,7 @@ import { Label } from "@/components/ui/label";
 type Inputs = {
   title: string;
   genre: string;
+  kids_mode: boolean;
   description: string;
   contentCategory: string;
   contentType: string;
@@ -31,10 +37,19 @@ type Inputs = {
   file: File | null;
   thumbnailImg: File | null;
   trailer: File | null;
+  casts: { cast: string; cast_img: File | null }[];
+  series: {
+    series_name: string;
+    episode_name: string;
+    episode_number: string;
+    episode_file: File | null;
+    episode_thumbnail: File | null;
+  }[];
 };
 
 export function ContentUploadForm() {
   const [dragActive, setDragActive] = useState(false);
+  const [isSeries, setIsSeries] = useState(false);
   const queryClient = useQueryClient();
 
   const {
@@ -42,6 +57,7 @@ export function ContentUploadForm() {
     handleSubmit,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm<Inputs>({
     defaultValues: {
@@ -53,7 +69,36 @@ export function ContentUploadForm() {
       file: null,
       thumbnailImg: null,
       trailer: null,
+      casts: [{ cast: "", cast_img: null }],
+      series: [
+        {
+          series_name: "",
+          episode_name: "",
+          episode_number: "",
+          episode_file: null,
+          episode_thumbnail: null,
+        },
+      ],
     },
+  });
+
+  const {
+    fields: castFields,
+    append: appendCast,
+    remove: removeCast,
+  } = useFieldArray({
+    control,
+    name: "casts",
+  });
+
+  // For series
+  const {
+    fields: seriesFields,
+    append: appendSeries,
+    remove: removeSeries,
+  } = useFieldArray({
+    control,
+    name: "series",
   });
 
   const genre = watch("genre");
@@ -102,6 +147,34 @@ export function ContentUploadForm() {
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     console.log(data);
+
+    // New approach for get cast
+    /* const formData = new FormData();
+    data.casts.forEach((cast: any, i: number) => {
+      formData.append(`casts[${i}][cast]`, cast.cast);
+      formData.append(`casts[${i}][cast_img]`, cast.cast_img[0]);
+    });
+
+    data.series.forEach((tv: any, i: number) => {
+      formData.append(`series[${i}][series_name]`, tv.series_name);
+      formData.append(`series[${i}][episode_name]`, tv.episode_name);
+      formData.append(`series[${i}][episode_number]`, tv.episode_number);
+      formData.append(`series[${i}][episode_file]`, tv.episode_file[0]);
+      formData.append(
+        `series[${i}][episode_thumbnail]`,
+        tv.episode_thumbnail[0]
+      );
+    });
+
+    for (let [key, value] of formData.entries()) {
+      if (value instanceof File) {
+        console.log(key, value); // Full File object
+      } else {
+        console.log(key, value); // Normal string
+      }
+    } */
+
+    /*
     uploadContent.mutate(data, {
       onSuccess: () => {
         console.log("UPdate done");
@@ -112,7 +185,7 @@ export function ContentUploadForm() {
         // toast.error(error.message || "Failed to upload content");
         console.log("Error form update content");
       },
-    });
+    });*/
   };
 
   // Drag handlers
@@ -240,7 +313,7 @@ export function ContentUploadForm() {
                 {...register("title", { required: "Title is required" })}
               />
               {errors.title && (
-                <p className="text-sm text-red-500">{errors.title.message}</p>
+                <p className="error-msg">{errors.title.message}</p>
               )}
             </div>
 
@@ -270,7 +343,7 @@ export function ContentUploadForm() {
                 </SelectContent>
               </Select>
               {errors.genre && (
-                <p className="text-sm text-red-500">{errors.genre.message}</p>
+                <p className="error-msg">{errors.genre.message}</p>
               )}
             </div>
           </div>
@@ -281,9 +354,18 @@ export function ContentUploadForm() {
             className="text-base flex items-center justify-between gap-3 border-gray3-bg bg-secondary-bg rounded px-4 py-5 cursor-pointer w-full"
           >
             <span> Kids Mode</span>
-            <Checkbox
-              id="kids_mode"
-              className="data-[state=checked]:bg-primary-color data-[state=checked]:border-primary-color rounded-full h-5 w-5"
+            <Controller
+              name="kids_mode"
+              control={control}
+              defaultValue={false}
+              render={({ field }) => (
+                <Checkbox
+                  id="kids_mode"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  className="data-[state=checked]:bg-primary-color data-[state=checked]:border-primary-color rounded-full h-5 w-5"
+                />
+              )}
             />
           </Label>
 
@@ -301,9 +383,7 @@ export function ContentUploadForm() {
               })}
             />
             {errors.description && (
-              <p className="text-sm text-red-500">
-                {errors.description.message}
-              </p>
+              <p className="error-msg">{errors.description.message}</p>
             )}
           </div>
 
@@ -343,13 +423,12 @@ export function ContentUploadForm() {
                 {...register("contentCategory", {
                   required: "Content type is required",
                 })}
+                {...register("contentCategory")}
                 value={contentCategory}
                 readOnly
               />
               {errors.contentCategory && (
-                <p className="mt-1 text-sm text-red-500">
-                  {errors.contentCategory.message}
-                </p>
+                <p className="error-msg">{errors.contentCategory.message}</p>
               )}
             </div>
 
@@ -394,9 +473,7 @@ export function ContentUploadForm() {
                 readOnly
               />
               {errors.contentType && (
-                <p className="mt-1 text-sm text-red-500">
-                  {errors.contentType.message}
-                </p>
+                <p className="error-msg">{errors.contentType.message}</p>
               )}
             </div>
           </div>
@@ -415,32 +492,235 @@ export function ContentUploadForm() {
                 })}
               />
               {errors.director_name && (
-                <p className="text-sm text-red-500">
-                  {errors.director_name.message}
-                </p>
+                <p className="error-msg">{errors.director_name.message}</p>
               )}
             </div>
 
             <div>
               <label className="text-base font-medium block mb-2">
-                Director Name
+                Director Image
               </label>
               <div>
                 <input
                   type="file"
-                  className="custom-content-input file:!h-auto !p-2.5 cursor-pointer  file:bg-primary-color file:text-white  file:px-2"
+                  className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white  file:px-2"
                   {...register("director_img", {
                     required: "Director image is required",
                   })}
                 />
               </div>
               {errors.director_img && (
-                <p className="text-sm text-red-500">
-                  {errors.director_img.message}
-                </p>
+                <p className="error-msg">{errors.director_img.message}</p>
               )}
             </div>
           </div>
+
+          {/* Cast */}
+          {castFields.map((item, index) => (
+            <div
+              key={item.id}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 relative border border-gray3-bg p-2"
+            >
+              <div>
+                <label className="text-base font-medium block mb-2">Cast</label>
+                <Input
+                  placeholder="Cast name"
+                  className="custom-content-input"
+                  {...register(`casts.${index}.cast`, {
+                    required: "Cast name is required",
+                  })}
+                />
+                {errors?.casts?.[index]?.cast && (
+                  <p className="error-msg">
+                    {errors.casts[index].cast?.message as string}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-base font-medium block mb-2">
+                  Cast Image
+                </label>
+                <input
+                  type="file"
+                  className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                  {...register(`casts.${index}.cast_img`, {
+                    required: "Cast image is required",
+                  })}
+                />
+                {errors?.casts?.[index]?.cast_img && (
+                  <p className="error-msg">
+                    {errors.casts[index].cast_img?.message as string}
+                  </p>
+                )}
+              </div>
+
+              {index > 0 && (
+                <button
+                  type="button"
+                  className="absolute top-2 right-2 cursor-pointer bg-secondary-color text-white p-1 rounded-sm"
+                  onClick={() => removeCast(index)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={() => appendCast({ cast: "", cast_img: null })}
+            className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Add Cast</span>
+          </button>
+
+          {/* Series Mode */}
+          <div className="flex items-center gap-2">
+            <Checkbox
+              className="data-[state=checked]:bg-primary-color h-5 w-5 cursor-pointer"
+              id="series-mode"
+              onCheckedChange={() => setIsSeries(!isSeries)}
+            />
+            <Label
+              htmlFor="series-mode"
+              className="text-base font-medium cursor-pointer"
+            >
+              Enable Series Mode
+            </Label>
+          </div>
+
+          {/* Series Item */}
+          {isSeries &&
+            seriesFields.map((item, index) => (
+              <div
+                key={item.id}
+                className="grid md:grid-cols-2 xl:grid-cols-4 gap-4 relative border border-gray3-bg p-2"
+              >
+                <div className="md:col-span-2 xl:col-span-4">
+                  <label className="text-base font-medium block mb-2">
+                    Series Name
+                  </label>
+                  <Input
+                    placeholder="Series name"
+                    className="custom-content-input"
+                    {...register(`series.${index}.series_name`, {
+                      required: "Series name is required",
+                    })}
+                  />
+                  {errors?.series?.[index]?.series_name && (
+                    <p className="error-msg">
+                      {errors.series[index].series_name?.message as string}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-base font-medium block mb-2">
+                    Episode Name
+                  </label>
+                  <Input
+                    placeholder="Episode name"
+                    className="custom-content-input"
+                    {...register(`series.${index}.episode_name`, {
+                      required: "Episode name is required",
+                    })}
+                  />
+                  {errors?.series?.[index]?.episode_name && (
+                    <p className="error-msg">
+                      {errors.series[index].episode_name?.message as string}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-base font-medium block mb-2">
+                    Episode Number
+                  </label>
+                  <Input
+                    placeholder="Episode number"
+                    className="custom-content-input"
+                    {...register(`series.${index}.episode_number`, {
+                      required: "Episode number is required",
+                    })}
+                  />
+                  {errors?.series?.[index]?.episode_number && (
+                    <p className="error-msg">
+                      {errors.series[index].episode_number?.message as string}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-base font-medium block mb-2">
+                    Episode File
+                  </label>
+                  <input
+                    type="file"
+                    className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                    {...register(`series.${index}.episode_file`, {
+                      required: "Episode file is required",
+                    })}
+                  />
+                  {errors?.series?.[index]?.episode_file && (
+                    <p className="error-msg">
+                      {errors.series[index].episode_file?.message as string}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-base font-medium block mb-2">
+                    Episode Thumbnail
+                  </label>
+                  <input
+                    type="file"
+                    className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                    {...register(`series.${index}.episode_thumbnail`, {
+                      required: "Episode thumbnail is required",
+                    })}
+                  />
+                  {errors?.series?.[index]?.episode_thumbnail && (
+                    <p className="error-msg">
+                      {
+                        errors.series[index].episode_thumbnail
+                          ?.message as string
+                      }
+                    </p>
+                  )}
+                </div>
+
+                {index > 0 && (
+                  <button
+                    type="button"
+                    className="absolute top-2 right-2 cursor-pointer bg-secondary-color text-white p-1 rounded-sm"
+                    onClick={() => removeSeries(index)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ))}
+
+          {isSeries && (
+            <button
+              type="button"
+              onClick={() =>
+                appendSeries({
+                  series_name: "",
+                  episode_name: "",
+                  episode_number: "",
+                  episode_file: null,
+                  episode_thumbnail: null,
+                })
+              }
+              className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Add New Episode</span>
+            </button>
+          )}
 
           {/* Trailer */}
           <div>
