@@ -26,7 +26,7 @@ interface CityData {
   value: string;
 }
 
-interface LanguegeData {
+interface LanguageData {
   label: string;
   value: string;
 }
@@ -135,14 +135,14 @@ export default function Setting() {
   ];
 
   // Country
-  const languege: LanguegeData[] = [
+  const language: LanguageData[] = [
     {
       label: "English",
-      value: "engalish",
+      value: "English",
     },
     {
-      label: "Usa",
-      value: "usa",
+      label: "Mexican",
+      value: "Mexican",
     },
   ];
 
@@ -258,7 +258,7 @@ export default function Setting() {
         <div className="bg-[#131824] p-4 rounded-[8px] mt-4">
           <div className="grid sm:grid-cols-2 gap-5">
             {/* Name */}
-            <div className="mb-4">
+            <div>
               <Label className="text-base font-medium mb-3">Name</Label>
               <Input
                 defaultValue={user?.name}
@@ -271,6 +271,28 @@ export default function Setting() {
                 <p className="error-msg">{errors.name.message}</p>
               )}
             </div>
+
+            {/* Email */}
+            <div>
+              <Label className="text-base font-mediumd mb-3">Email</Label>
+              <Input
+                defaultValue={user?.email}
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Please enter a valid email address",
+                  },
+                })}
+                className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
+                placeholder="cameron.graham@example.com"
+              />
+
+              {errors.email && (
+                <p className="error-msg">{errors.email.message}</p>
+              )}
+            </div>
+
             {/* Date of Birth */}
             <div>
               <Label className="text-base font-medium mb-3">
@@ -294,26 +316,34 @@ export default function Setting() {
                 <Calendar className="absolute right-3 top-1/4  w-5 h-5 text-gray-400 pointer-events-none" />
               </div>
             </div>
-          </div>
-          {/* Email */}
-          <div>
-            <Label className="text-base font-mediumd mb-3">Email</Label>
-            <Input
-              defaultValue={user?.email}
-              {...register("email", {
-                required: "Email is required",
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Please enter a valid email address",
-                },
-              })}
-              className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
-              placeholder="cameron.graham@example.com"
-            />
 
-            {errors.email && (
-              <p className="error-msg">{errors.email.message}</p>
-            )}
+            {/* Language */}
+            <div>
+              <Label className="text-base font-medium mb-3">Language</Label>
+
+              <Select
+                value={user?.city}
+                onValueChange={(val) => setValue("city", val)}
+                {...register("city")}
+              >
+                <SelectTrigger className="h-[40px] cursor-pointer w-full px-4 py-3 text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color">
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent className="bg-secondary-bg text-white border border-slate-700 rounded">
+                  {language.map((city, idx) => {
+                    return (
+                      <SelectItem
+                        key={idx}
+                        value={city.value}
+                        className="cursor-pointer"
+                      >
+                        {city.label}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-5 mt-4">
@@ -404,18 +434,16 @@ export default function Setting() {
               {...register("bio")}
               defaultValue={user?.bio}
               className="h-[100px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
-              placeholder="write your Bio"
+              placeholder="Write your Bio"
             />
           </div>
 
-          <div className="">
-            <button
-              type="submit"
-              className="bg-[#2D9DFF] rounded-full   text-white px-[150px] md:px-[206px] py-[14px]  text-sm font-normal cursor-pointer flex justify-center items-center mx-auto "
-            >
-              Save
-            </button>
-          </div>
+          <button
+            type="submit"
+            className="bg-primary-color rounded-full text-white py-[14px] max-w-[400px] w-full text-base font-medium cursor-pointer block mx-auto  border border-white"
+          >
+            Save
+          </button>
         </div>
       </form>
     </>

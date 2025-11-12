@@ -9,7 +9,7 @@ export default function StatsCard({ title, count, description }: any) {
           <div className="self-stretch text-[color:var(--Neutral-Colors-100,#FFF)]  text-[28px] font-semibold leading-[130%] tracking-[0.14px]">
             {count}
           </div>
-          <p className="text-xs font-normal">{description}</p>
+          <p className="text-xs font-normal text-[11px]">{description}</p>
         </div>
       </div>
     </div>

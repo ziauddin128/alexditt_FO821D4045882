@@ -53,7 +53,6 @@ const userDetails: UserDetail[] = [
   },
 ];
 
-
 // Table columns
 const columns: ColumnDef<UserDetail>[] = [
   {

@@ -12,24 +12,23 @@ import { privateAxios } from "@/components/axiosInstance/axios";
 // interface UserDetailsProps {
 //   id: string;
 // }
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 
 export default function UserDetails({ params }: { params: any }) {
-  const id = params?.id;
-  /* const { data: userDet, isLoading } = useQuery({
-    queryKey: ["userDet", id],
-    queryFn: async () => {
-      const res = await privateAxios.get(`/admin/user/users/${id}`);
-      return res.data;
-    },
-  }); */
+  const id = 1;
+  // const id = params?.id;
 
-  const userDet = {
-    id: 1,
-    name: "zia uddin",
-    status: "success",
-  };
+  // const { data: userDet, isLoading } = useQuery({
+  //   queryKey: ["userDet", id],
+  //   queryFn: async () => {
+  //     const res = await privateAxios.get(`/admin/user/users/${id}`);
+  //     return res.data;
+  //   },
+  // });
+  const userDet = { id: 1, name: "", email: "" };
   const isLoading = false;
-
   const tabs = [
     { name: "Personal Info", value: "personal-info" },
     { name: "Subscription", value: "subscription" },
@@ -44,7 +43,11 @@ export default function UserDetails({ params }: { params: any }) {
     <>
       <UserDetTop id={id} userDet={userDet} />
 
-      <div className="my-4">
+      <div>
+        <PersonalInfo userDet={userDet} />
+      </div>
+
+      {/* <div className="my-4">
         <Tabs defaultValue="personal-info" className="usersTab">
           <TabsList className="bg-transparent w-full sm:w-fit overflow-x-auto tabs_wrapper">
             {tabs.map((tab, index) => (
@@ -63,7 +66,6 @@ export default function UserDetails({ params }: { params: any }) {
               </TabsTrigger>
             ))}
           </TabsList>
-
           <div className="mt-2">
             <TabsContent value="personal-info" className="space-y-4">
               <PersonalInfo userDet={userDet} />
@@ -76,7 +78,7 @@ export default function UserDetails({ params }: { params: any }) {
             </TabsContent>
           </div>
         </Tabs>
-      </div>
+      </div> */}
     </>
   );
 }
