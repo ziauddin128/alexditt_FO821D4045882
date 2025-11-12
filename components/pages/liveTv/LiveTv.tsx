@@ -183,12 +183,8 @@ export default function LiveTvPage() {
     queryFn: async () => {
       const res = await privateAxios.get("/payments/totalSubscribers");
       return res.data;
-<<<<<<< HEAD
 
     }
-=======
-    },
->>>>>>> ca2152f14d6c120a2487b25fb37e633045ac2d6a
   });
 
   // active subscription
@@ -221,35 +217,11 @@ export default function LiveTvPage() {
   return (
     <>
       {/* Stats */}
-<<<<<<< HEAD
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-5 mt-4">
         <StatsCard title="Active Streams" count="8" description="+2 from yesterday" />
         <StatsCard title="Current Viewers" count="3,421" description="Peak: 5,200" />
         <StatsCard title="Avg. Watch Time" count="32 min" description="Engagement: 68%" />
         <StatsCard title="Scheduled Events" count="5" description="Next: Movie Premiere" />
-=======
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsCard
-          title="Active Streams"
-          count={totalSubscriber?.totalSubscribers.toLocaleString()}
-          description="+2 from yesterday"
-        />
-        <StatsCard
-          title="Current Viewers"
-          count={totalActiveSubscription?.message}
-          description="Peak: 5,200"
-        />
-        <StatsCard
-          title="Avg. Watch Time"
-          count={monthlyRevenue?.message}
-          description="Engagement: 68%"
-        />
-        <StatsCard
-          title="Scheduled Events"
-          count={totalAvgSubValue?.message}
-          description="Next: Movie Premiere"
-        />
->>>>>>> ca2152f14d6c120a2487b25fb37e633045ac2d6a
       </section>
 
       <div>

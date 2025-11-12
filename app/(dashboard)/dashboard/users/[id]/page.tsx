@@ -17,26 +17,8 @@ interface PageProps {
 }
 
 export default function UserDetails({ params }: { params: any }) {
-<<<<<<< HEAD
   const id = 1;
   // const { id } = await params;
-=======
-  const id = params?.id;
-  /* const { data: userDet, isLoading } = useQuery({
-    queryKey: ["userDet", id],
-    queryFn: async () => {
-      const res = await privateAxios.get(`/admin/user/users/${id}`);
-      return res.data;
-    },
-  }); */
-
-  const userDet = {
-    id: 1,
-    name: "zia uddin",
-    status: "success",
-  };
-  const isLoading = false;
->>>>>>> ca2152f14d6c120a2487b25fb37e633045ac2d6a
 
 
   // const { data: userDet, isLoading } = useQuery({
