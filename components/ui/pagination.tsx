@@ -14,7 +14,10 @@ function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
       role="navigation"
       aria-label="pagination"
       data-slot="pagination"
-      className={cn("mx-auto flex w-full justify-center  items-center", className)}
+      className={cn(
+        "mx-auto flex w-full justify-center  items-center",
+        className
+      )}
       {...props}
     />
   );
@@ -58,8 +61,8 @@ function PaginationLink({
           variant: isActive ? "outline" : "ghost",
           size,
         }),
-        "rounded-md px-3 py-1  border-[#171C28] hover:bg-[#7A24BC] hover:text-white", // Rounded corners with padding
-        isActive && "bg-[#7A24BC] text-white ", // Active page styling
+        "rounded-md px-3 py-1  border-[#171C28] hover:bg-primary-color hover:text-white", // Rounded corners with padding
+        isActive && "bg-primary-color text-white ", // Active page styling
         className
       )}
       {...props}

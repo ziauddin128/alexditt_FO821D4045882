@@ -1,8 +1,7 @@
-
+"use client";
+import React from "react";
 import { DataTable } from "@/components/reusable/data-table";
 import { ColumnDef } from "@tanstack/react-table";
-
-import React from "react";
 
 interface VideoDetails {
   id: number;
@@ -42,7 +41,7 @@ const videoData: VideoDetails[] = [
     views: "25K",
   },
 ];
-//
+
 const columns: ColumnDef<VideoDetails>[] = [
   {
     accessorKey: "type",
@@ -69,13 +68,13 @@ const columns: ColumnDef<VideoDetails>[] = [
 export default function LatestUploadsTable() {
   return (
     <div className="rounded-lg mt-4 ">
-      <DataTable columns={columns} data={videoData} >
+      <DataTable columns={columns} data={videoData}>
         <div className="flex items-center justify-between">
-          <h2 className="text-[color:var(--W,#FFF)] text-base font-medium leading-[160%]">
+          <h2 className="text-base font-medium leading-[160%]">
             Latest Uploads
           </h2>
 
-          <button className="text-[color:var(--W,#FFF)]  text-xs font-medium leading-[100%] cursor-pointer">
+          <button className="border border-[#181818] p-1 text-xs font-medium leading-[100%] cursor-pointer">
             View All
           </button>
         </div>

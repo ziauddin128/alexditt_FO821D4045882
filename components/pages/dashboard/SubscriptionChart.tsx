@@ -78,24 +78,26 @@ const CustomLegend = ({ payload }: any) => {
 
 export function SubscriptionGrowthChart() {
   return (
-        <div className="bg-[#131824] rounded-lg p-4 border border-slate-800">
+    <div className="bg-[#131824] rounded-lg p-4 border border-slate-800">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-white">Subscription Growth</h2>
-        <DropdownMenu>
+        <h2 className="text-base font-medium text-white">
+          Subscription Growth
+        </h2>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800 gap-2">
+            <Button className="text-slate-400  hover:bg-slate-800 gap-2 border border-[#181818] outline-none shadow-none focus-visible:ring-0 focus-visible:border-0 cursor-pointer rounded">
               Last week
               <ChevronDown className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-slate-800 border-slate-700">
-            <DropdownMenuItem className="text-slate-300 hover:text-white hover:bg-slate-700">
+            <DropdownMenuItem className="text-slate-300 hover:text-white hover:bg-slate-700 cursor-pointer">
               Last week
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-slate-300 hover:text-white hover:bg-slate-700">
+            <DropdownMenuItem className="text-slate-300 hover:text-white hover:bg-slate-700 cursor-pointer">
               Last month
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-slate-300 hover:text-white hover:bg-slate-700">
+            <DropdownMenuItem className="text-slate-300 hover:text-white hover:bg-slate-700 cursor-pointer">
               Last quarter
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -109,13 +111,17 @@ export function SubscriptionGrowthChart() {
             margin={{
               top: 0,
               right: 10,
-              left: 0,
+              left: -12,
               bottom: 0,
             }}
             barCategoryGap="28%"
           >
-       
-            <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 12 }} />
+            <XAxis
+              dataKey="day"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: "#94a3b8", fontSize: 12 }}
+            />
             <YAxis
               axisLine={false}
               tickLine={false}
@@ -125,14 +131,21 @@ export function SubscriptionGrowthChart() {
               ticks={[0, 5, 10, 15, 20, 25]}
             />
             <Legend content={<CustomLegend />} />
-            <Bar dataKey="newSubscribers" fill="#7A24BC" radius={[10, 10, 10, 10]} maxBarSize={40} />
-            <Bar dataKey="cancellations" fill="#1814F3" radius={[10, 10, 10, 10]} maxBarSize={40} />
+            <Bar
+              dataKey="newSubscribers"
+              fill="#2d9dff"
+              radius={[10, 10, 10, 10]}
+              maxBarSize={40}
+            />
+            <Bar
+              dataKey="cancellations"
+              fill="#eb3d4d"
+              radius={[10, 10, 10, 10]}
+              maxBarSize={40}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
     </div>
   );
 }
-
-
-

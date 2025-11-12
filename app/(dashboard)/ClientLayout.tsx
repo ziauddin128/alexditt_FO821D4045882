@@ -41,7 +41,7 @@ const menuItems = [
     label: "Dashboard",
   },
   {
-    href: "/dashboard/content-management",
+    href: "/dashboard/film-management",
     icon: <FilmManagement className="w-[18px] h-[18px]" />,
     label: "Film Management",
   },
@@ -60,11 +60,6 @@ const menuItems = [
     icon: <LiveTbIcon className="w-[18px] h-[18px]" />,
     label: "Live TV",
   },
-  // {
-  //   href: "/dashboard/help-support",
-  //   icon: <MessageCircleQuestionMark className="w-[18px] h-[18px]" />,
-  //   label: "Help & Support",
-  // },
   {
     href: "/dashboard/setting",
     icon: <Setting className="w-[18px] h-[18px]" />,
@@ -146,8 +141,9 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
   const TopBar = () => {
     return (
       <div className="lg:p-4 flex items-center justify-between bg-[#0D121E]">
-        <div className="font-semibold text-2xl hidden lg:block">
-          {"Welcome, Admin"}
+        <div className="hidden lg:block">
+          <h4 className="font-semibold text-2xl">Welcome, Jane Cooper</h4>
+          <p className="text-base">Have a nice day</p>
         </div>
 
         <div className="flex items-center ">
@@ -221,7 +217,6 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
                     width={48}
                     height={48}
                     alt="User"
-
                   />
                 </div>
               </div>
@@ -252,24 +247,23 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
 
       {/* Sidebar */}
       <div
-        className={`fixed z-30 h-screen w-64 transform bg-[#131824]  transition-transform duration-300 ease-in-out text-[#FFF] ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } lg:translate-x-0`}
+        className={`fixed z-30 h-screen w-64 transform bg-[#131824]  transition-transform duration-300 ease-in-out text-[#FFF] ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0`}
       >
         {/* Logo */}
-        <div className="flex items-center ">
+        <div className="flex items-center justify-center pt-[25px]">
           <Link href="/dashboard">
-            <Image
-              src="/dashboard/dashboardlgo.png"
-              alt="logo"
-              width={182}
-              height={155}
-              className="w-full "
+            <img
+              src="/dashboard/logo.png"
+              className="w-[182px] h-[155px] object-cover"
+              alt="Logo"
             />
           </Link>
         </div>
 
         {/* Menu Items */}
-        <nav className="mt-4 px-4">
+        <nav className="mt-[30px] px-4">
           {menuItems.map((item, index) => {
             const isActive = (() => {
               if (item.href === "/dashboard") {
@@ -278,13 +272,14 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
               return pathname.startsWith(item.href);
             })();
             return (
-              <div className="mb-2" key={index} >
+              <div className="mb-6" key={index}>
                 <Link
                   href={item.href}
-                  className={`flex items-center text-base font-medium px-4 py-3 rounded-md gap-2 ${isActive
-                    ? "bg-[#2D9DFF] primary-text font-medium"
-                    : "text-[#FFF] hover:bg-[#7A24BC]/10"
-                    }`}
+                  className={`flex items-center text-lg px-4 py-2.5 rounded-[30px] gap-2 border border-transparent ${
+                    isActive
+                      ? "bg-primary-color primary-text border-white"
+                      : "text-[#FFF] hover:bg-primary-color/20"
+                  }`}
                 >
                   {item.icon}
                   {item.label}
@@ -302,10 +297,11 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
               <div className="px-4 py-1" key={index}>
                 <button
                   onClick={handleLogout}
-                  className={`cursor-pointer  w-full flex items-center justify-center text-base font-medium px-4 py-3 rounded-full gap-1  ${isActive
-                    ? " primary-text font-medium "
-                    : "text-[#FFFFFF] font-sans font-normal text-[20px] leading-[120%] align-middle bg-red-600"
-                    }`}
+                  className={`cursor-pointer  w-full flex items-center justify-center text-base font-medium px-4 py-3 rounded-full gap-1  ${
+                    isActive
+                      ? " primary-text font-medium "
+                      : "text-[#FFFFFF] font-sans font-normal text-[20px] leading-[120%] align-middle bg-red-600"
+                  }`}
                 >
                   {item.icon}
                   {item.label}

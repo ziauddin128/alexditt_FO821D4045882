@@ -5,8 +5,9 @@ import { Pagination } from "@/components/ui/pagination";
 import UpcomingTable from "./upcomingTable";
 
 export default function Tabcreate() {
-    const [activeTab, setActiveTab] = useState<"live" | "upcoming">("live");
+  const [activeTab, setActiveTab] = useState<"live" | "upcoming">("live");
 
+<<<<<<< HEAD
     return (
         <div className="py-4 ">
             {/* ---------- Buttons ---------- */}
@@ -45,4 +46,32 @@ export default function Tabcreate() {
 
         </div >
     );
+=======
+  return (
+    <div className="py-4 px-5">
+      {/* ---------- Buttons ---------- */}
+      <div className="flex gap-2 mb-5">
+        <button
+          onClick={() => setActiveTab("live")}
+          className={`py-[10px] px-5 rounded ${activeTab === "live" ? "" : ""}`}
+        >
+          Live
+        </button>
+
+        <button
+          onClick={() => setActiveTab("upcoming")}
+          className={`py-[10px] px-5 rounded ${
+            activeTab === "upcoming" ? "" : ""
+          }`}
+        >
+          Upcoming
+        </button>
+      </div>
+
+      {/* ---------- Conditional Render ---------- */}
+      {activeTab === "live" && <LivePage />}
+      {activeTab === "upcoming" && <UpcomingPage />}
+    </div>
+  );
+>>>>>>> ca2152f14d6c120a2487b25fb37e633045ac2d6a
 }
