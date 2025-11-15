@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CategoryModalProps {
   category: Category | null;
@@ -105,11 +106,11 @@ export default function AddCategories({ category }: CategoryModalProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div>
-            <div className="mb-4">
-              <Label className="text-sm font-normal mb-3">Category Name</Label>
+            <div className="mb-3">
+              <Label className="custom-label mb-3">Category Name</Label>
               <Input
                 placeholder="e.g., Horror, Sci-Fi"
-                className="w-full px-4 py-3 text-sm font-normal bg-[#181E2A] border border-[#222733] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color text-white"
+                className="custom-input"
                 {...register("category_name", {
                   required: "Category name is required",
                 })}
@@ -119,22 +120,17 @@ export default function AddCategories({ category }: CategoryModalProps) {
               )}
             </div>
 
-            <div className="mb-4">
-              <Label className="text-sm font-normal mb-3">Description</Label>
-              <textarea
+            <div className="mb-3">
+              <Label className="custom-label mb-3">Description</Label>
+              <Textarea
                 placeholder="Brief description (optional)"
-                className="w-full px-4 py-3 text-sm font-normal bg-[#181E2A] border border-[#222733] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color text-white"
+                className="!h-[100px] custom-input"
                 {...register("description")}
               />
             </div>
 
-            <div className="mb-4">
-              <Label
-                htmlFor="category-status"
-                className="text-sm font-normal mb-3"
-              >
-                Status
-              </Label>
+            <div className="mb-3">
+              <Label className="custom-label mb-3">Status</Label>
 
               <Controller
                 name="status"
@@ -149,16 +145,24 @@ export default function AddCategories({ category }: CategoryModalProps) {
                     onValueChange={field.onChange}
                     value={field.value}
                   >
-                    <SelectTrigger className="w-full px-4 py-3 text-sm font-normal bg-[#181E2A] border border-[#222733] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color text-white cursor-pointer">
+                    <SelectTrigger className="custom-input cursor-pointer">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-none">
-                      <SelectItem value="1" className="cursor-pointer">
-                        Active
-                      </SelectItem>
-                      <SelectItem value="0" className="cursor-pointer">
-                        Deactive
-                      </SelectItem>
+                    <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
+                      <SelectGroup className="space-y-2">
+                        <SelectItem
+                          value="1"
+                          className="selectOption !justify-start"
+                        >
+                          Active
+                        </SelectItem>
+                        <SelectItem
+                          value="0"
+                          className="selectOption !justify-start"
+                        >
+                          Deactive
+                        </SelectItem>
+                      </SelectGroup>
                     </SelectContent>
                   </Select>
                 )}
@@ -169,13 +173,13 @@ export default function AddCategories({ category }: CategoryModalProps) {
               )}
             </div>
 
-            <div className="mb-4">
-              <Label className="text-sm font-normal mb-3">
+            <div className="mb-6">
+              <Label className="custom-label mb-3">
                 Assign Tags (optional)
               </Label>
-              <textarea
+              <Textarea
                 placeholder="#Superhero #Crime #RomCom"
-                className="w-full px-4 py-3 text-sm font-normal bg-[#181E2A] border border-[#222733] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color text-white"
+                className="!h-[100px] custom-input"
                 {...register("category_tags")}
               />
             </div>
