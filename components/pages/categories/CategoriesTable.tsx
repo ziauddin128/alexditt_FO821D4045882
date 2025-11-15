@@ -176,7 +176,6 @@ export default function CategoriesTable() {
   //   return <div>Error: {error.message}</div>;
   // }
 
-  console.log("Category", fakeCategories);
   return (
     <div>
       {/* Categories title */}

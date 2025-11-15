@@ -145,7 +145,7 @@ export default function UserTable() {
             className="bg-[#FFECD2] rounded-full h-9 w-9 flex items-center justify-center"
             title="Active/Deactive"
           >
-            <ToggleRight className="text-[#FFA21D] h-5 w-5"/>
+            <ToggleRight className="text-[#FFA21D] h-5 w-5" />
           </Link>
 
           <Link
@@ -205,7 +205,7 @@ export default function UserTable() {
             <SelectTrigger className="flex items-center gap-2 rounded border border-gray-black-50 bg-dark-bg px-5 py-3 !text-white cursor-pointer outline-none shadow-none focus-visible:ring-0 focus-visible:border-border-gray-black-50">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
-            <SelectContent className="border border-gray-black-50 bg-dark-bg rounded">
+            <SelectContent className="border border-gray3-bg bg-dark-bg rounded">
               <SelectGroup className="space-y-2">
                 <SelectItem className="selectOption" value="all">
                   All

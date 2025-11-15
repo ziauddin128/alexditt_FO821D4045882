@@ -198,7 +198,7 @@ body {
 }
 
 .selectOption {
-  @apply cursor-pointer border-[#1B202C] px-2.5 py-[9px] rounded-sm border text-center flex items-center justify-center text-white focus:bg-accent focus:text-accent-foreground;
+  @apply cursor-pointer border-[#1B202C] px-2.5 py-[9px] rounded-sm border text-center flex items-center justify-center text-white focus:bg-[#2D9DFF99] focus:text-white;
 }
 
 /* Users Tab */
@@ -248,5 +248,5 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .custom-input {
-  @apply h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color;
+  @apply h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-dark-bg bg-dark-bg rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color;
 }

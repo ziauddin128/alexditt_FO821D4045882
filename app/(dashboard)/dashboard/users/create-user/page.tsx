@@ -1,158 +1,349 @@
 "use client";
-
-import React, { useState } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
-
-import { Input } from "@/components/ui/input";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import React from "react";
 import { Label } from "@/components/ui/label";
-import Calendar from "@/components/icons/Calendar";
-import EyeOfIcon from "@/components/icons/EyeOfIcon";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useAuth } from "@/provider/AuthProvider";
+
+import { Controller, useForm } from "react-hook-form";
+import { privateAxios } from "@/components/axiosInstance/axios";
+import { toast } from "sonner";
+import Calendar from "@/components/icons/Calendar";
+import { PencilLine } from "lucide-react";
+import EyeIcon from "@/components/icons/EyeIcon";
+import EyeSlash from "@/components/icons/EyeSlash";
+
 interface FormData {
-    name: string;
-    email: string;
-    address: string;
-    phone: string;
-    gender: string;
-    description: string;
-    create_date: string;
-    password: string;
+  name: string;
+  email: string;
+  date_of_birth: string;
+  Address: string;
+  phone_number: string;
+  country: string | null;
+  postal_code: string;
+  description: string;
+  gender: string;
+  password: string;
 }
 
 export default function CreateUser() {
-    const [showPassword, setShowPassword] = useState(false);
+  const [type, setType] = React.useState<"password" | "text">("password");
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<FormData>({});
+  const [image, setImage] = useState<File | undefined>();
+  // Image Preview Show
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-    const onSubmit: SubmitHandler<FormData> = (data) => {
-        console.log("Form submitted:", data);
+  // Handle file selection and show the image preview
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      // Read the file as a data URL (base64 string)
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string); // Update image preview state
+      };
+      if (file) {
+        reader.readAsDataURL(file); // Convert the file to a data URL
+      }
+
+      setImage(file);
+    }
+  };
+
+  // Update Image
+  useEffect(() => {
+    const updateImage = async () => {
+      const data = {
+        profilePicture: image,
+      };
+
+      try {
+        const response = await privateAxios.put("/users/update-image", data, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        if (response.data) {
+          toast.success("Image updated successfully", {
+            position: "top-right",
+            style: {
+              backgroundColor: "#4CAF50",
+              color: "#fff",
+            },
+          });
+        }
+      } catch (errorData: any) {
+        toast.error("Image updated failed", {
+          position: "top-right",
+          style: {
+            backgroundColor: "#f44336",
+            color: "#fff",
+          },
+        });
+      }
     };
 
-    return (
-        <div className=" rounded-sm">
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="bg-[#131824] p-4 rounded-[8px] mt-4">
-                    <div className="grid sm:grid-cols-2 gap-5">
-                        <div>
-                            <Label className="text-white font-inter text-[16px] font-medium leading-[160%] pb-3">Name</Label>
-                            <Input
-                                {...register("name", { required: "Name is required" })}
-                                placeholder="Cameron Williamson"
-                                className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
-                            />
-                            {errors.name && <p className="text-red-500 mt-1 text-sm">{errors.name.message}</p>}
-                        </div>
+    if (image) {
+      updateImage();
+    }
+  }, [image]);
 
-                        <div>
-                            <Label className="text-white font-inter text-[16px] font-medium leading-[160%] pb-3">Email</Label>
-                            <Input
-                                {...register("email", {
-                                    required: "Email is required",
-                                    pattern: {
-                                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                                        message: "Please enter a valid email address",
-                                    },
-                                })}
-                                placeholder="cameron.graham@example.com"
-                                className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
-                            />
-                            {errors.email && <p className="text-red-500 mt-1 text-sm">{errors.email.message}</p>}
-                        </div>
-                    </div>
+  // Handle delete action (reset the image preview)
+  /*  const handleDelete = () => {
+     setImagePreview(null);  // Reset the preview image
+     setImage(undefined);
+   }; */
 
-                    <div className="grid sm:grid-cols-2 gap-5 mt-4">
-                        <div>
-                            <Label className="text-white font-inter text-[16px] font-medium leading-[160%] pb-3">Create Date</Label>
+  const {
+    register,
+    formState: { errors },
+    handleSubmit,
+    setValue,
+    control,
+  } = useForm<FormData>();
 
-                            <div className="relative">
-                                <Input
-                                    type="date"
-                                    {...register("create_date", { required: "Create date is required" })}
-                                    className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
-                                />
-                                <Calendar className="absolute right-3 top-1/4 w-5 h-5 text-gray-400 pointer-events-none" />
-                                {errors.create_date && <p className="text-red-500 mt-1 text-sm">{errors.create_date.message}</p>}
-                            </div>
-                        </div>
+  const onSubmit = async (data: FormData) => {
+    console.log(data);
 
-                        <div>
-                            <Label className="text-white font-inter text-[16px] font-medium leading-[160%] pb-3">Phone</Label>
-                            <Input
-                                {...register("phone", { required: "Phone number is required" })}
-                                placeholder="(704) 555-0127"
-                                className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
-                            />
-                            {errors.phone && <p className="text-red-500 mt-1 text-sm">{errors.phone.message}</p>}
-                        </div>
-                    </div>
+    /* try {
+      const date_of_birth = new Date(data.date_of_birth).toISOString();
+      data.date_of_birth = date_of_birth;
 
-                    <div className="grid sm:grid-cols-2 gap-5 mt-4">
-                        <div>
-                            <Label className="text-white font-inter text-[16px] font-medium leading-[160%] pb-3">Gender</Label>
-                            <select
-                                {...register("gender", { required: "Gender is required" })}
-                                className="h-[40px] w-full px-4 py-[4px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
-                                defaultValue=""
-                            >
-                                <option value="" disabled>
-                                    Select gender
-                                </option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                            </select>
-                            {errors.gender && <p className="text-red-500 mt-1 text-sm">{errors.gender.message}</p>}
-                        </div>
+      const response = await privateAxios.put(
+        "/users/update-user-details",
+        data
+      );
+      if (response.data) {
+        toast.success("Data updated successfully", {
+          position: "top-right",
+          style: {
+            backgroundColor: "#4CAF50",
+            color: "#fff",
+          },
+        });
+      }
+    } catch (errorData: any) {
+      toast.error("Data updated failed", {
+        position: "top-right",
+        style: {
+          backgroundColor: "#f44336",
+          color: "#fff",
+        },
+      });
+    } */
+  };
 
-                        <div>
-                            <Label className="text-white font-inter text-[16px] font-medium leading-[160%] pb-3">Description</Label>
-                            <textarea
-                                {...register("description", { required: "Description is required" })}
-                                placeholder="Write a description about yourself"
-                                className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
-                            />
-                            {errors.description && <p className="text-red-500 mt-1 text-sm">{errors.description.message}</p>}
-                        </div>
-                    </div>
+  return (
+    <>
+      <h4 className="text-xl md:text-2xl font-medium mb-4">
+        Creating a new user
+      </h4>
 
-                    {/* Password Field with show/hide */}
-                    <div className="relative mt-4">
-                        <Label className="text-white font-inter text-[16px] font-medium leading-[160%] pb-3" htmlFor="password">
-                            Password
-                        </Label>
-                        <Input
-                            id="password"
-                            type={showPassword ? "text" : "password"}
-                            {...register("password", { required: "Password is required", minLength: { value: 6, message: "Password must be at least 6 characters" } })}
-                            placeholder="•••••••••••••"
-                            className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
-                        />
-                        {errors.password && <p className="text-red-500 mt-1 text-sm">{errors.password.message}</p>}
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-[48px] text-white"
-                            aria-label={showPassword ? "Hide password" : "Show password"}
-                        >
-                            <EyeOfIcon />
-                        </button>
-                    </div>
-
-                    <div className="mt-8 flex justify-center">
-                        <button
-                            type="submit"
-                            className="bg-[#2D9DFF] rounded-full text-white px-[100px] md:px-[206px] py-[14px] text-sm font-normal cursor-pointer  border border-white "
-                        >
-                            Creating a new user
-                        </button>
-                    </div>
-                </div>
-            </form>
+      {/* Image Upload */}
+      <div className="flex flex-wrap items-center gap-2 sm:gap-5 ">
+        <div>
+          <div className="h-[100px] w-[100px]">
+            {imagePreview ? (
+              <Image
+                src={imagePreview}
+                alt="Preview"
+                className="h-full w-full object-cover rounded-full"
+                width={100}
+                height={100}
+              />
+            ) : (
+              <div className="h-[100px] w-[100px] rounded-full bg-[#FFFFFF33] flex items-center justify-center">
+                <PencilLine />
+              </div>
+            )}
+          </div>
         </div>
-    );
+        <label
+          htmlFor="profileImage"
+          className="cursor-pointer py-[14px] px-5 border border-white rounded-[100px]"
+        >
+          <input
+            type="file"
+            hidden
+            id="profileImage"
+            accept="image/*"
+            onChange={handleImageChange}
+          />
+          <span className="text-sm font-medium">Upload New Picture</span>
+        </label>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="bg-[#131824] p-4 rounded-[8px] mt-4">
+          <div className="grid sm:grid-cols-2 gap-4">
+            {/* Name */}
+            <div className="mb-3">
+              <Label className="custom-label mb-3">Name</Label>
+              <Input
+                {...register("name", { required: "Name is required" })}
+                className="custom-input"
+                placeholder="Cameron Williamson"
+              />
+
+              {errors.name && (
+                <p className="error-msg">{errors.name.message}</p>
+              )}
+            </div>
+
+            {/* Email */}
+            <div className="mb-3">
+              <Label className="custom-label mb-3">Email</Label>
+              <Input
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Please enter a valid email address",
+                  },
+                })}
+                className="custom-input "
+                placeholder="cameron.graham@example.com"
+              />
+
+              {errors.email && (
+                <p className="error-msg">{errors.email.message}</p>
+              )}
+            </div>
+
+            {/* Date of Birth */}
+            <div className="mb-3">
+              <Label className="custom-label mb-3">Date of Birth</Label>
+              <div className="relative">
+                <Input
+                  {...register("date_of_birth")}
+                  type="text"
+                  placeholder="1 Feb, 1990"
+                  onFocus={(e) => (e.target.type = "date")}
+                  onBlur={(e) => {
+                    if (!e.target.value) e.target.type = "text";
+                  }}
+                  className="custom-input"
+                  id="datepicker"
+                />
+
+                {/* Calendar Icon */}
+                <Calendar className="absolute right-3 top-1/4  w-5 h-5 text-gray-400 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Phone */}
+            <div className="mb-3">
+              <Label className="custom-label mb-3">Phone</Label>
+              <Input
+                {...register("phone_number")}
+                className="custom-input"
+                placeholder="(704) 555-0127"
+              />
+            </div>
+
+            {/* Gender */}
+            <div className="mb-3">
+              <Label className="custom-label mb-3">Gender</Label>
+              <Controller
+                name="gender"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  >
+                    <SelectTrigger className="custom-input cursor-pointer">
+                      <SelectValue placeholder="Select Gender" />
+                    </SelectTrigger>
+                    <SelectContent className="border border-gray3-bg bg-dark-bg rounded">
+                      <SelectGroup className="space-y-2">
+                        <SelectItem
+                          value="Male"
+                          className="selectOption !justify-start"
+                        >
+                          Male
+                        </SelectItem>
+                        <SelectItem
+                          value="Female"
+                          className="selectOption !justify-start"
+                        >
+                          Female
+                        </SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+
+            {/* Description */}
+            <div className="mb-3">
+              <Label className="custom-label mb-3">Description</Label>
+              <Input
+                {...register("description")}
+                className="custom-input"
+                placeholder="Description"
+              />
+            </div>
+
+            {/* Password */}
+            <div className="mb-6 sm:col-span-2">
+              <Label className="custom-label mb-3">Password</Label>
+              <div className="relative">
+                <Input
+                  type={type}
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: {
+                      value: 8,
+                      message: "Password should be at least 8 characters",
+                    },
+                  })}
+                  className="custom-input"
+                  placeholder="Password"
+                />
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setType(type === "password" ? "text" : "password")
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+                >
+                  {type === "password" ? (
+                    <EyeIcon className="h-5 w-5" />
+                  ) : (
+                    <EyeSlash className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="error-msg">{errors.password.message}</p>
+              )}
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="bg-primary-color rounded-full text-white py-[14px] max-w-[400px] w-full text-base font-medium cursor-pointer block mx-auto border border-white"
+          >
+            Creating a new user
+          </button>
+        </div>
+      </form>
+    </>
+  );
 }

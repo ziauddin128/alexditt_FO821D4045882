@@ -9,11 +9,11 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Tabs from "@/components/pages/setting/Tabs";
 import { useAuth } from "@/provider/AuthProvider";
 
 import { Controller, useForm } from "react-hook-form";
@@ -110,7 +110,9 @@ export default function EditUser({ params }: { params: any }) {
   } = useForm<FormData>();
 
   const onSubmit = async (data: FormData) => {
-    try {
+    console.log(data);
+
+    /* try {
       const date_of_birth = new Date(data.date_of_birth).toISOString();
       data.date_of_birth = date_of_birth;
 
@@ -135,7 +137,7 @@ export default function EditUser({ params }: { params: any }) {
           color: "#fff",
         },
       });
-    }
+    } */
   };
 
   // Convert dob in normal
@@ -259,14 +261,11 @@ export default function EditUser({ params }: { params: any }) {
 
             {/* Gender */}
             <div className="mb-3">
-              <Label className="custom-label mb-3">Date of Birth</Label>
+              <Label className="custom-label mb-3">Gender</Label>
               <Controller
                 name="gender"
                 control={control}
                 defaultValue=""
-                rules={{
-                  validate: (value) => value !== "" || "Gender is required",
-                }}
                 render={({ field }) => (
                   <Select
                     {...field}
@@ -276,16 +275,25 @@ export default function EditUser({ params }: { params: any }) {
                     <SelectTrigger className="custom-input cursor-pointer">
                       <SelectValue placeholder="Select Gender" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Male">Male</SelectItem>
-                      <SelectItem value="Female">Female</SelectItem>
+                    <SelectContent className="border border-gray3-bg bg-dark-bg rounded">
+                      <SelectGroup className="space-y-2">
+                        <SelectItem
+                          value="Male"
+                          className="selectOption !justify-start"
+                        >
+                          Male
+                        </SelectItem>
+                        <SelectItem
+                          value="Female"
+                          className="selectOption !justify-start"
+                        >
+                          Female
+                        </SelectItem>
+                      </SelectGroup>
                     </SelectContent>
                   </Select>
                 )}
               />
-              {errors.gender && (
-                <p className="error-msg">{errors.gender.message}</p>
-              )}
             </div>
           </div>
 
