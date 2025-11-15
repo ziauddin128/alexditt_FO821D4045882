@@ -20,7 +20,7 @@ import Link from "next/link";
 
 interface VideoDetail {
   id: number;
-  thumbnail: string; // Added field for the thumbnail
+  thumbnail: string; 
   title: string;
   genre: string;
   category: string;

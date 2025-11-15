@@ -12,6 +12,7 @@
 
   --color-btn-secondary-bg: #7a24bc33;
   --color-secondary-bg: #131824;
+  --color-success-color: #2ecc71;
 
   --color-gray3-bg: #1b202c;
   --color-gray3-border: #181e2a;
@@ -238,5 +239,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   position: absolute;
   right: 12px;
   cursor: pointer;
-  color:red;
+  color: red;
+}
+
+/* Custom Label & Input */
+.custom-label {
+  @apply text-base font-normal;
+}
+
+.custom-input {
+  @apply h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color;
 }

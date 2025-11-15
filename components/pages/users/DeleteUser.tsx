@@ -1,86 +1,88 @@
-import { privateAxios } from "@/components/axiosInstance/axios";
-import TrashBin from "@/components/icons/TrashBin";
-import { DiamondMinus } from "lucide-react";
+"use client";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import DeleteIcon from "@/components/icons/DeleteIcon";
+import { Button } from "@/components/ui/button";
+import { Controller, useForm } from "react-hook-form";
 import { useState } from "react";
 
-import { toast } from "sonner";
+export default function DeleteUser({ id }: { id: string | number }) {
+  const [open, setOpen] = useState(false);
 
-export default function DeleteUser({id}: {id: string}) {
+  const {
+    formState: { errors },
+    handleSubmit,
+    control,
+  } = useForm<FormData>();
 
-  const [isOpen, setIsOpen] = useState(false);
-  
-  // Delete User
-  const handleDelete = async () => {
-    try {
-    const response = await privateAxios.delete(`/admin/user/user/${id}`);
-    if(response.data)
-    {
-        toast.success("User deleted successfully", {
-        position: "top-right",
-        style: {
-            backgroundColor: "#4CAF50", 
-            color: "#fff", 
-        },
-        });
-    }
-    } catch (error: any) {
-        toast.error(error.response.data, {
-        position: "top-right",
-        style: {
-            backgroundColor: "#f44336",
-            color: "#fff",
-        },
-        });
-    } 
-    setIsOpen(false);
+  const onSubmit = async (data: FormData) => {
+    console.log(data);
 
+    setOpen(false);
   };
 
   return (
-    <>
-       <button  onClick={() => setIsOpen(!isOpen)} className="cursor-pointer flex items-center gap-2 px-[14px] py-[7px] bg-[#E63946] text-white rounded">
-              <TrashBin />
-              <span className="text-sm font-normal">Delete</span>
-            </button>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <button
+          className="bg-[#FFE6E6] rounded-full h-9 w-9 flex items-center justify-center cursor-pointer"
+          title="Delete"
+        >
+          <DeleteIcon className="text-[#E70D0D] h-5 w-5" />
+        </button>
+      </DialogTrigger>
 
-             {isOpen && (
-        <>
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-[1px] flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded-lg max-w-sm">
-              <div className="flex items-center justify-center mb-4">
-                <DiamondMinus className="w-30 h-14 text-red-500" />
+      <DialogContent className="sm:max-w-[530px] bg-gray3-bg border-gray3-border settingDialog flex justify-center items-center mx-auto">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <DialogHeader className="pb-4 border-b border-[#222733]"></DialogHeader>
+          <DialogDescription className="">
+            <div className="flex flex-col items-center justify-center space-y-3 text-center">
+              {/* Delete Icon */}
+              <div className="flex justify-center items-center w-12 h-12 bg-white rounded-lg">
+                <DeleteIcon className="text-[#E70D0D] w-6 h-6 " />
               </div>
-              <h3 className="text-xl mb-4 text-wrap text-center text-gray-900">
-                Are you sure you want to delete this user?
-              </h3>
-              <div>
-                {/* <p>{item.title}</p> */}
-                {/* Add any additional item details if necessary */}
-              </div>
-              <div className="mt-4 flex gap-4 justify-evenly">
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 bg-gray-300 rounded text-black cursor-pointer"
+
+              {/* Title */}
+              <p className="text-white text-lg font-semibold mt-3">
+                Confirm Delete
+              </p>
+
+              {/* Description */}
+              <p className="text-gray-300 text-sm max-w-sm">
+                You want to delete the marked items. This can't be undone once
+                you delete.
+              </p>
+            </div>
+          </DialogDescription>
+          <DialogFooter className="">
+            <div className="flex justify-center items-center mx-auto gap-4 mt-6">
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="py-3 px-4 bg-[#202632] text-white font-sm font-medium cursor-pointer hover:bg-[#11151c]  border border-white hover:text-white rounded-md"
                 >
                   Cancel
-                </button>
-                <button
-                  //   onClick={() => {
-                  //     // onDelete(item.id); // Call delete function
-                  //     // onClose(); // Close the modal
-                  //     handleDelete;
-                  //   }}
-                  onClick={handleDelete}
-                  className="px-4 py-2 bg-red-500 text-white rounded cursor-pointer"
-                >
-                  Delete
-                </button>
-              </div>
+                </Button>
+              </DialogClose>
+              <Button
+                type="submit"
+                className="py-3 px-4 bg-secondary-color text-white font-sm font-medium cursor-pointer hover:bg-[#E70D0D] rounded-md"
+              >
+                Delete
+              </Button>
             </div>
-          </div>
-        </>
-      )}
-    </>
- 
-  )
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
 }

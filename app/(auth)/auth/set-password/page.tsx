@@ -107,15 +107,15 @@ export default function SetPassword() {
       <div className="text-white py-10 max-w-[500px] w-full lg:max-w-full mx-auto lg:mx-0">
         <Link href="/auth">
           <Image
-            src="/images/logo.png"
-            height={300}
-            width={300}
+            src="/dashboard/logo.png"
+            height={120}
+            width={145}
             alt="Logo"
-            className="w-[216px] h-[80px] block mx-auto"
+            className="w-[145] h-[119px] object-cover block mx-auto"
           />
         </Link>
 
-        <div className="h-10 lg:h-20"></div>
+        <div className="h-10"></div>
 
         <div className="mt-4 mb-12">
           <h1 className="text-[28px] font-medium">Set new password</h1>
