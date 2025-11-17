@@ -10,7 +10,7 @@ export default function DashboardContent() {
     <div className="space-y-4">
       <StatsCard />
 
-      <div className="flex flex-col md:flex-row gap-4">
+      {/* <div className="flex flex-col md:flex-row gap-4">
         <div className="w-full md:w-[63%]">
           <RevenueChart />
         </div>
@@ -18,7 +18,7 @@ export default function DashboardContent() {
           <SubscriptionGrowthChart />
           <LatestUploadsTable />
         </div>
-      </div>
+      </div> */}
 
       <UsersTable />
     </div>

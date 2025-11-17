@@ -69,7 +69,7 @@ export default function ForgotPassword() {
 
         <div className="mt-4 mb-12">
           <h1 className="text-[28px] font-medium">Forgot Password?</h1>
-          <p className="text-base font-normal">
+          <p className="text-base font-normal mt-4">
             No worries, we’ll send you reset instructions.
           </p>
         </div>
@@ -77,7 +77,7 @@ export default function ForgotPassword() {
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-12">
-            <Label className="font-base font-medium mb-3">Email</Label>
+            {/* <Label className="font-base font-medium mb-3">Email</Label> */}
             <Input
               {...register("email", {
                 required: "Email is required",
@@ -86,7 +86,7 @@ export default function ForgotPassword() {
                   message: "Please enter a valid email address",
                 },
               })}
-              className="h-[40px] w-full px-4 py-3 text-sm font-normal border border-[#4A4C56] rounded-[8px] outline-none focus-visible:ring-0 focus-visible:border-primary-color"
+              className="h-[44px] w-full px-4 py-3 text-sm font-normal border border-[#4A4C56] rounded-[8px] outline-none focus-visible:ring-0 focus-visible:border-primary-color"
               placeholder="Enter Email Address"
             />
 
@@ -97,12 +97,14 @@ export default function ForgotPassword() {
             )}
           </div>
 
-          <button
-            type="submit"
-            className="h-11 w-full rounded bg-primary-color font-base font-medium cursor-pointer"
-          >
-            Send Email
-          </button>
+          <Link href="/auth/verify-code">
+            <button
+              type="submit"
+              className="h-11 w-full rounded bg-primary-color font-base font-medium cursor-pointer"
+            >
+              Send Email
+            </button>
+          </Link>
         </form>
       </div>
       <div className="hidden lg:block">

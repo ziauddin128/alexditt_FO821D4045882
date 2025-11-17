@@ -24,7 +24,7 @@ export default function SetPassword() {
   const [formError, setFormError] = useState<string | React.ReactNode>("");
 
   // checked came from otp verified page or not
-  useEffect(() => {
+  /* useEffect(() => {
     const checkVerification = () => {
       const verified_otp = storage.getItem("verified_otp");
       if (!verified_otp) {
@@ -33,7 +33,7 @@ export default function SetPassword() {
     };
 
     checkVerification();
-  }, [router]);
+  }, [router]); */
 
   // submit
   const {
@@ -119,7 +119,7 @@ export default function SetPassword() {
 
         <div className="mt-4 mb-12">
           <h1 className="text-[28px] font-medium">Set new password</h1>
-          <p className="text-base font-normal">
+          <p className="text-base font-normal mt-4">
             Your new password must be different to previously used passwords.
           </p>
         </div>
@@ -229,12 +229,14 @@ export default function SetPassword() {
                 )}
           </div>
 
-          <button
-            type="submit"
-            className="h-11 w-full rounded bg-primary-color font-base font-medium cursor-pointer"
-          >
-            Reset Password
-          </button>
+          <Link href="/auth/reset-successful">
+            <button
+              type="submit"
+              className="h-11 w-full rounded bg-primary-color font-base font-medium cursor-pointer"
+            >
+              Reset Password
+            </button>
+          </Link>
         </form>
       </div>
       <div className="hidden lg:block">

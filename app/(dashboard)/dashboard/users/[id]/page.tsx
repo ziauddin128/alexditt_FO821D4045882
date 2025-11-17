@@ -27,7 +27,7 @@ export default function UserDetails({ params }: { params: any }) {
   //     return res.data;
   //   },
   // });
-  const userDet = { id: 1, name: "", email: "" };
+  const userDet = { id: 1, name: "Zia Uddin Bablu", email: "zia@gmail.com" };
   const isLoading = false;
   const tabs = [
     { name: "Personal Info", value: "personal-info" },

@@ -133,7 +133,7 @@ function SignInContent() {
                   message: "Please enter a valid email address",
                 },
               })}
-              className="h-[40px] w-full px-4 py-3 text-sm font-normal border border-[#4A4C56] rounded-[8px] outline-none focus-visible:ring-0 focus-visible:border-primary-color"
+              className="h-[44px] w-full px-4 py-3 text-sm font-normal border border-[#4A4C56] rounded-[8px] outline-none focus-visible:ring-0 focus-visible:border-primary-color"
               placeholder="Enter Email Address"
             />
 
@@ -155,7 +155,7 @@ function SignInContent() {
                     message: "Password should be at least 8 characters",
                   },
                 })}
-                className="h-[40px] w-full px-4 pr-10 py-3 text-sm font-normal border border-[#4A4C56] rounded-[8px] outline-none focus-visible:ring-0 focus-visible:border-primary-color"
+                className="h-[44px] w-full px-4 pr-10 py-3 text-sm font-normal border border-[#4A4C56] rounded-[8px] outline-none focus-visible:ring-0 focus-visible:border-primary-color"
                 placeholder="Enter your password"
               />
 
@@ -214,12 +214,14 @@ function SignInContent() {
             {error && <p className="error-msg text-center">{error}</p>}
           </div>
 
-          <button
-            type="submit"
-            className="h-11 w-full rounded bg-primary-color font-base font-medium cursor-pointer"
-          >
-            Log In
-          </button>
+          <Link href="/dashboard">
+            <button
+              type="submit"
+              className="h-11 w-full rounded bg-primary-color font-base font-medium cursor-pointer"
+            >
+              Log In
+            </button>
+          </Link>
         </form>
       </div>
       <div className="hidden lg:block">

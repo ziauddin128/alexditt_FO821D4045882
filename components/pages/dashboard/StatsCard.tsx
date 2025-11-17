@@ -11,21 +11,21 @@ interface StatCard {
 
 export default function StatsCard() {
   return (
-    <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
       <StatCard
         icon={<User className="h-6 w-6" />}
         title="Total Users"
         count="20.8K"
       />
-      <StatCard
+      {/* <StatCard
         icon={<CurrencyDollar className="h-6 w-6" />}
         title="Active subscriptions"
         count="14.5K"
-      />
+      /> */}
       <StatCard
         icon={<ChartIcon className="h-6 w-6" />}
-        title="Revenue this Month"
-        count="$8.2K"
+        title="Total Video"
+        count="8.2K"
       />
     </section>
   );

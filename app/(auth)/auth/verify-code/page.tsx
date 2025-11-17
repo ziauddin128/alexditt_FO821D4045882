@@ -80,7 +80,7 @@ export default function VerifyCode() {
 
         <div className="mt-4 mb-12">
           <h1 className="text-[28px] font-medium">Check Your Email</h1>
-          <p className="text-base font-normal">
+          <p className="text-base font-normal mt-4">
             We sent a verification link to{" "}
             <span className="break-all">{otpEmail ? otpEmail : ""}</span>
           </p>
@@ -141,13 +141,14 @@ export default function VerifyCode() {
               formError && <p className="error-msg">{formError}</p>
             )}
           </div>
-
-          <button
-            type="submit"
-            className="h-11 w-full rounded bg-primary-color font-base font-medium cursor-pointer"
-          >
-            Verify Email
-          </button>
+          <Link href="/auth/set-password">
+            <button
+              type="submit"
+              className="h-11 w-full rounded bg-primary-color font-base font-medium cursor-pointer"
+            >
+              Verify Email
+            </button>
+          </Link>
         </form>
       </div>
       <div className="hidden lg:block">

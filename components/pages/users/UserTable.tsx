@@ -24,7 +24,6 @@ interface UserDetail {
   id: number;
   name: string;
   email: string;
-  Subscription: string;
   createdDate: string;
   status: string;
 }
@@ -47,7 +46,6 @@ export default function UserTable() {
       id: 1,
       name: "John Doe",
       email: "john@example.com",
-      Subscription: "Most Popular",
       createdDate: "2021-01-01",
       status: "active",
     },
@@ -55,7 +53,6 @@ export default function UserTable() {
       id: 2,
       name: "John Doe",
       email: "john@example.com",
-      Subscription: "Most Popular",
       createdDate: "2021-01-01",
       status: "deactive",
     },
@@ -63,7 +60,6 @@ export default function UserTable() {
       id: 3,
       name: "John Doe",
       email: "john@example.com",
-      Subscription: "Most Popular",
       createdDate: "2021-01-01",
       status: "active",
     },
@@ -71,7 +67,6 @@ export default function UserTable() {
       id: 4,
       name: "John Doe",
       email: "john@example.com",
-      Subscription: "Most Popular",
       createdDate: "2021-01-01",
       status: "active",
     },
@@ -95,11 +90,6 @@ export default function UserTable() {
       accessorKey: "email",
       header: "Email",
       cell: ({ row }) => <span className="">{row.original.email}</span>,
-    },
-    {
-      accessorKey: "subscription",
-      header: "Subscription",
-      cell: ({ row }) => <span className="">{row.original.Subscription}</span>,
     },
     {
       accessorKey: "created_date",

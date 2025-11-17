@@ -90,7 +90,7 @@ export default function ChangePassword() {
             <DialogDescription>
               <div className="mt-4">
                 {/* Current Password */}
-                <div className="mb-3">
+                <div className="mb-6">
                   <Label className="custom-label mb-3 text-white">
                     Old Password<span className="text-red-500">*</span>
                   </Label>
@@ -127,7 +127,7 @@ export default function ChangePassword() {
                 </div>
 
                 {/* New Password */}
-                <div className="mb-3">
+                <div className="mb-6">
                   <Label className="custom-label mb-3 text-white">
                     New Password<span className="text-red-500">*</span>
                   </Label>

@@ -336,7 +336,7 @@ export default function EditUser({ params }: { params: any }) {
             type="submit"
             className="bg-primary-color rounded-full text-white py-[14px] max-w-[400px] w-full text-base font-medium cursor-pointer block mx-auto border border-white"
           >
-            Save
+            Update
           </button>
         </div>
       </form>

@@ -14,8 +14,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+
+/* userDet: Partial<FormData>; */
+
 interface PersonalInfoProps {
-  userDet: Partial<FormData>;
+  userDet: {
+    id?: string | number;
+    name?: string;
+    status?: string | null;
+    created_at?: string;
+  };
 }
 
 export default function PersonalInfo({ userDet }: PersonalInfoProps) {

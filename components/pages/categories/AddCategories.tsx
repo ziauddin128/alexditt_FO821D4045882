@@ -106,7 +106,7 @@ export default function AddCategories({ category }: CategoryModalProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div>
-            <div className="mb-3">
+            <div className="mb-6">
               <Label className="custom-label mb-3">Category Name</Label>
               <Input
                 placeholder="e.g., Horror, Sci-Fi"
@@ -120,7 +120,7 @@ export default function AddCategories({ category }: CategoryModalProps) {
               )}
             </div>
 
-            <div className="mb-3">
+            <div className="mb-6">
               <Label className="custom-label mb-3">Description</Label>
               <Textarea
                 placeholder="Brief description (optional)"
@@ -129,7 +129,7 @@ export default function AddCategories({ category }: CategoryModalProps) {
               />
             </div>
 
-            <div className="mb-3">
+            <div className="mb-6">
               <Label className="custom-label mb-3">Status</Label>
 
               <Controller
