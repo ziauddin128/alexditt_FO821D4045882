@@ -20,7 +20,7 @@ import Link from "next/link";
 
 interface VideoDetail {
   id: number;
-  thumbnail: string; // Added field for the thumbnail
+  thumbnail: string;
   title: string;
   genre: string;
   category: string;
@@ -238,7 +238,7 @@ export default function ContentTable() {
           <SelectTrigger className="flex items-center gap-2 rounded border border-gray-black-50 bg-dark-bg px-5 py-2.5 !text-white cursor-pointer outline-none shadow-none focus-visible:ring-0 focus-visible:border-border-gray-black-50">
             <SelectValue placeholder="Genre" />
           </SelectTrigger>
-          <SelectContent className="border border-gray-black-50 bg-dark-bg rounded">
+          <SelectContent className="border border-gray3-bg bg-dark-bg rounded">
             <SelectGroup className="space-y-2">
               <SelectItem className="selectOption" value="Action">
                 Action
@@ -255,7 +255,7 @@ export default function ContentTable() {
           <SelectTrigger className="flex items-center gap-2 rounded border border-gray-black-50 bg-dark-bg px-5 py-2.5 !text-white cursor-pointer outline-none shadow-none focus-visible:ring-0 focus-visible:border-border-gray-black-50">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
-          <SelectContent className="border border-gray-black-50 bg-dark-bg rounded">
+          <SelectContent className="border border-gray3-bg bg-dark-bg rounded">
             <SelectGroup className="space-y-2 ">
               <SelectItem className="selectOption" value="action">
                 Action
@@ -272,7 +272,7 @@ export default function ContentTable() {
           <SelectTrigger className="flex items-center gap-2 rounded border border-gray-black-50 bg-dark-bg px-5 py-2.5 !text-white cursor-pointer outline-none shadow-none focus-visible:ring-0 focus-visible:border-border-gray-black-50">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
-          <SelectContent className="border border-gray-black-50 bg-dark-bg rounded">
+          <SelectContent className="border border-gray3-bg bg-dark-bg rounded">
             <SelectGroup className="space-y-2">
               <SelectItem className="selectOption" value="published">
                 Published

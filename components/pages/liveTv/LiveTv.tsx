@@ -2,7 +2,6 @@
 import { privateAxios } from "@/components/axiosInstance/axios";
 import StatsCard from "@/components/reusable/StatsCard";
 import { useQuery } from "@tanstack/react-query";
-import Image from "next/image";
 import Tabcreate from "./tabcreate";
 
 const vedio = [
@@ -183,8 +182,7 @@ export default function LiveTvPage() {
     queryFn: async () => {
       const res = await privateAxios.get("/payments/totalSubscribers");
       return res.data;
-
-    }
+    },
   });
 
   // active subscription
@@ -218,10 +216,26 @@ export default function LiveTvPage() {
     <>
       {/* Stats */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-5 mt-4">
-        <StatsCard title="Active Streams" count="8" description="+2 from yesterday" />
-        <StatsCard title="Current Viewers" count="3,421" description="Peak: 5,200" />
-        <StatsCard title="Avg. Watch Time" count="32 min" description="Engagement: 68%" />
-        <StatsCard title="Scheduled Events" count="5" description="Next: Movie Premiere" />
+        <StatsCard
+          title="Active Streams"
+          count="8"
+          description="+2 from yesterday"
+        />
+        <StatsCard
+          title="Current Viewers"
+          count="3,421"
+          description="Peak: 5,200"
+        />
+        <StatsCard
+          title="Avg. Watch Time"
+          count="32 min"
+          description="Engagement: 68%"
+        />
+        <StatsCard
+          title="Scheduled Events"
+          count="5"
+          description="Next: Movie Premiere"
+        />
       </section>
 
       <div>

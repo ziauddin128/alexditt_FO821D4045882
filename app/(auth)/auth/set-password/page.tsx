@@ -24,7 +24,7 @@ export default function SetPassword() {
   const [formError, setFormError] = useState<string | React.ReactNode>("");
 
   // checked came from otp verified page or not
-  useEffect(() => {
+  /* useEffect(() => {
     const checkVerification = () => {
       const verified_otp = storage.getItem("verified_otp");
       if (!verified_otp) {
@@ -33,7 +33,7 @@ export default function SetPassword() {
     };
 
     checkVerification();
-  }, [router]);
+  }, [router]); */
 
   // submit
   const {
@@ -107,19 +107,19 @@ export default function SetPassword() {
       <div className="text-white py-10 max-w-[500px] w-full lg:max-w-full mx-auto lg:mx-0">
         <Link href="/auth">
           <Image
-            src="/images/logo.png"
-            height={300}
-            width={300}
+            src="/dashboard/logo.png"
+            height={120}
+            width={145}
             alt="Logo"
-            className="w-[216px] h-[80px] block mx-auto"
+            className="w-[145] h-[119px] object-cover block mx-auto"
           />
         </Link>
 
-        <div className="h-10 lg:h-20"></div>
+        <div className="h-10"></div>
 
         <div className="mt-4 mb-12">
           <h1 className="text-[28px] font-medium">Set new password</h1>
-          <p className="text-base font-normal">
+          <p className="text-base font-normal mt-4">
             Your new password must be different to previously used passwords.
           </p>
         </div>
@@ -229,12 +229,14 @@ export default function SetPassword() {
                 )}
           </div>
 
-          <button
-            type="submit"
-            className="h-11 w-full rounded bg-primary-color font-base font-medium cursor-pointer"
-          >
-            Reset Password
-          </button>
+          <Link href="/auth/reset-successful">
+            <button
+              type="submit"
+              className="h-11 w-full rounded bg-primary-color font-base font-medium cursor-pointer"
+            >
+              Reset Password
+            </button>
+          </Link>
         </form>
       </div>
       <div className="hidden lg:block">

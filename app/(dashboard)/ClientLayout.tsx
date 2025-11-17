@@ -3,7 +3,7 @@ import React, { ReactNode, useEffect, useRef, useState } from "react";
 import logo from "@/public/logo.svg";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import {
   DropdownMenu,
@@ -55,11 +55,11 @@ const menuItems = [
     icon: <Users className="w-5 h-5 text-white" />,
     label: "User Management",
   },
-  {
+  /*  {
     href: "/dashboard/liveTv",
     icon: <LiveTbIcon className="w-5 h-5 text-white" />,
     label: "Live TV",
-  },
+  }, */
   {
     href: "/dashboard/setting",
     icon: <Setting className="w-5 h-5 text-white" />,
@@ -134,8 +134,10 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
   };
 
   // Handle Logout
+  const router = useRouter();
   const handleLogout = () => {
-    logout();
+    // logout();
+    router.push("/auth");
   };
 
   const TopBar = () => {
@@ -154,8 +156,8 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
             />
             <SearchIcon className="absolute bottom-[12.5px] right-4" />
           </div> */}
-          <div className="mr-4 relative">
-            {/* Notification */}
+          {/* Notification */}
+          {/* <div className="mr-4 relative">
             <DropdownMenu>
               <DropdownMenuTrigger className="shadow-none outline-0 cursor-pointer">
                 <div className="relative flex w-12 h-12 items-center gap-2.5  justify-center rounded-3xl cursor-pointer">
@@ -169,11 +171,9 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
                 className="bg-gray3-bg border-gray3-border text-white mr-2 sm:mr-14"
                 style={{ width: "300px" }}
               >
-                {/* Top */}
                 <div className="flex justify-between gap-2 p-4 border-b border-[#1F2430]">
                   <h1 className="text-base font-semibold">Notification</h1>
                 </div>
-                {/* Middle */}
                 <div>
                   {lastFourNotifications.map((notification: any) => {
                     return (
@@ -193,7 +193,6 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
                     );
                   })}
                 </div>
-                {/* Bottom */}
                 <div className="p-4">
                   <Link
                     href="/dashboard/setting/notification"
@@ -204,7 +203,7 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
+          </div> */}
 
           {/* User Profile */}
           <DropdownMenu>

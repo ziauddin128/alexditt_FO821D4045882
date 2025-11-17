@@ -1,189 +1,98 @@
 "use client";
 
 import React from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Calendar from "@/components/icons/Calendar";
-import convertDateStr from "@/hooks/convertDateStr";
 
-interface FormData {
-  name: string;
-  email: string;
-  address: string;
-  phone_number: string;
-  gender: string;
-  description: string;
-  create_date: string;
-}
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+
+/* userDet: Partial<FormData>; */
 
 interface PersonalInfoProps {
-  userDet: Partial<FormData>;
+  userDet: {
+    id?: string | number;
+    name?: string;
+    status?: string | null;
+    created_at?: string;
+  };
 }
 
 export default function PersonalInfo({ userDet }: PersonalInfoProps) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>({
-
-  });
-
-  const onSubmit: SubmitHandler<FormData> = (data) => {
-    console.log("Form submitted:", data);
-  };
-
   return (
     <div className=" rounded-sm">
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form>
         <div className="bg-[#131824] p-4 rounded-[8px] mt-4">
-          <div className="grid sm:grid-cols-2 gap-5">
-            <div>
-              <Label className="text-white font-inter text-[16px] font-medium leading-[160%] pb-3">Name</Label>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="mb-3">
+              <Label className="text-white mb-3 custom-label">Name</Label>
               <Input
-                {...register("name", { required: "Name is required" })}
                 placeholder="Cameron Williamson"
-                className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
+                className="custom-input"
               />
-              {errors.name && <p className="text-red-500 mt-1 text-sm">{errors.name.message}</p>}
             </div>
 
-            <div>
-              <Label className="text-white font-inter text-[16px] font-medium leading-[160%] pb-3">Email</Label>
+            <div className="mb-3">
+              <Label className="text-white mb-3 custom-label">Email</Label>
               <Input
-                {...register("email", {
-                  required: "Email is required",
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "Please enter a valid email address",
-                  },
-                })}
                 placeholder="cameron.graham@example.com"
-                className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
+                className="custom-input"
               />
-              {errors.email && <p className="text-red-500 mt-1 text-sm">{errors.email.message}</p>}
             </div>
-          </div>
 
-          <div className="grid sm:grid-cols-2 gap-5 mt-4">
-            <div>
-              <Label className="text-white font-inter text-[16px] font-medium leading-[160%] pb-3">Create Date</Label>
+            <div className="mb-3">
+              <Label className="text-white mb-3 custom-label">
+                Create Date
+              </Label>
 
               <div className="relative">
-                <Input
-                  type="date"
-                  {...register("create_date", { required: "Create date is required" })}
-                  className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
-                />
+                <Input type="date" className="custom-input" />
                 <Calendar className="absolute right-3 top-1/4 w-5 h-5 text-gray-400 pointer-events-none" />
-                {errors.create_date && <p className="text-red-500 mt-1 text-sm">{errors.create_date.message}</p>}
               </div>
             </div>
 
-            <div>
-              <Label className="text-white font-inter text-[16px] font-medium leading-[160%] pb-3">Phone</Label>
-              <Input
-                {...register("phone_number", { required: "Phone number is required" })}
-                placeholder="(704) 555-0127"
-                className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
+            <div className="mb-3">
+              <Label className="text-white mb-3 custom-label">Phone</Label>
+              <Input placeholder="(704) 555-0127" className="custom-input" />
+            </div>
+
+            <div className="mb-3">
+              <Label className="text-white mb-3 custom-label">Gender</Label>
+              <Select>
+                <SelectTrigger className="custom-input cursor-pointer">
+                  <SelectValue placeholder="Select Gender" />
+                </SelectTrigger>
+                <SelectContent className="rounded-none">
+                  <SelectItem value="Male" className="cursor-pointer">
+                    Male
+                  </SelectItem>
+                  <SelectItem value="Female" className="cursor-pointer">
+                    Female
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="mb-3">
+              <Label className="text-white mb-3 custom-label">
+                Description
+              </Label>
+              <Textarea
+                className="!h-[100px] custom-input"
+                placeholder="Description"
               />
-              {errors.phone_number && <p className="text-red-500 mt-1 text-sm">{errors.phone_number.message}</p>}
             </div>
           </div>
-
-          <div className="grid sm:grid-cols-2 gap-5 mt-4">
-            <div>
-              <Label className="text-white font-inter text-[16px] font-medium leading-[160%] pb-3">Gender</Label>
-              <select
-                {...register("gender", { required: "Gender is required" })}
-                className="h-[40px] w-full px-4 py-[4px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
-                defaultValue=""
-              >
-                <option value="" disabled>
-                  Select gender
-                </option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
-              {errors.gender && <p className="text-red-500 mt-1 text-sm">{errors.gender.message}</p>}
-            </div>
-
-            <div>
-              <Label className="text-white font-inter text-[16px] font-medium leading-[160%] pb-3">Description</Label>
-              <textarea
-                {...register("description", { required: "Description is required" })}
-                placeholder="Write a description about yourself"
-                className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
-              />
-              {errors.description && <p className="text-red-500 mt-1 text-sm">{errors.description.message}</p>}
-            </div>
-          </div>
-
-          {/* Password Field with show/hide */}
-
-
-
         </div>
       </form>
     </div>
   );
 }
-
-
-{/* <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
-          <p className="text-sm">Username: <span className="font-medium">{userDet.name}</span></p>
-          <p className="text-sm">Email: <span className="font-medium">{userDet.email}</span> <small className="text-[#2ECC71] text-xs">Verified</small></p>
-          <p className="text-sm">Phone Number: <span className="font-medium">{userDet.phone_number}</span></p>
-          <p className="text-sm">Date of Birth:
-            <span className="font-medium">
-              {(userDet.date_of_birth != null) ? convertDateStr(userDet.date_of_birth) : ""}
-            </span>
-          </p>
-          <p className="text-sm">Gender: <span className="font-medium">{userDet.gender}</span></p>
-          <p className="text-sm">Country: <span className="font-medium">{userDet.country}</span></p>
-        </div> */}
-
-
-
-{/* Account Security */ }
-{/* <div className="bg-secondary-bg p-4 rounded-sm">
-      <h1 className="text-base font-medium">Account Secuirity</h1>
-      <div className="bg-gray3-bg my-4 h-[1px]"></div>
-
-      <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
-         <p className="text-sm">Last Login: <span className="font-medium">Today, 10:45 AM</span></p>
-         <p className="text-sm">Last Login IP: <span className="font-medium">Last Login IP: 192.168.1.45</span></p>
-         <p className="text-sm">Password Last Changed: <span className="font-medium">1 month ago</span></p>
-      </div>
-
-    </div> */}
-
-{/* Preferences */ }
-{/* <div className="bg-secondary-bg p-4 rounded-sm">
-      <h1 className="text-base font-medium">Preferences</h1>
-      <div className="bg-gray3-bg my-4 h-[1px]"></div>
-
-      <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
-         <p className="text-sm">Language: <span className="font-medium">English (US)</span></p>
-         <p className="text-sm">Content Preferences: <span className="font-medium">Action, Sci-Fi, Drama</span></p>
-         <p className="text-sm">Notification Settings: <span className="font-medium">Email & Push</span></p>
-         <p className="text-sm">Auto-play: <span className="font-medium">Enabled</span></p>
-      </div>
-
-    </div> */}
-
-{/* Notes */ }
-{/*  <div className="bg-secondary-bg p-4 rounded-sm">
-        <h1 className="text-base font-medium mb-4">Admin Notes</h1>
-
-        <Textarea className="h-[100px] w-full px-4 py-3 text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color" placeholder="Customer contacted support on 10/03/2025 regarding playback issues. Issue resolved by clearing cache"/>
-    </div> */}
-
-{/*  <div className="flex justify-end">
-        <button className="bg-primary-color text-white px-5 py-[10px] rounded text-sm font-normal cursor-pointer">Save Notes</button>
-    </div> */}
-
-

@@ -12,6 +12,7 @@
 
   --color-btn-secondary-bg: #7a24bc33;
   --color-secondary-bg: #131824;
+  --color-success-color: #2ecc71;
 
   --color-gray3-bg: #1b202c;
   --color-gray3-border: #181e2a;
@@ -197,7 +198,7 @@ body {
 }
 
 .selectOption {
-  @apply cursor-pointer border-[#1B202C] px-2.5 py-[9px] rounded-sm border text-center flex items-center justify-center text-white focus:bg-accent focus:text-accent-foreground;
+  @apply cursor-pointer border-[#1B202C] px-2.5 py-[9px] rounded-sm border text-center flex items-center justify-center text-white focus:bg-[#2D9DFF99] focus:text-white;
 }
 
 /* Users Tab */
@@ -238,5 +239,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   position: absolute;
   right: 12px;
   cursor: pointer;
-  color:red;
+  color: red;
+}
+
+/* Custom Label & Input */
+.custom-label {
+  @apply text-base font-normal;
+}
+
+.custom-input {
+  @apply h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-dark-bg bg-dark-bg rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color;
 }

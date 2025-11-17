@@ -27,7 +27,7 @@ export default function UserDetails({ params }: { params: any }) {
   //     return res.data;
   //   },
   // });
-  const userDet = { id: 1, name: "", email: "" };
+  const userDet = { id: 1, name: "Zia Uddin Bablu", email: "zia@gmail.com" };
   const isLoading = false;
   const tabs = [
     { name: "Personal Info", value: "personal-info" },
@@ -42,10 +42,7 @@ export default function UserDetails({ params }: { params: any }) {
   return (
     <>
       <UserDetTop id={id} userDet={userDet} />
-
-      <div>
-        <PersonalInfo userDet={userDet} />
-      </div>
+      <PersonalInfo userDet={userDet} />
 
       {/* <div className="my-4">
         <Tabs defaultValue="personal-info" className="usersTab">

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -306,7 +307,7 @@ export function ContentUploadForm() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Title */}
             <div>
-              <label className="text-base font-medium block mb-2">Title</label>
+              <Label className="custom-label mb-3">Title</Label>
               <Input
                 placeholder="Type your movie name"
                 className="custom-content-input"
@@ -319,27 +320,44 @@ export function ContentUploadForm() {
 
             {/* Genre */}
             <div>
-              <label className="text-base font-medium block mb-2">Genre</label>
+              <Label className="custom-label mb-3">Genre</Label>
               <Select value={genre}>
                 <SelectTrigger className="custom-content-input cursor-pointer">
                   <SelectValue placeholder="Select genre" />
                 </SelectTrigger>
-                <SelectContent className="bg-secondary-bg border-gray3-bg text-white">
-                  <SelectItem value="comedy" className="cursor-pointer">
-                    Comedy
-                  </SelectItem>
-                  <SelectItem value="drama" className="cursor-pointer">
-                    Drama
-                  </SelectItem>
-                  <SelectItem value="action" className="cursor-pointer">
-                    Action
-                  </SelectItem>
-                  <SelectItem value="horror" className="cursor-pointer">
-                    Horror
-                  </SelectItem>
-                  <SelectItem value="romance" className="cursor-pointer">
-                    Romance
-                  </SelectItem>
+                <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
+                  <SelectGroup className="space-y-2">
+                    <SelectItem
+                      value="comedy"
+                      className="selectOption !justify-start"
+                    >
+                      Comedy
+                    </SelectItem>
+                    <SelectItem
+                      value="drama"
+                      className="selectOption !justify-start"
+                    >
+                      Drama
+                    </SelectItem>
+                    <SelectItem
+                      value="action"
+                      className="selectOption !justify-start"
+                    >
+                      Action
+                    </SelectItem>
+                    <SelectItem
+                      value="horror"
+                      className="selectOption !justify-start"
+                    >
+                      Horror
+                    </SelectItem>
+                    <SelectItem
+                      value="romance"
+                      className="selectOption !justify-start"
+                    >
+                      Romance
+                    </SelectItem>
+                  </SelectGroup>
                 </SelectContent>
               </Select>
               {errors.genre && (
@@ -371,9 +389,7 @@ export function ContentUploadForm() {
 
           {/* Description */}
           <div>
-            <label className="text-base font-medium block mb-2">
-              Description
-            </label>
+            <Label className="custom-label mb-3">Description</Label>
             <Textarea
               placeholder="Enter a short description"
               className="custom-content-input"
@@ -391,42 +407,42 @@ export function ContentUploadForm() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Content Type */}
             <div>
-              <label className="text-base font-medium text-white block mb-2">
-                Content Category
-              </label>
-              <Select
-                value={contentCategory}
-                onValueChange={(val) =>
-                  setValue("contentCategory", val, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  })
-                }
-              >
-                <SelectTrigger className="custom-content-input cursor-pointer">
-                  <SelectValue placeholder="Select content type" />
-                </SelectTrigger>
-                <SelectContent className="border-gray3-bg bg-secondary-bg text-white">
-                  {categoriesList?.data?.map((cat: any) => (
-                    <SelectItem
-                      key={cat.id}
-                      value={cat.id}
-                      className="cursor-pointer"
-                    >
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <input
-                type="hidden"
-                {...register("contentCategory", {
-                  required: "Content type is required",
-                })}
-                {...register("contentCategory")}
-                value={contentCategory}
-                readOnly
+              <Label className="custom-label mb-3">Content Category</Label>
+
+              <Controller
+                name="contentCategory"
+                control={control}
+                defaultValue=""
+                rules={{
+                  validate: (value) =>
+                    value !== "" || "Content category is required",
+                }}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  >
+                    <SelectTrigger className="custom-content-input cursor-pointer">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
+                      <SelectGroup className="space-y-2">
+                        {categoriesList?.data?.map((cat: any) => (
+                          <SelectItem
+                            key={cat.id}
+                            value={cat.id}
+                            className="selectOption !justify-start"
+                          >
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                )}
               />
+
               {errors.contentCategory && (
                 <p className="error-msg">{errors.contentCategory.message}</p>
               )}
@@ -434,44 +450,57 @@ export function ContentUploadForm() {
 
             {/* Content Status */}
             <div>
-              <label className="text-base font-medium text-white block mb-2">
-                Content Status
-              </label>
-              <Select
-                value={contentType}
-                onValueChange={(val) =>
-                  setValue("contentType", val, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  })
-                }
-              >
-                <SelectTrigger className="custom-content-input cursor-pointer">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent className="border-gray3-bg bg-secondary-bg text-white">
-                  <SelectItem value="published" className="cursor-pointer">
-                    Published
-                  </SelectItem>
-                  <SelectItem value="draft" className="cursor-pointer">
-                    Draft
-                  </SelectItem>
-                  <SelectItem value="private" className="cursor-pointer">
-                    Private
-                  </SelectItem>
-                  <SelectItem value="scheduled" className="cursor-pointer">
-                    Scheduled
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <input
-                type="hidden"
-                {...register("contentType", {
-                  required: "Content status is required",
-                })}
-                value={contentType}
-                readOnly
+              <Label className="custom-label mb-3">Content Status</Label>
+
+              <Controller
+                name="contentType"
+                control={control}
+                defaultValue=""
+                rules={{
+                  validate: (value) =>
+                    value !== "" || "Content type is required",
+                }}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  >
+                    <SelectTrigger className="custom-content-input cursor-pointer">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
+                      <SelectGroup className="space-y-2">
+                        <SelectItem
+                          value="published"
+                          className="selectOption !justify-start"
+                        >
+                          Published
+                        </SelectItem>
+                        <SelectItem
+                          value="draft"
+                          className="selectOption !justify-start"
+                        >
+                          Draft
+                        </SelectItem>
+                        <SelectItem
+                          value="private"
+                          className="selectOption !justify-start"
+                        >
+                          Private
+                        </SelectItem>
+                        <SelectItem
+                          value="scheduled"
+                          className="selectOption !justify-start"
+                        >
+                          Scheduled
+                        </SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                )}
               />
+
               {errors.contentType && (
                 <p className="error-msg">{errors.contentType.message}</p>
               )}
@@ -481,9 +510,7 @@ export function ContentUploadForm() {
           {/* Director */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-base font-medium block mb-2">
-                Director Name
-              </label>
+              <Label className="custom-label mb-3">Director Name</Label>
               <Input
                 placeholder="Director name"
                 className="custom-content-input"
@@ -497,9 +524,7 @@ export function ContentUploadForm() {
             </div>
 
             <div>
-              <label className="text-base font-medium block mb-2">
-                Director Image
-              </label>
+              <Label className="custom-label mb-3">Director Image</Label>
               <div>
                 <input
                   type="file"
@@ -522,7 +547,7 @@ export function ContentUploadForm() {
               className="grid grid-cols-1 md:grid-cols-2 gap-4 relative border border-gray3-bg p-2"
             >
               <div>
-                <label className="text-base font-medium block mb-2">Cast</label>
+                <Label className="custom-label mb-3">Cast</Label>
                 <Input
                   placeholder="Cast name"
                   className="custom-content-input"
@@ -538,9 +563,7 @@ export function ContentUploadForm() {
               </div>
 
               <div>
-                <label className="text-base font-medium block mb-2">
-                  Cast Image
-                </label>
+                <Label className="custom-label mb-3">Cast Image</Label>
                 <input
                   type="file"
                   className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
@@ -599,9 +622,7 @@ export function ContentUploadForm() {
                 className="grid md:grid-cols-2 xl:grid-cols-4 gap-4 relative border border-gray3-bg p-2"
               >
                 <div className="md:col-span-2 xl:col-span-4">
-                  <label className="text-base font-medium block mb-2">
-                    Series Name
-                  </label>
+                  <Label className="custom-label mb-3">Series Name</Label>
                   <Input
                     placeholder="Series name"
                     className="custom-content-input"
@@ -617,9 +638,7 @@ export function ContentUploadForm() {
                 </div>
 
                 <div>
-                  <label className="text-base font-medium block mb-2">
-                    Episode Name
-                  </label>
+                  <Label className="custom-label mb-3">Episode Name</Label>
                   <Input
                     placeholder="Episode name"
                     className="custom-content-input"
@@ -635,9 +654,7 @@ export function ContentUploadForm() {
                 </div>
 
                 <div>
-                  <label className="text-base font-medium block mb-2">
-                    Episode Number
-                  </label>
+                  <Label className="custom-label mb-3">Episode Number</Label>
                   <Input
                     placeholder="Episode number"
                     className="custom-content-input"
@@ -653,9 +670,7 @@ export function ContentUploadForm() {
                 </div>
 
                 <div>
-                  <label className="text-base font-medium block mb-2">
-                    Episode File
-                  </label>
+                  <Label className="custom-label mb-3">Episode File</Label>
                   <input
                     type="file"
                     className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white file:px-2"
@@ -671,9 +686,7 @@ export function ContentUploadForm() {
                 </div>
 
                 <div>
-                  <label className="text-base font-medium block mb-2">
-                    Episode Thumbnail
-                  </label>
+                  <Label className="custom-label mb-3">Episode Thumbnail</Label>
                   <input
                     type="file"
                     className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white file:px-2"
@@ -724,9 +737,8 @@ export function ContentUploadForm() {
 
           {/* Trailer */}
           <div>
-            <label className="text-base block font-medium text-white mb-2">
-              Trailer File
-            </label>
+            <Label className="custom-label mb-3"> Trailer File</Label>
+
             <div className="flex items-center space-x-3">
               <div className="flex-1">
                 <div className="relative">
@@ -767,9 +779,7 @@ export function ContentUploadForm() {
 
           {/* Thumbnail Image */}
           <div>
-            <label className="text-base block font-medium text-white mb-2">
-              Thumbnail Image
-            </label>
+            <Label className="custom-label mb-3">Thumbnail Image</Label>
             <div className="flex items-center space-x-3">
               <div className="flex-1">
                 <div className="relative">

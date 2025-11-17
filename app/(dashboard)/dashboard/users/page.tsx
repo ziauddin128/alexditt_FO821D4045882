@@ -1,4 +1,4 @@
-import UserTable from "@/components/pages/users/UserManagementTable";
+import UserTable from "@/components/pages/users/UserTable";
 
 export default function Users() {
   return (
@@ -6,5 +6,5 @@ export default function Users() {
       {/* Table */}
       <UserTable />
     </>
-  )
+  );
 }

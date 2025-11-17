@@ -21,31 +21,13 @@ import { privateAxios } from "@/components/axiosInstance/axios";
 import { toast } from "sonner";
 import Calendar from "@/components/icons/Calendar";
 
-interface CityData {
-  label: string;
-  value: string;
-}
-
-interface LanguageData {
-  label: string;
-  value: string;
-}
-
-interface StateData {
-  label: string;
-  value: string;
-}
-
 interface FormData {
   name: string;
   email: string;
   date_of_birth: string;
-  language: string;
   Address: string;
   phone_number: string;
   country: string | null;
-  state: string | null;
-  city: string | null;
   postal_code: string;
   bio: string;
 }
@@ -118,48 +100,6 @@ export default function Setting() {
      setImage(undefined);
    }; */
 
-  // City
-  const citis: CityData[] = [
-    {
-      label: "Dhaka",
-      value: "Dhaka",
-    },
-    {
-      label: "Chittagong",
-      value: "Chittagong",
-    },
-    {
-      label: "Feni",
-      value: "Feni",
-    },
-  ];
-
-  // Country
-  const language: LanguageData[] = [
-    {
-      label: "English",
-      value: "English",
-    },
-    {
-      label: "Mexican",
-      value: "Mexican",
-    },
-  ];
-
-  // State
-  const states: StateData[] = [
-    {
-      label: "8080 Railroad St.",
-      value: "8080 Railroad St.",
-    },
-    {
-      label: "States 2",
-      value: "States 2",
-    },
-  ];
-
-  //console.log(user);
-
   const {
     register,
     formState: { errors },
@@ -196,7 +136,7 @@ export default function Setting() {
     }
   };
 
-  // convert dob in normal
+  // Convert dob in normal
   const formattedDate = user?.date_of_birth
     ? new Date(user.date_of_birth).toLocaleDateString("en-CA")
     : "";
@@ -250,20 +190,19 @@ export default function Setting() {
           />
           <span className="text-sm font-medium">Upload New Picture</span>
         </label>
-        {/* <button type="button" onClick={handleDelete} className='text-sm font-medium px-5 py-[14px] rounded-[100px] bg-btn-secondary-bg cursor-pointer'>Delete</button> */}
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* Personal Details Form */}
         <div className="bg-[#131824] p-4 rounded-[8px] mt-4">
-          <div className="grid sm:grid-cols-2 gap-5">
+          <div className="grid sm:grid-cols-2 gap-4">
             {/* Name */}
-            <div>
-              <Label className="text-base font-medium mb-3">Name</Label>
+            <div className="mb-3">
+              <Label className="custom-label mb-3">Name</Label>
               <Input
                 defaultValue={user?.name}
                 {...register("name", { required: "Name is required" })}
-                className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
+                className="custom-input"
                 placeholder="Cameron Williamson"
               />
 
@@ -272,32 +211,9 @@ export default function Setting() {
               )}
             </div>
 
-            {/* Email */}
-            <div>
-              <Label className="text-base font-mediumd mb-3">Email</Label>
-              <Input
-                defaultValue={user?.email}
-                {...register("email", {
-                  required: "Email is required",
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "Please enter a valid email address",
-                  },
-                })}
-                className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
-                placeholder="cameron.graham@example.com"
-              />
-
-              {errors.email && (
-                <p className="error-msg">{errors.email.message}</p>
-              )}
-            </div>
-
             {/* Date of Birth */}
-            <div>
-              <Label className="text-base font-medium mb-3">
-                Date of Birth
-              </Label>
+            <div className="mb-3">
+              <Label className="custom-label mb-3">Date of Birth</Label>
               <div className="relative">
                 <Input
                   {...register("date_of_birth")}
@@ -308,7 +224,7 @@ export default function Setting() {
                     if (!e.target.value) e.target.type = "text";
                   }}
                   defaultValue={formattedDate}
-                  className="block h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color appearance-none"
+                  className="custom-input"
                   id="datepicker"
                 />
 
@@ -317,130 +233,66 @@ export default function Setting() {
               </div>
             </div>
 
-            {/* Language */}
-            <div>
-              <Label className="text-base font-medium mb-3">Language</Label>
+            {/* Email */}
+            <div className="mb-3 sm:col-span-2">
+              <Label className="custom-label mb-3">Email</Label>
+              <Input
+                defaultValue={user?.email}
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Please enter a valid email address",
+                  },
+                })}
+                className="custom-input "
+                placeholder="cameron.graham@example.com"
+              />
 
-              <Select
-                value={user?.city}
-                onValueChange={(val) => setValue("city", val)}
-                {...register("city")}
-              >
-                <SelectTrigger className="h-[40px] cursor-pointer w-full px-4 py-3 text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color">
-                  <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent className="bg-secondary-bg text-white border border-slate-700 rounded">
-                  {language.map((city, idx) => {
-                    return (
-                      <SelectItem
-                        key={idx}
-                        value={city.value}
-                        className="cursor-pointer"
-                      >
-                        {city.label}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
+              {errors.email && (
+                <p className="error-msg">{errors.email.message}</p>
+              )}
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-5 mt-4">
+          <div className="grid sm:grid-cols-2 gap-4 mt-4">
             {/* address */}
-            <div>
-              <Label className="text-base font-mediumd mb-3">Address</Label>
+            <div className="mb-3">
+              <Label className="custom-label mb-3">Address</Label>
               <Input
                 {...register("Address")}
                 defaultValue={user?.Address}
-                className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
-                placeholder="2972 Westheimer Rd. Santa Ana, Illinois 85486  "
+                className="custom-input"
+                placeholder="Address"
               />
             </div>
 
             {/* Phone */}
-            <div>
-              <Label className="text-base font-mediumd mb-3">Phone</Label>
+            <div className="mb-3">
+              <Label className="custom-label mb-3">Phone</Label>
               <Input
                 {...register("phone_number")}
                 defaultValue={user?.phone_number}
-                className="h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
+                className="custom-input"
                 placeholder="(704) 555-0127"
               />
             </div>
           </div>
 
-          {/* Country */}
-
-          {/* 
-            {/* States */}
-          {/* <div>
-              <Label className="text-base font-mediumd mb-3">State</Label>
-
-              <Select
-                value={user?.state}
-                onValueChange={(val) => setValue("state", val)}
-                {...register("state")}
-              >
-                <SelectTrigger className="h-[40px] w-full px-4 py-3 text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color">
-                  <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent className="bg-secondary-bg text-white border border-slate-700 rounded">
-                  {
-                    states.map((state, idx) => {
-                      return (
-                        <SelectItem key={idx} value={state.value} className="cursor-pointer">{state.label}</SelectItem>
-                      )
-                    })
-                  }
-                </SelectContent>
-              </Select>
-            </div>
-
-            City
-            <div>
-              <Label className="text-base font-mediumd mb-3">City</Label>
-
-              <Select
-                value={user?.city}
-                onValueChange={(val) => setValue("city", val)}
-                {...register("city")}
-              >
-                <SelectTrigger className="h-[40px] w-full px-4 py-3 text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color">
-                  <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent className="bg-secondary-bg text-white border border-slate-700 rounded">
-                  {
-                    citis.map((city, idx) => {
-                      return (
-                        <SelectItem key={idx} value={city.value} className="cursor-pointer">{city.label}</SelectItem>
-                      )
-                    })
-                  }
-                </SelectContent>
-              </Select>
-            </div> */}
-
-          {/* Postal Code */}
-          {/* <div>
-              <Label className="text-base font-mediumd mb-3">Postal Code</Label>
-              <Input {...register("postal_code")} defaultValue={user?.postal_code} className="h-[40px] w-full px-4 py-3 text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color" placeholder="Enter postal code" />
-            </div> */}
-
           {/* Bio */}
           <div className="mt-4 mb-6">
-            <Label className="text-base font-mediumd mb-3">Bio</Label>
+            <Label className="custom-label mb-3">Bio</Label>
             <Textarea
               {...register("bio")}
               defaultValue={user?.bio}
-              className="h-[100px] w-full px-4 py-[14px] text-sm font-normal border border-[#0D121E] bg-[#0D121E] rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color"
+              className="!h-[100px] custom-input"
               placeholder="Write your Bio"
             />
           </div>
 
           <button
             type="submit"
-            className="bg-primary-color rounded-full text-white py-[14px] max-w-[400px] w-full text-base font-medium cursor-pointer block mx-auto  border border-white"
+            className="bg-primary-color rounded-full text-white py-[14px] max-w-[400px] w-full text-base font-medium cursor-pointer block mx-auto border border-white"
           >
             Save
           </button>
