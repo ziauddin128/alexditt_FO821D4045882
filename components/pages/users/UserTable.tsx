@@ -24,7 +24,7 @@ interface UserDetail {
   id: number;
   name: string;
   email: string;
-  createdDate: string;
+  created_at: string;
   status: string;
 }
 
@@ -32,45 +32,21 @@ export default function UserTable() {
   const [filter, setFilter] = useState<string>("all");
 
   // get data
-  /* const {data: userData, error,isLoading } = useQuery({
-      queryKey: ['userData'],
-      queryFn: async () =>
-      {
-        const res = await privateAxios.get("/admin/user/allusers");
-        return res.data;
-      }
-    }) */
+  const {
+    data: userData,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ["userData"],
+    queryFn: async () => {
+      const res = await privateAxios.get("/admin/user/:status");
+      return res.data;
+    },
+  });
 
-  const userData = [
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john@example.com",
-      createdDate: "2021-01-01",
-      status: "active",
-    },
-    {
-      id: 2,
-      name: "John Doe",
-      email: "john@example.com",
-      createdDate: "2021-01-01",
-      status: "deactive",
-    },
-    {
-      id: 3,
-      name: "John Doe",
-      email: "john@example.com",
-      createdDate: "2021-01-01",
-      status: "active",
-    },
-    {
-      id: 4,
-      name: "John Doe",
-      email: "john@example.com",
-      createdDate: "2021-01-01",
-      status: "active",
-    },
-  ];
+  console.log("User Data---", userData);
+
+  return;
 
   const columns: ColumnDef<UserDetail>[] = [
     {
@@ -95,7 +71,7 @@ export default function UserTable() {
       accessorKey: "created_date",
       header: "Create Date",
       cell: ({ row }) => (
-        <span className="">{convertDate(row.original.createdDate)}</span>
+        <span className="">{convertDate(row.original.created_at)}</span>
       ),
     },
     {
@@ -103,7 +79,7 @@ export default function UserTable() {
       header: "Status",
       cell: ({ row }) => {
         {
-          return row.original.status == "active" ? (
+          return row.original.status == "ACTIVE" ? (
             <span className="text-success-color">
               {row.original.status.charAt(0).toUpperCase() +
                 row.original.status.slice(1)}
@@ -152,16 +128,18 @@ export default function UserTable() {
     },
   ];
 
-  const isLoading = false;
-  const error = false;
-
   const [page, setPage] = useState(1);
   const pageSize = 10;
+
+  /*  const filteredData =
+    filter === "all"
+      ? userData
+      : userData.filter((user) => user.status === filter); */
 
   const filteredData =
     filter === "all"
       ? userData
-      : userData.filter((user) => user.status === filter);
+      : userData.data.filter((user) => user.status === filter);
 
   const total = filteredData?.length;
   const paginatedData = filteredData?.slice(

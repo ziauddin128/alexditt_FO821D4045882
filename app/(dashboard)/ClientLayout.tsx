@@ -83,6 +83,7 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   // Fake user data (since we're not fetching real data)
+
   const user = {
     data: {
       avatar_url: "/dashboard/profile.png",
@@ -136,7 +137,7 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
   // Handle Logout
   const router = useRouter();
   const handleLogout = () => {
-    // logout();
+    logout();
     router.push("/auth");
   };
 

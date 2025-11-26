@@ -1,31 +1,30 @@
 import ChartIcon from "@/components/icons/ChartIcon";
-import CurrencyDollar from "@/components/icons/CurrencyDollar";
 import User from "@/components/icons/User";
 import React from "react";
 
 interface StatCard {
   icon: React.ReactNode;
   title: string;
-  count: string | number;
+  count: number | string;
 }
 
-export default function StatsCard() {
+interface StatsData {
+  totalUser: number | string;
+  totalVideos: number | string;
+}
+
+export default function StatsCard({ statsData }: { statsData: StatsData }) {
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
       <StatCard
         icon={<User className="h-6 w-6" />}
         title="Total Users"
-        count="20.8K"
+        count={statsData.totalUser}
       />
-      {/* <StatCard
-        icon={<CurrencyDollar className="h-6 w-6" />}
-        title="Active subscriptions"
-        count="14.5K"
-      /> */}
       <StatCard
         icon={<ChartIcon className="h-6 w-6" />}
         title="Total Video"
-        count="8.2K"
+        count={statsData.totalVideos}
       />
     </section>
   );

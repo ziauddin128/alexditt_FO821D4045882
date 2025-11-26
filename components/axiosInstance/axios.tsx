@@ -2,8 +2,7 @@
 import axios from "axios";
 import { storage } from "../../lib/storage";
 
-const apiBaseURL =
-  process.env.NEXT_PUBLIC_API_BASE_URL;
+const apiBaseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Public Axios instance (no auth)
 export const publicAxios = axios.create({

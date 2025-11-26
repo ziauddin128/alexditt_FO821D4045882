@@ -11,12 +11,12 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 
   // admin validation
   useEffect(() => {
-    // console.log(user);
+    //console.log(user);
     if (isLoading) return; // Wait for auth check to finish
     if (!user) {
       // console.log("User not found");
       router.replace("/auth");
-    } else if (user?.role !== "admin") {
+    } else if (user?.type !== "admin") {
       // console.log("role not matched");
       router.replace("/auth"); // Or another fallback route
     }
@@ -26,7 +26,7 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
     return <div className="text-center p-10">Loading...</div>;
   }
 
-  if (user?.role !== "admin") {
+  if (user?.type !== "admin") {
     return null; // Or a message/component for unauthorized access
   }
 

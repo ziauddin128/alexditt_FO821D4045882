@@ -2,17 +2,7 @@
 
 import { privateAxios, publicAxios } from "@/components/axiosInstance/axios";
 import { storage } from "@/lib/storage";
-import Link from "next/link";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-
-import { io } from "socket.io-client";
+import { createContext, useContext, useEffect, useState } from "react";
 
 interface AuthContextType {
   user: any;
@@ -29,8 +19,8 @@ const defaultAuthContext: AuthContextType = {
   isLoading: true,
   isNotification: null,
   error: null,
-  login: async () => { },
-  logout: async () => { },
+  login: async () => {},
+  logout: async () => {},
 };
 
 //   create context
@@ -60,9 +50,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (token) {
         try {
-          const { data } = await privateAxios.get("/users/get-me");
+          const { data } = await privateAxios.get("/auth/me");
 
-          if (data?.data?.role == "admin") {
+          if (data?.data?.type == "admin") {
             setUser(data?.data);
           } else {
             storage.removeItem("authToken");
@@ -81,63 +71,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Login method
   const login = async (credentials: { email: string; password: string }) => {
-    // console.log("Logging from context:", credentials);
+    //console.log("Logging from context:", credentials);
     setIsLoading(true);
     try {
-      const response = await publicAxios.post("/users/login", credentials);
+      const response = await publicAxios.post("/auth/login", credentials);
 
       const authorization = response.data;
-      storage.setItem("authToken", authorization.token);
-      setUser(authorization?.user);
+      storage.setItem("authToken", authorization.authorization.access_token);
+      // setUser(authorization?.user); //login er time ey data return korle directly set kore deowa jaito
+
+      // Set up user state on first login time
+      const token = storage.getItem("authToken");
+      if (token) {
+        try {
+          const { data } = await privateAxios.get("/auth/me");
+          if (data?.data?.type == "admin") {
+            setUser(data?.data);
+          } else {
+            storage.removeItem("authToken");
+          }
+        } catch (error) {
+          setUser(null);
+        }
+      }
+
       return authorization;
     } catch (error: any) {
-      let errorRes = error?.response?.data?.message;
-
-      if (errorRes === "deactivated") {
-        errorRes = (
-          <>
-            Your account is deactivated. Please activate your account to log in.{" "}
-            <Link
-              href="/auth/active-account"
-              className="text-blue-400 underline"
-            >
-              Activate your account
-            </Link>
-          </>
-        );
-      }
+      let errorRes = error?.response?.data?.message?.message;
       setError(errorRes || "Unknown error");
       setUser(null);
     } finally {
       setIsLoading(false);
     }
   };
-
-  // Socket For Real-time notification
-  const socket = useMemo(() => {
-    return io(process.env.NEXT_PUBLIC_NOTIFICATION_BASE_URL, {
-      extraHeaders: {
-        Auth: storage.getItem("authToken") || "",
-      },
-    });
-  }, []);
-
-  const handleNotification = useCallback(async (payload: any) => {
-    console.log(payload);
-    setIsNotification(payload);
-  }, []);
-
-  useEffect(() => {
-    socket.on("notification", handleNotification);
-
-    /* socket.on("connect", () => {
-      console.log("Connect");
-    }); */
-
-    return () => {
-      socket.off("notification", handleNotification);
-    };
-  }, [socket]);
 
   const logout = async () => {
     setIsLoading(true);
