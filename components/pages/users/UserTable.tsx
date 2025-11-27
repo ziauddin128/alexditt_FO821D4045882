@@ -1,24 +1,24 @@
 "use client";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import { DataTable } from "@/components/reusable/data-table";
-import convertDate from "@/hooks/convertDate";
 import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import { Plus, ToggleRight } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import EyeIcon from "@/components/icons/EyeIcon";
 import EditIcon from "@/components/icons/EditIcon";
 import DeleteUser from "./DeleteUser";
+import LoadingSpinner from "@/app/(dashboard)/loading";
+import convertDateStr from "@/hooks/convertDateStr";
 
 interface UserDetail {
   id: number;
@@ -33,20 +33,21 @@ export default function UserTable() {
 
   // get data
   const {
-    data: userData,
+    data: users,
     error,
     isLoading,
+    refetch,
   } = useQuery({
-    queryKey: ["userData"],
+    queryKey: ["users", filter],
     queryFn: async () => {
-      const res = await privateAxios.get("/admin/user/:status");
+      const res = await privateAxios.get("/admin/user", {
+        params: filter === "all" ? {} : { status: filter },
+      });
       return res.data;
     },
   });
 
-  console.log("User Data---", userData);
-
-  return;
+  const userData = users?.data || [];
 
   const columns: ColumnDef<UserDetail>[] = [
     {
@@ -68,10 +69,10 @@ export default function UserTable() {
       cell: ({ row }) => <span className="">{row.original.email}</span>,
     },
     {
-      accessorKey: "created_date",
+      accessorKey: "created_at",
       header: "Create Date",
       cell: ({ row }) => (
-        <span className="">{convertDate(row.original.created_at)}</span>
+        <span className="">{convertDateStr(row.original.created_at)}</span>
       ),
     },
     {
@@ -106,13 +107,13 @@ export default function UserTable() {
             <EyeIcon className="text-[#0CAF60] h-5 w-5" />
           </Link>
 
-          <Link
+          {/*   <Link
             href="#"
             className="bg-[#FFECD2] rounded-full h-9 w-9 flex items-center justify-center"
             title="Active/Deactive"
           >
             <ToggleRight className="text-[#FFA21D] h-5 w-5" />
-          </Link>
+          </Link> */}
 
           <Link
             href={`/dashboard/users/edit/${row.original.id}`}
@@ -122,33 +123,35 @@ export default function UserTable() {
             <EditIcon className="text-[#51CEDA] h-5 w-5" />
           </Link>
 
-          <DeleteUser id={row.original.id} />
+          <DeleteUser id={row.original.id} refetch={refetch} />
         </div>
       ),
     },
   ];
 
-  const [page, setPage] = useState(1);
-  const pageSize = 10;
+  /*   const [page, setPage] = useState(1);
+  const pageSize = 10; */
 
-  /*  const filteredData =
-    filter === "all"
-      ? userData
-      : userData.filter((user) => user.status === filter); */
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  useEffect(() => {
+    if (users?.pagination) {
+      setPage(users.pagination.page);
+      setPageSize(users.pagination.perPage);
+    }
+  }, [users]);
 
   const filteredData =
     filter === "all"
       ? userData
-      : userData.data.filter((user) => user.status === filter);
+      : userData.filter((user: { status: string }) => user.status === filter);
 
   const total = filteredData?.length;
   const paginatedData = filteredData?.slice(
     (page - 1) * pageSize,
     page * pageSize
   );
-
-  if (isLoading) return null;
-  if (error) return null;
 
   return (
     <div>
@@ -178,25 +181,29 @@ export default function UserTable() {
                 <SelectItem className="selectOption" value="all">
                   All
                 </SelectItem>
-                <SelectItem className="selectOption" value="active">
-                  Active
+                <SelectItem className="selectOption" value="ACTIVE">
+                  ACTIVE
                 </SelectItem>
-                <SelectItem className="selectOption" value="deactive">
-                  Deactive
+                <SelectItem className="selectOption" value="INACTIVE">
+                  INACTIVE
                 </SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
         </div>
 
-        <DataTable
-          columns={columns}
-          data={paginatedData}
-          page={page}
-          pageSize={pageSize}
-          total={total}
-          onPageChange={setPage}
-        />
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <DataTable
+            columns={columns}
+            data={paginatedData}
+            page={page}
+            pageSize={pageSize}
+            total={total}
+            onPageChange={setPage}
+          />
+        )}
       </div>
     </div>
   );

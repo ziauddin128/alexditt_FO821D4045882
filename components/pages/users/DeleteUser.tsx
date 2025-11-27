@@ -6,27 +6,45 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import DeleteIcon from "@/components/icons/DeleteIcon";
 import { Button } from "@/components/ui/button";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useState } from "react";
+import { privateAxios } from "@/components/axiosInstance/axios";
+import { toast } from "sonner";
 
-export default function DeleteUser({ id }: { id: string | number }) {
+export default function DeleteUser({
+  id,
+  refetch,
+}: {
+  id: string | number;
+  refetch: () => void;
+}) {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const {
     formState: { errors },
     handleSubmit,
-    control,
   } = useForm<FormData>();
 
   const onSubmit = async (data: FormData) => {
-    console.log(data);
-
-    setOpen(false);
+    setLoading(true);
+    try {
+      const response = await privateAxios.delete(`/admin/user/${id}`);
+      if (response.data) {
+        toast.success(response?.data?.message);
+        refetch();
+      }
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message?.message;
+      toast.error(errorMessage);
+    } finally {
+      setOpen(false);
+      setLoading(false);
+    }
   };
 
   return (
@@ -77,7 +95,7 @@ export default function DeleteUser({ id }: { id: string | number }) {
                 type="submit"
                 className="py-3 px-4 bg-secondary-color text-white font-sm font-medium cursor-pointer hover:bg-[#E70D0D] rounded-md"
               >
-                Delete
+                {loading ? "Deleing..." : "Delete"}
               </Button>
             </div>
           </DialogFooter>

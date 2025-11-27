@@ -29,7 +29,7 @@ export default function RootLayout({
         <QueryClientWrapper>
           <AuthProvider>{children}</AuthProvider>
         </QueryClientWrapper>
-        <Toaster />
+        <Toaster position="top-center" />
       </body>
     </html>
   );

@@ -22,7 +22,7 @@ import {
 } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { privateAxios } from "@/components/axiosInstance/axios";
-import { fetchCategoris } from "../categories/CategoriesTable";
+// import { fetchCategoris } from "../categories/CategoriesTable";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
@@ -228,10 +228,10 @@ export function ContentUploadForm() {
     setValue("file", vidFile, { shouldValidate: true, shouldDirty: true });
   };
 
-  const { data: categoriesList, isLoading: categoriesLoading } = useQuery({
+  /*  const { data: categoriesList, isLoading: categoriesLoading } = useQuery({
     queryKey: ["categories"],
     queryFn: fetchCategoris,
-  });
+  }); */
 
   return (
     <div>
@@ -428,7 +428,7 @@ export function ContentUploadForm() {
                     </SelectTrigger>
                     <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
                       <SelectGroup className="space-y-2">
-                        {categoriesList?.data?.map((cat: any) => (
+                        {/*  {categoriesList?.data?.map((cat: any) => (
                           <SelectItem
                             key={cat.id}
                             value={cat.id}
@@ -436,7 +436,7 @@ export function ContentUploadForm() {
                           >
                             {cat.name}
                           </SelectItem>
-                        ))}
+                        ))} */}
                       </SelectGroup>
                     </SelectContent>
                   </Select>

@@ -17,8 +17,7 @@ interface PageProps {
 }
 
 export default function UserDetails({ params }: { params: any }) {
-  const id = 1;
-  // const id = params?.id;
+  const id = params?.id;
 
   // const { data: userDet, isLoading } = useQuery({
   //   queryKey: ["userDet", id],
