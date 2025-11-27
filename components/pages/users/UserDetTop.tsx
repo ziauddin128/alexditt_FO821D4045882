@@ -75,33 +75,6 @@ export default function UserDetTop({ id, userDet }: UserDetTopProps) {
             @Wade Warren
           </p>
         </div>
-        {/* <div>
-          <h1 className="text-base font-semibold">{userDet.name || "No Name"}</h1>
-          <div className="my-4 flex items-center gap-4">
-            <p className={isActive ? "text-[#2ECC71] text-xs" : "text-[#e70d0d] text-xs"}>
-              {formattedStatus}
-            </p>
-            <span className="text-xs px-[10px] py-[5px] bg-[#1D1A33] rounded-[2px]">
-              Premium Member
-            </span>
-          </div>
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className="flex items-center gap-2">
-              <IdCard className="w-6 h-6" />
-              <p className="text-sm">ID: {userDet.id ?? "N/A"}</p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Calendar className="w-6 h-6" />
-              <p className="text-sm">
-                Joined:{" "}
-                {userDet.created_at
-                  ? convertDateStr(userDet.created_at)
-                  : "N/A"}
-              </p>
-            </div>
-          </div>
-        </div> */}
       </div>
     </>
   );

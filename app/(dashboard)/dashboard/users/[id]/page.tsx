@@ -8,40 +8,42 @@ import Payments from "@/components/pages/users/Payments";
 import UserDetTop from "@/components/pages/users/UserDetTop";
 import { useQuery } from "@tanstack/react-query";
 import { privateAxios } from "@/components/axiosInstance/axios";
+import { useRouter } from "next/navigation";
 
 // interface UserDetailsProps {
 //   id: string;
 // }
-interface PageProps {
-  params: Promise<{ id: string }>;
-}
 
 export default function UserDetails({ params }: { params: any }) {
   const id = params?.id;
 
-  // const { data: userDet, isLoading } = useQuery({
-  //   queryKey: ["userDet", id],
-  //   queryFn: async () => {
-  //     const res = await privateAxios.get(`/admin/user/users/${id}`);
-  //     return res.data;
-  //   },
-  // });
-  const userDet = { id: 1, name: "Zia Uddin Bablu", email: "zia@gmail.com" };
-  const isLoading = false;
-  const tabs = [
+  const router = useRouter();
+
+  // Fetch Data
+  const { data: userDet, isLoading } = useQuery({
+    queryKey: ["userDet", id],
+    queryFn: async () => {
+      const res = await privateAxios.get(`/admin/user/user-view/${id}`);
+      return res.data;
+    },
+  });
+
+  if (userDet?.data === null) {
+    router.push("/dashboard/users");
+  }
+
+  /* const tabs = [
     { name: "Personal Info", value: "personal-info" },
     { name: "Subscription", value: "subscription" },
     { name: "Payments", value: "payments" },
-  ];
+  ]; */
 
-  const [activeTab, setActiveTab] = useState(tabs[0].value);
-
-  if (isLoading) return <p>Loading...</p>;
+  // const [activeTab, setActiveTab] = useState(tabs[0].value);
 
   return (
     <>
-      <UserDetTop id={id} userDet={userDet} />
-      <PersonalInfo userDet={userDet} />
+      {/* <UserDetTop id={id} userDet={userDet} /> */}
+      <PersonalInfo userDet={userDet?.data} isLoading={isLoading} />
 
       {/* <div className="my-4">
         <Tabs defaultValue="personal-info" className="usersTab">
