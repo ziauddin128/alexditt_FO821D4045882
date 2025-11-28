@@ -60,11 +60,11 @@ const menuItems = [
     icon: <LiveTbIcon className="w-5 h-5 text-white" />,
     label: "Live TV",
   }, */
-  {
+  /*   {
     href: "/dashboard/setting",
     icon: <Setting className="w-5 h-5 text-white" />,
     label: "Setting",
-  },
+  }, */
 ];
 
 const bottomMenu = [
@@ -79,18 +79,18 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
 
-  const { logout, isNotification } = useAuth();
+  const { logout, isNotification, user } = useAuth();
   const pathname = usePathname();
 
   // Fake user data (since we're not fetching real data)
 
-  const user = {
+  /* const user = {
     data: {
       avatar_url: "/dashboard/profile.png",
       name: "John Doe",
       email: "john.doe@example.com",
     },
-  };
+  }; */
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -145,7 +145,9 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
     return (
       <div className="lg:p-4 flex items-center justify-between bg-[#0D121E]">
         <div className="hidden lg:block">
-          <h4 className="font-semibold text-2xl">Welcome, Jane Cooper</h4>
+          <h4 className="font-semibold text-2xl">
+            Welcome {user?.name ? `,${user?.name}` : ""}
+          </h4>
           <p className="text-base">Have a nice day</p>
         </div>
 
@@ -207,16 +209,26 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
           </div> */}
 
           {/* User Profile */}
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger className="shadow-none outline-0 cursor-pointer">
               <div>
                 <div className="flex-shrink-0 rounded-full">
-                  <Image
+                  {/* Ata Uncomment kore dile real admin er image asbe */}
+
+                  {/* <Image
                     className="w-12 h-12 rounded-full object-cover"
-                    src={user?.data?.avatar_url || "/dashboard/profile.png"}
+                    src={user?.avatar_url || "/dashboard/profile.png"}
                     width={48}
                     height={48}
                     alt="User"
+                  /> */}
+
+                  <Image
+                    className="w-12 h-12 rounded-full object-cover"
+                    src={"/dashboard/profile.png"}
+                    width={48}
+                    height={48}
+                    alt="Admin"
                   />
                 </div>
               </div>

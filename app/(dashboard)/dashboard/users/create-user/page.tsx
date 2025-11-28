@@ -1,10 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
-import Image from "next/image";
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 
 import {
   Select,
@@ -14,24 +11,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAuth } from "@/provider/AuthProvider";
 
 import { Controller, useForm } from "react-hook-form";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import { toast } from "sonner";
-import Calendar from "@/components/icons/Calendar";
-import { PencilLine } from "lucide-react";
 import EyeIcon from "@/components/icons/EyeIcon";
 import EyeSlash from "@/components/icons/EyeSlash";
 
 interface FormData {
   name: string;
   email: string;
-  date_of_birth: string;
-  Address: string;
   phone_number: string;
-  country: string | null;
-  postal_code: string;
   description: string;
   gender: string;
   password: string;
@@ -40,108 +30,26 @@ interface FormData {
 export default function CreateUser() {
   const [type, setType] = React.useState<"password" | "text">("password");
 
-  const [image, setImage] = useState<File | undefined>();
-  // Image Preview Show
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-
-  // Handle file selection and show the image preview
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      // Read the file as a data URL (base64 string)
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string); // Update image preview state
-      };
-      if (file) {
-        reader.readAsDataURL(file); // Convert the file to a data URL
-      }
-
-      setImage(file);
-    }
-  };
-
-  // Update Image
-  useEffect(() => {
-    const updateImage = async () => {
-      const data = {
-        profilePicture: image,
-      };
-
-      try {
-        const response = await privateAxios.put("/users/update-image", data, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-        if (response.data) {
-          toast.success("Image updated successfully", {
-            position: "top-right",
-            style: {
-              backgroundColor: "#4CAF50",
-              color: "#fff",
-            },
-          });
-        }
-      } catch (errorData: any) {
-        toast.error("Image updated failed", {
-          position: "top-right",
-          style: {
-            backgroundColor: "#f44336",
-            color: "#fff",
-          },
-        });
-      }
-    };
-
-    if (image) {
-      updateImage();
-    }
-  }, [image]);
-
-  // Handle delete action (reset the image preview)
-  /*  const handleDelete = () => {
-     setImagePreview(null);  // Reset the preview image
-     setImage(undefined);
-   }; */
-
   const {
     register,
     formState: { errors },
     handleSubmit,
     setValue,
     control,
+    reset,
   } = useForm<FormData>();
 
   const onSubmit = async (data: FormData) => {
-    console.log(data);
-
-    /* try {
-      const date_of_birth = new Date(data.date_of_birth).toISOString();
-      data.date_of_birth = date_of_birth;
-
-      const response = await privateAxios.put(
-        "/users/update-user-details",
-        data
-      );
+    try {
+      const response = await privateAxios.post("/auth/register", data);
       if (response.data) {
-        toast.success("Data updated successfully", {
-          position: "top-right",
-          style: {
-            backgroundColor: "#4CAF50",
-            color: "#fff",
-          },
-        });
+        toast.success(response?.data?.message);
       }
-    } catch (errorData: any) {
-      toast.error("Data updated failed", {
-        position: "top-right",
-        style: {
-          backgroundColor: "#f44336",
-          color: "#fff",
-        },
-      });
-    } */
+      reset();
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message?.message;
+      toast.error(errorMessage);
+    }
   };
 
   return (
@@ -149,40 +57,6 @@ export default function CreateUser() {
       <h4 className="text-xl md:text-2xl font-medium mb-4">
         Creating a new user
       </h4>
-
-      {/* Image Upload */}
-      <div className="flex flex-wrap items-center gap-2 sm:gap-5 ">
-        <div>
-          <div className="h-[100px] w-[100px]">
-            {imagePreview ? (
-              <Image
-                src={imagePreview}
-                alt="Preview"
-                className="h-full w-full object-cover rounded-full"
-                width={100}
-                height={100}
-              />
-            ) : (
-              <div className="h-[100px] w-[100px] rounded-full bg-[#FFFFFF33] flex items-center justify-center">
-                <PencilLine />
-              </div>
-            )}
-          </div>
-        </div>
-        <label
-          htmlFor="profileImage"
-          className="cursor-pointer py-[14px] px-5 border border-white rounded-[100px]"
-        >
-          <input
-            type="file"
-            hidden
-            id="profileImage"
-            accept="image/*"
-            onChange={handleImageChange}
-          />
-          <span className="text-sm font-medium">Upload New Picture</span>
-        </label>
-      </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="bg-[#131824] p-4 rounded-[8px] mt-4">
@@ -221,29 +95,8 @@ export default function CreateUser() {
               )}
             </div>
 
-            {/* Date of Birth */}
-            <div className="mb-3">
-              <Label className="custom-label mb-3">Date of Birth</Label>
-              <div className="relative">
-                <Input
-                  {...register("date_of_birth")}
-                  type="text"
-                  placeholder="1 Feb, 1990"
-                  onFocus={(e) => (e.target.type = "date")}
-                  onBlur={(e) => {
-                    if (!e.target.value) e.target.type = "text";
-                  }}
-                  className="custom-input"
-                  id="datepicker"
-                />
-
-                {/* Calendar Icon */}
-                <Calendar className="absolute right-3 top-1/4  w-5 h-5 text-gray-400 pointer-events-none" />
-              </div>
-            </div>
-
             {/* Phone */}
-            <div className="mb-3">
+            <div className="mb-3 sm:col-span-2">
               <Label className="custom-label mb-3">Phone</Label>
               <Input
                 {...register("phone_number")}

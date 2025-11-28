@@ -29,6 +29,8 @@ interface UserDetail {
 }
 
 export default function UserTable() {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [filter, setFilter] = useState<string>("all");
 
   // get data
@@ -38,13 +40,18 @@ export default function UserTable() {
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["users", filter],
+    queryKey: ["users", page, pageSize, filter],
     queryFn: async () => {
       const res = await privateAxios.get("/admin/user", {
-        params: filter === "all" ? {} : { status: filter },
+        params: {
+          page,
+          perPage: pageSize,
+          ...(filter !== "all" && { status: filter }),
+        },
       });
       return res.data;
     },
+    placeholderData: (prev) => prev,
   });
 
   const userData = users?.data || [];
@@ -129,12 +136,6 @@ export default function UserTable() {
     },
   ];
 
-  /*   const [page, setPage] = useState(1);
-  const pageSize = 10; */
-
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-
   useEffect(() => {
     if (users?.pagination) {
       setPage(users.pagination.page);
@@ -147,11 +148,7 @@ export default function UserTable() {
       ? userData
       : userData.filter((user: { status: string }) => user.status === filter);
 
-  const total = filteredData?.length;
-  const paginatedData = filteredData?.slice(
-    (page - 1) * pageSize,
-    page * pageSize
-  );
+  const total = users?.pagination?.totalItems;
 
   return (
     <div>
@@ -197,7 +194,7 @@ export default function UserTable() {
         ) : (
           <DataTable
             columns={columns}
-            data={paginatedData}
+            data={filteredData}
             page={page}
             pageSize={pageSize}
             total={total}

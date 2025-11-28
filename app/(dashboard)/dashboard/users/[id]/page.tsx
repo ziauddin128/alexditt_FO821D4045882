@@ -5,14 +5,9 @@ import { useState } from "react";
 import PersonalInfo from "@/components/pages/users/PersonalInfo";
 import Subscription from "@/components/pages/users/Subscription";
 import Payments from "@/components/pages/users/Payments";
-import UserDetTop from "@/components/pages/users/UserDetTop";
 import { useQuery } from "@tanstack/react-query";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import { useRouter } from "next/navigation";
-
-// interface UserDetailsProps {
-//   id: string;
-// }
 
 export default function UserDetails({ params }: { params: any }) {
   const id = params?.id;
@@ -42,7 +37,6 @@ export default function UserDetails({ params }: { params: any }) {
 
   return (
     <>
-      {/* <UserDetTop id={id} userDet={userDet} /> */}
       <PersonalInfo userDet={userDet?.data} isLoading={isLoading} />
 
       {/* <div className="my-4">
