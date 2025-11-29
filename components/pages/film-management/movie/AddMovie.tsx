@@ -22,35 +22,50 @@ import {
 } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { privateAxios } from "@/components/axiosInstance/axios";
-// import { fetchCategoris } from "../categories/CategoriesTable";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+
+interface Category {
+  id: string;
+  category_name: string;
+}
 
 type Inputs = {
   title: string;
   genre: string;
   kids_mode: boolean;
   description: string;
-  contentCategory: string;
+  category_id: string;
   contentType: string;
   director_name: string;
-  director_img: string;
+  director_thumbnail: string;
   file: File | null;
-  thumbnailImg: File | null;
+  movie_thumbnail: File | null;
   trailer: File | null;
   casts: { cast: string; cast_img: File | null }[];
-  series: {
-    series_name: string;
-    episode_name: string;
-    episode_number: string;
-    episode_file: File | null;
-    episode_thumbnail: File | null;
-  }[];
 };
 
-export function ContentUploadForm() {
+export default function AddMovie() {
   const [dragActive, setDragActive] = useState(false);
-  const [isSeries, setIsSeries] = useState(false);
+
+  // Genre
+  const { data: allGenre, isLoading: isGenreLoading } = useQuery({
+    queryKey: ["genre"],
+    queryFn: async () => {
+      const response = await privateAxios.get("/dashborad/genre-list");
+      return response.data;
+    },
+  });
+
+  // Category
+  const { data: allCategory, isLoading: isCategoryLoading } = useQuery({
+    queryKey: ["category"],
+    queryFn: async () => {
+      const response = await privateAxios.get("/dashborad/category-list");
+      return response.data;
+    },
+  });
+
   const queryClient = useQueryClient();
 
   const {
@@ -63,23 +78,14 @@ export function ContentUploadForm() {
   } = useForm<Inputs>({
     defaultValues: {
       title: "",
-      genre: "",
       description: "",
-      contentCategory: "",
-      contentType: "published",
+      category_id: "",
+      genre: "",
+      contentType: "",
       file: null,
-      thumbnailImg: null,
+      movie_thumbnail: null,
       trailer: null,
       casts: [{ cast: "", cast_img: null }],
-      series: [
-        {
-          series_name: "",
-          episode_name: "",
-          episode_number: "",
-          episode_file: null,
-          episode_thumbnail: null,
-        },
-      ],
     },
   });
 
@@ -92,21 +98,12 @@ export function ContentUploadForm() {
     name: "casts",
   });
 
-  // For series
-  const {
-    fields: seriesFields,
-    append: appendSeries,
-    remove: removeSeries,
-  } = useFieldArray({
-    control,
-    name: "series",
-  });
-
   const genre = watch("genre");
-  const contentCategory = watch("contentCategory");
+  const category_id = watch("category_id");
   const contentType = watch("contentType");
+  const kids_mode = watch("kids_mode");
   const trailer = watch("trailer");
-  const thumbnail = watch("thumbnailImg");
+  const thumbnail = watch("movie_thumbnail");
   const vidFile = watch("file");
 
   // send to the server
@@ -114,21 +111,31 @@ export function ContentUploadForm() {
     mutationFn: async (data: Inputs) => {
       try {
         const formData = new FormData();
-        // Append file data
-        if (data.file) formData.append("file", data.file);
-        if (data.thumbnailImg) formData.append("thumbnail", data.thumbnailImg);
 
-        // Append other fields as regular form data
+        // Append Movie, Thumbnail, Trailer File
+        if (data.file) formData.append("video", data.file);
+        if (data.movie_thumbnail)
+          formData.append("movie_thumbnail", data.movie_thumbnail);
+        if (data.trailer) formData.append("movie_trailer", data.trailer);
+
+        // Form Data
         formData.append("title", data.title);
-        formData.append("description", data.description);
         formData.append("genre", data.genre);
-        formData.append("category_id", data.contentCategory);
-        formData.append("type", data.contentType);
+        formData.append("kids_mode", data.kids_mode ? "true" : "false");
+        formData.append("description", data.description);
+        formData.append("category_id", data.category_id);
+
+        //formData.append("type", data.contentType);
+
+        formData.append("director_name", data.director_name);
+        formData.append("director_thumbnail", data.director_thumbnail);
 
         console.log("FormData Contents:");
         formData.forEach((value, key) => {
           console.log(`${key}: ${value}`);
         });
+
+        return;
 
         // You can replace this with your actual API endpoint
         const response = await privateAxios.post(`/uploads/video`, formData, {
@@ -147,7 +154,9 @@ export function ContentUploadForm() {
   });
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
-    console.log(data);
+    console.log("All File Data", data);
+
+    return;
 
     // New approach for get cast
     /* const formData = new FormData();
@@ -175,7 +184,6 @@ export function ContentUploadForm() {
       }
     } */
 
-    /*
     uploadContent.mutate(data, {
       onSuccess: () => {
         console.log("UPdate done");
@@ -186,7 +194,7 @@ export function ContentUploadForm() {
         // toast.error(error.message || "Failed to upload content");
         console.log("Error form update content");
       },
-    });*/
+    });
   };
 
   // Drag handlers
@@ -203,7 +211,7 @@ export function ContentUploadForm() {
     setDragActive(false);
     const file = e.dataTransfer?.files?.[0];
     if (file) {
-      setValue("thumbnailImg", file, {
+      setValue("movie_thumbnail", file, {
         shouldValidate: true,
         shouldDirty: true,
       });
@@ -214,7 +222,10 @@ export function ContentUploadForm() {
   const handleFilePick: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const file = e.target.files?.[0] ?? null;
 
-    setValue("thumbnailImg", file, { shouldValidate: true, shouldDirty: true });
+    setValue("movie_thumbnail", file, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
   };
 
   const handleTrailerPick: React.ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -227,11 +238,6 @@ export function ContentUploadForm() {
 
     setValue("file", vidFile, { shouldValidate: true, shouldDirty: true });
   };
-
-  /*  const { data: categoriesList, isLoading: categoriesLoading } = useQuery({
-    queryKey: ["categories"],
-    queryFn: fetchCategoris,
-  }); */
 
   return (
     <div>
@@ -321,45 +327,42 @@ export function ContentUploadForm() {
             {/* Genre */}
             <div>
               <Label className="custom-label mb-3">Genre</Label>
-              <Select value={genre}>
-                <SelectTrigger className="custom-content-input cursor-pointer">
-                  <SelectValue placeholder="Select genre" />
-                </SelectTrigger>
-                <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
-                  <SelectGroup className="space-y-2">
-                    <SelectItem
-                      value="comedy"
-                      className="selectOption !justify-start"
-                    >
-                      Comedy
-                    </SelectItem>
-                    <SelectItem
-                      value="drama"
-                      className="selectOption !justify-start"
-                    >
-                      Drama
-                    </SelectItem>
-                    <SelectItem
-                      value="action"
-                      className="selectOption !justify-start"
-                    >
-                      Action
-                    </SelectItem>
-                    <SelectItem
-                      value="horror"
-                      className="selectOption !justify-start"
-                    >
-                      Horror
-                    </SelectItem>
-                    <SelectItem
-                      value="romance"
-                      className="selectOption !justify-start"
-                    >
-                      Romance
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+
+              <Controller
+                name="genre"
+                control={control}
+                defaultValue=""
+                rules={{
+                  validate: (value) => value !== "" || "Genre is required",
+                }}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  >
+                    <SelectTrigger className="custom-content-input cursor-pointer">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
+                      <SelectGroup className="space-y-2">
+                        <SelectGroup className="space-y-2">
+                          {allGenre?.data.map((item: string, idx: number) => (
+                            <SelectItem
+                              key={idx}
+                              className="selectOption !justify-start"
+                              value={item}
+                            >
+                              {item}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+
               {errors.genre && (
                 <p className="error-msg">{errors.genre.message}</p>
               )}
@@ -410,7 +413,7 @@ export function ContentUploadForm() {
               <Label className="custom-label mb-3">Content Category</Label>
 
               <Controller
-                name="contentCategory"
+                name="category_id"
                 control={control}
                 defaultValue=""
                 rules={{
@@ -428,23 +431,25 @@ export function ContentUploadForm() {
                     </SelectTrigger>
                     <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
                       <SelectGroup className="space-y-2">
-                        {/*  {categoriesList?.data?.map((cat: any) => (
-                          <SelectItem
-                            key={cat.id}
-                            value={cat.id}
-                            className="selectOption !justify-start"
-                          >
-                            {cat.name}
-                          </SelectItem>
-                        ))} */}
+                        {allCategory?.data?.map(
+                          (item: Category, idx: number) => (
+                            <SelectItem
+                              key={idx}
+                              className="selectOption !justify-start"
+                              value={item?.id}
+                            >
+                              {item?.category_name}
+                            </SelectItem>
+                          )
+                        )}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
                 )}
               />
 
-              {errors.contentCategory && (
-                <p className="error-msg">{errors.contentCategory.message}</p>
+              {errors.category_id && (
+                <p className="error-msg">{errors.category_id.message}</p>
               )}
             </div>
 
@@ -529,13 +534,13 @@ export function ContentUploadForm() {
                 <input
                   type="file"
                   className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white  file:px-2"
-                  {...register("director_img", {
+                  {...register("director_thumbnail", {
                     required: "Director image is required",
                   })}
                 />
               </div>
-              {errors.director_img && (
-                <p className="error-msg">{errors.director_img.message}</p>
+              {errors.director_thumbnail && (
+                <p className="error-msg">{errors.director_thumbnail.message}</p>
               )}
             </div>
           </div>
@@ -598,142 +603,6 @@ export function ContentUploadForm() {
             <Plus className="w-5 h-5" />
             <span>Add Cast</span>
           </button>
-
-          {/* Series Mode */}
-          <div className="flex items-center gap-2">
-            <Checkbox
-              className="data-[state=checked]:bg-primary-color h-5 w-5 cursor-pointer"
-              id="series-mode"
-              onCheckedChange={() => setIsSeries(!isSeries)}
-            />
-            <Label
-              htmlFor="series-mode"
-              className="text-base font-medium cursor-pointer"
-            >
-              Enable Series Mode
-            </Label>
-          </div>
-
-          {/* Series Item */}
-          {isSeries &&
-            seriesFields.map((item, index) => (
-              <div
-                key={item.id}
-                className="grid md:grid-cols-2 xl:grid-cols-4 gap-4 relative border border-gray3-bg p-2"
-              >
-                <div className="md:col-span-2 xl:col-span-4">
-                  <Label className="custom-label mb-3">Series Name</Label>
-                  <Input
-                    placeholder="Series name"
-                    className="custom-content-input"
-                    {...register(`series.${index}.series_name`, {
-                      required: "Series name is required",
-                    })}
-                  />
-                  {errors?.series?.[index]?.series_name && (
-                    <p className="error-msg">
-                      {errors.series[index].series_name?.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label className="custom-label mb-3">Episode Name</Label>
-                  <Input
-                    placeholder="Episode name"
-                    className="custom-content-input"
-                    {...register(`series.${index}.episode_name`, {
-                      required: "Episode name is required",
-                    })}
-                  />
-                  {errors?.series?.[index]?.episode_name && (
-                    <p className="error-msg">
-                      {errors.series[index].episode_name?.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label className="custom-label mb-3">Episode Number</Label>
-                  <Input
-                    placeholder="Episode number"
-                    className="custom-content-input"
-                    {...register(`series.${index}.episode_number`, {
-                      required: "Episode number is required",
-                    })}
-                  />
-                  {errors?.series?.[index]?.episode_number && (
-                    <p className="error-msg">
-                      {errors.series[index].episode_number?.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label className="custom-label mb-3">Episode File</Label>
-                  <input
-                    type="file"
-                    className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white file:px-2"
-                    {...register(`series.${index}.episode_file`, {
-                      required: "Episode file is required",
-                    })}
-                  />
-                  {errors?.series?.[index]?.episode_file && (
-                    <p className="error-msg">
-                      {errors.series[index].episode_file?.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label className="custom-label mb-3">Episode Thumbnail</Label>
-                  <input
-                    type="file"
-                    className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white file:px-2"
-                    {...register(`series.${index}.episode_thumbnail`, {
-                      required: "Episode thumbnail is required",
-                    })}
-                  />
-                  {errors?.series?.[index]?.episode_thumbnail && (
-                    <p className="error-msg">
-                      {
-                        errors.series[index].episode_thumbnail
-                          ?.message as string
-                      }
-                    </p>
-                  )}
-                </div>
-
-                {index > 0 && (
-                  <button
-                    type="button"
-                    className="absolute top-2 right-2 cursor-pointer bg-secondary-color text-white p-1 rounded-sm"
-                    onClick={() => removeSeries(index)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            ))}
-
-          {isSeries && (
-            <button
-              type="button"
-              onClick={() =>
-                appendSeries({
-                  series_name: "",
-                  episode_name: "",
-                  episode_number: "",
-                  episode_file: null,
-                  episode_thumbnail: null,
-                })
-              }
-              className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer"
-            >
-              <Plus className="w-5 h-5" />
-              <span>Add New Episode</span>
-            </button>
-          )}
 
           {/* Trailer */}
           <div>
@@ -805,13 +674,13 @@ export function ContentUploadForm() {
                 </div>
                 <input
                   type="hidden"
-                  {...register("thumbnailImg", {
+                  {...register("movie_thumbnail", {
                     required: "Thumbnail image is required",
                   })}
                 />
-                {errors.thumbnailImg && (
+                {errors.movie_thumbnail && (
                   <p className="mt-1 text-sm text-red-500">
-                    {errors.thumbnailImg.message as string}
+                    {errors.movie_thumbnail.message as string}
                   </p>
                 )}
               </div>

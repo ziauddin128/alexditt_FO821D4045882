@@ -48,7 +48,7 @@ type Inputs = {
   }[];
 };
 
-export function ContentUploadForm() {
+export default function AddSeries() {
   const [dragActive, setDragActive] = useState(false);
   const [isSeries, setIsSeries] = useState(false);
   const queryClient = useQueryClient();
@@ -237,10 +237,10 @@ export function ContentUploadForm() {
     <div>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+        className="grid grid-cols-1  gap-6"
       >
         {/* Upload Area */}
-        <div className="space-y-6 h-fit">
+        {/* <div className="space-y-6 h-fit">
           <div
             className={`border border-dashed flex flex-col items-center justify-between h-fit rounded-lg p-8 text-center transition-colors bg-[#131824] ${
               dragActive
@@ -300,10 +300,10 @@ export function ContentUploadForm() {
               .
             </div>
           </div>
-        </div>
+        </div>*/}
 
         {/* Form Fields */}
-        <div className="space-y-6 md:col-span-2">
+        <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Title */}
             <div>

@@ -1,76 +1,60 @@
 "use client";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import { DataTable } from "@/components/reusable/data-table";
-import convertDate from "@/hooks/convertDate";
 import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import { Plus, ToggleRight } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import EyeIcon from "@/components/icons/EyeIcon";
 import EditIcon from "@/components/icons/EditIcon";
 import DeleteUser from "./DeleteUser";
+import LoadingSpinner from "@/app/(dashboard)/loading";
+import convertDateStr from "@/hooks/convertDateStr";
 
 interface UserDetail {
   id: number;
   name: string;
   email: string;
-  createdDate: string;
+  created_at: string;
   status: string;
 }
 
 export default function UserTable() {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [filter, setFilter] = useState<string>("all");
 
   // get data
-  /* const {data: userData, error,isLoading } = useQuery({
-      queryKey: ['userData'],
-      queryFn: async () =>
-      {
-        const res = await privateAxios.get("/admin/user/allusers");
-        return res.data;
-      }
-    }) */
+  const {
+    data: users,
+    error,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["users", page, pageSize, filter],
+    queryFn: async () => {
+      const res = await privateAxios.get("/admin/user", {
+        params: {
+          page,
+          perPage: pageSize,
+          ...(filter !== "all" && { status: filter }),
+        },
+      });
+      return res.data;
+    },
+    placeholderData: (prev) => prev,
+  });
 
-  const userData = [
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john@example.com",
-      createdDate: "2021-01-01",
-      status: "active",
-    },
-    {
-      id: 2,
-      name: "John Doe",
-      email: "john@example.com",
-      createdDate: "2021-01-01",
-      status: "deactive",
-    },
-    {
-      id: 3,
-      name: "John Doe",
-      email: "john@example.com",
-      createdDate: "2021-01-01",
-      status: "active",
-    },
-    {
-      id: 4,
-      name: "John Doe",
-      email: "john@example.com",
-      createdDate: "2021-01-01",
-      status: "active",
-    },
-  ];
+  const userData = users?.data || [];
 
   const columns: ColumnDef<UserDetail>[] = [
     {
@@ -92,10 +76,10 @@ export default function UserTable() {
       cell: ({ row }) => <span className="">{row.original.email}</span>,
     },
     {
-      accessorKey: "created_date",
+      accessorKey: "created_at",
       header: "Create Date",
       cell: ({ row }) => (
-        <span className="">{convertDate(row.original.createdDate)}</span>
+        <span className="">{convertDateStr(row.original.created_at)}</span>
       ),
     },
     {
@@ -103,7 +87,7 @@ export default function UserTable() {
       header: "Status",
       cell: ({ row }) => {
         {
-          return row.original.status == "active" ? (
+          return row.original.status == "ACTIVE" ? (
             <span className="text-success-color">
               {row.original.status.charAt(0).toUpperCase() +
                 row.original.status.slice(1)}
@@ -130,13 +114,13 @@ export default function UserTable() {
             <EyeIcon className="text-[#0CAF60] h-5 w-5" />
           </Link>
 
-          <Link
+          {/*   <Link
             href="#"
             className="bg-[#FFECD2] rounded-full h-9 w-9 flex items-center justify-center"
             title="Active/Deactive"
           >
             <ToggleRight className="text-[#FFA21D] h-5 w-5" />
-          </Link>
+          </Link> */}
 
           <Link
             href={`/dashboard/users/edit/${row.original.id}`}
@@ -146,31 +130,25 @@ export default function UserTable() {
             <EditIcon className="text-[#51CEDA] h-5 w-5" />
           </Link>
 
-          <DeleteUser id={row.original.id} />
+          <DeleteUser id={row.original.id} refetch={refetch} />
         </div>
       ),
     },
   ];
 
-  const isLoading = false;
-  const error = false;
-
-  const [page, setPage] = useState(1);
-  const pageSize = 10;
+  useEffect(() => {
+    if (users?.pagination) {
+      setPage(users.pagination.page);
+      setPageSize(users.pagination.perPage);
+    }
+  }, [users]);
 
   const filteredData =
     filter === "all"
       ? userData
-      : userData.filter((user) => user.status === filter);
+      : userData.filter((user: { status: string }) => user.status === filter);
 
-  const total = filteredData?.length;
-  const paginatedData = filteredData?.slice(
-    (page - 1) * pageSize,
-    page * pageSize
-  );
-
-  if (isLoading) return null;
-  if (error) return null;
+  const total = users?.pagination?.totalItems;
 
   return (
     <div>
@@ -200,25 +178,29 @@ export default function UserTable() {
                 <SelectItem className="selectOption" value="all">
                   All
                 </SelectItem>
-                <SelectItem className="selectOption" value="active">
-                  Active
+                <SelectItem className="selectOption" value="ACTIVE">
+                  ACTIVE
                 </SelectItem>
-                <SelectItem className="selectOption" value="deactive">
-                  Deactive
+                <SelectItem className="selectOption" value="INACTIVE">
+                  INACTIVE
                 </SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
         </div>
 
-        <DataTable
-          columns={columns}
-          data={paginatedData}
-          page={page}
-          pageSize={pageSize}
-          total={total}
-          onPageChange={setPage}
-        />
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <DataTable
+            columns={columns}
+            data={filteredData}
+            page={page}
+            pageSize={pageSize}
+            total={total}
+            onPageChange={setPage}
+          />
+        )}
       </div>
     </div>
   );

@@ -4,9 +4,8 @@ import PrivateRoute from "@/components/private/private";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
-    /*  <PrivateRoute>
+    <PrivateRoute>
       <ClientLayout>{children}</ClientLayout>
-    </PrivateRoute> */
-    <ClientLayout>{children}</ClientLayout>
+    </PrivateRoute>
   );
 }

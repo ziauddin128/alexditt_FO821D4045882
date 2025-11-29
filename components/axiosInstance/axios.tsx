@@ -2,8 +2,7 @@
 import axios from "axios";
 import { storage } from "../../lib/storage";
 
-const apiBaseURL =
-  process.env.NEXT_PUBLIC_API_BASE_URL;
+const apiBaseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Public Axios instance (no auth)
 export const publicAxios = axios.create({
@@ -43,6 +42,22 @@ privateAxios.interceptors.response.use(
     if (error.response?.status === 401) {
       // storage.removeItem('authToken');
       //window.location.href = '/auth/login';
+
+      
+      // If token expired
+      /*  try {
+        const res = await publicAxios.post("/auth/refresh-token");
+
+        const newAccessToken = res.data.accessToken;
+        storage.setItem("authToken", newAccessToken);
+
+        error.config.headers.Authorization = `Bearer ${newAccessToken}`;
+
+        return privateAxios(error.config);
+      } catch (refreshError) {
+        storage.removeItem("authToken");
+        window.location.href = "/auth/login";
+      } */
     }
     return Promise.reject(error);
   }

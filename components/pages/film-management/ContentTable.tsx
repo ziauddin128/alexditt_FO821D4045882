@@ -1,9 +1,8 @@
 "use client";
-import DeleteIcon from "@/components/icons/DeleteIcon";
 import EditIcon from "@/components/icons/EditIcon";
 import { DataTable } from "@/components/reusable/data-table";
 import { ColumnDef } from "@tanstack/react-table";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -17,19 +16,8 @@ import { privateAxios } from "@/components/axiosInstance/axios";
 import { useQuery } from "@tanstack/react-query";
 import DeleteContent from "./DeleteContent";
 import Link from "next/link";
-
-interface VideoDetail {
-  id: number;
-  thumbnail: string;
-  title: string;
-  genre: string;
-  category: string;
-  type: string;
-  duration: string;
-  status: string;
-  uploaded: string;
-  views: string;
-}
+import LoadingSpinner from "@/app/(dashboard)/loading";
+import convertDateStr from "@/hooks/convertDateStr";
 
 interface Content {
   id: string | number;
@@ -50,105 +38,44 @@ interface Content {
 
 interface Category {
   id: string;
-  name: string;
+  category_name: string;
 }
 
-// fetch content
-/* const fetchContent = async () => {
-  const res = await privateAxios.get("/contents/allContents");
-  return res.data;
-}; */
-
 export default function ContentTable() {
-  /* const { data, isLoading, error } = useQuery({
-    queryKey: ["contents"],
-    queryFn: fetchContent,
+  // Filter State
+  const [selectedGenre, setSelectedGenre] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
+
+  // All Content
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: [
+      "contents",
+      page,
+      pageSize,
+      selectedGenre,
+      selectedCategory,
+      selectedStatus,
+    ],
+    queryFn: async () => {
+      const response = await privateAxios.get("/dashborad/content-list", {
+        params: {
+          page,
+          perPage: pageSize,
+          ...(selectedGenre && { genres: selectedGenre }),
+          ...(selectedCategory && { category: selectedCategory }),
+          ...(selectedStatus !== "ALL" && { status: selectedStatus }),
+        },
+      });
+      return response.data;
+    },
+    placeholderData: (prev) => prev,
   });
- */
-  // console.log(data);
 
-  const videoDetailsList: Content[] = [
-    {
-      id: 1,
-      title: "Close Encounters of the Third Kind",
-      genre: "Action",
-      category: "Web series",
-      type: "HD",
-      duration: "2h 28m",
-      status: "Published",
-      uploaded: "20-04-25",
-      thumbnail: "/images/thumbnail.jpeg",
-    },
-    {
-      id: 2,
-      title: "Close Encounters of the Third Kind",
-      genre: "Action",
-      category: "Web series",
-      type: "HD",
-      duration: "2h 28m",
-      status: "Published",
-      uploaded: "20-04-25",
-      thumbnail: "/images/thumbnail.jpeg",
-    },
-    {
-      id: 3,
-      title: "Close Encounters of the Third Kind",
-      genre: "Action",
-      category: "Web series",
-      type: "HD",
-      duration: "2h 28m",
-      status: "Published",
-      uploaded: "20-04-25",
-      thumbnail: "/images/thumbnail.jpeg",
-    },
-    {
-      id: 4,
-      title: "Close Encounters of the Third Kind",
-      genre: "Action",
-      category: "Web series",
-      type: "HD",
-      duration: "2h 28m",
-      status: "Published",
-      uploaded: "20-04-25",
-      thumbnail: "/images/thumbnail.jpeg",
-    },
-    {
-      id: 5,
-      title: "Close Encounters of the Third Kind",
-      genre: "Action",
-      category: "Web series",
-      type: "HD",
-      duration: "2h 28m",
-      status: "Published",
-      uploaded: "20-04-25",
-      thumbnail: "/images/thumbnail.jpeg",
-    },
-    {
-      id: 6,
-      title: "Close Encounters of the Third Kind",
-      genre: "Action",
-      category: "Web series",
-      type: "HD",
-      duration: "2h 28m",
-      status: "Published",
-      uploaded: "20-04-25",
-      thumbnail: "/images/thumbnail.jpeg",
-    },
-    {
-      id: 7,
-      title: "Close Encounters of the Third Kind",
-      genre: "Action",
-      category: "Web series",
-      type: "HD",
-      duration: "2h 28m",
-      status: "Published",
-      uploaded: "20-04-25",
-      thumbnail: "/images/thumbnail.jpeg",
-    },
-  ];
-
-  const isLoading = false;
-  const error = false;
+  const videoDetailsList = data?.data || [];
 
   const columns: ColumnDef<Content>[] = [
     {
@@ -175,13 +102,7 @@ export default function ContentTable() {
     {
       accessorKey: "category",
       header: "Category",
-      // cell: ({ row }) => <span className="">{row.original.category.name}</span>,
       cell: ({ row }) => <span className="">{row.original.category}</span>,
-    },
-    {
-      accessorKey: "type",
-      header: "Type",
-      cell: ({ row }) => <span className="">{row.original.type}</span>,
     },
     {
       accessorKey: "duration",
@@ -196,7 +117,9 @@ export default function ContentTable() {
     {
       accessorKey: "uploaded",
       header: "Uploaded",
-      cell: ({ row }) => <span className="">{row.original.uploaded}</span>,
+      cell: ({ row }) => (
+        <span className="">{convertDateStr(row.original.uploaded)}</span>
+      ),
     },
     {
       id: "actions",
@@ -215,72 +138,98 @@ export default function ContentTable() {
     },
   ];
 
-  const [page, setPage] = useState(1);
-  const pageSize = 5;
+  useEffect(() => {
+    if (data?.pagination) {
+      setPage(data.pagination.page);
+      setPageSize(data.pagination.perPage);
+    }
+  }, [data]);
 
-  const total = videoDetailsList?.length;
-  const paginatedData = videoDetailsList?.slice(
-    (page - 1) * pageSize,
-    page * pageSize
-  );
+  const total = data?.pagination?.totalItems;
 
-  /*   const total = data?.length;
-  const paginatedData = data?.slice((page - 1) * pageSize, page * pageSize); */
+  // Genre
+  const { data: genre, isLoading: isGenreLoading } = useQuery({
+    queryKey: ["genre"],
+    queryFn: async () => {
+      const response = await privateAxios.get("/dashborad/genre-list");
+      return response.data;
+    },
+  });
 
-  if (isLoading) return <p>Loading...</p>;
-  if (error) return <p>error</p>;
+  // Category
+  const { data: category, isLoading: isCategoryLoading } = useQuery({
+    queryKey: ["category"],
+    queryFn: async () => {
+      const response = await privateAxios.get("/dashborad/category-list");
+      return response.data;
+    },
+  });
 
   return (
     <>
-      {/* filter */}
+      {/* Filter */}
       <div className="mb-4 flex flex-wrap gap-4">
-        <Select>
+        {/* Genre */}
+        <Select
+          value={selectedGenre}
+          onValueChange={(value) => setSelectedGenre(value)}
+        >
           <SelectTrigger className="flex items-center gap-2 rounded border border-gray-black-50 bg-dark-bg px-5 py-2.5 !text-white cursor-pointer outline-none shadow-none focus-visible:ring-0 focus-visible:border-border-gray-black-50">
             <SelectValue placeholder="Genre" />
           </SelectTrigger>
           <SelectContent className="border border-gray3-bg bg-dark-bg rounded">
             <SelectGroup className="space-y-2">
-              <SelectItem className="selectOption" value="Action">
-                Action
-              </SelectItem>
-              <SelectItem className="selectOption" value="Comedy">
-                Comedy
-              </SelectItem>
+              {genre?.data.map((item: string, idx: number) => (
+                <SelectItem key={idx} className="selectOption" value={item}>
+                  {item}
+                </SelectItem>
+              ))}
             </SelectGroup>
           </SelectContent>
         </Select>
 
-        {/* 2nd */}
-        <Select>
+        {/* Category */}
+        <Select
+          value={selectedCategory}
+          onValueChange={(value) => setSelectedCategory(value)}
+        >
           <SelectTrigger className="flex items-center gap-2 rounded border border-gray-black-50 bg-dark-bg px-5 py-2.5 !text-white cursor-pointer outline-none shadow-none focus-visible:ring-0 focus-visible:border-border-gray-black-50">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
           <SelectContent className="border border-gray3-bg bg-dark-bg rounded">
             <SelectGroup className="space-y-2 ">
-              <SelectItem className="selectOption" value="action">
-                Action
-              </SelectItem>
-              <SelectItem className="selectOption" value="comedy">
-                Comedy
-              </SelectItem>
+              {category?.data?.map((item: Category, idx: number) => (
+                <SelectItem key={idx} className="selectOption" value={item?.id}>
+                  {item?.category_name}
+                </SelectItem>
+              ))}
             </SelectGroup>
           </SelectContent>
         </Select>
 
-        {/* 3rd */}
-        <Select>
+        {/* Status */}
+        <Select
+          value={selectedStatus}
+          onValueChange={(value) => setSelectedStatus(value)}
+        >
           <SelectTrigger className="flex items-center gap-2 rounded border border-gray-black-50 bg-dark-bg px-5 py-2.5 !text-white cursor-pointer outline-none shadow-none focus-visible:ring-0 focus-visible:border-border-gray-black-50">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent className="border border-gray3-bg bg-dark-bg rounded">
             <SelectGroup className="space-y-2">
-              <SelectItem className="selectOption" value="published">
-                Published
+              <SelectItem className="selectOption" value="ALL">
+                All
               </SelectItem>
-              <SelectItem className="selectOption" value="live">
+              <SelectItem className="selectOption" value="LIVE">
                 Live
               </SelectItem>
-              <SelectItem className="selectOption" value="draft">
+              <SelectItem className="selectOption" value="PUBLISHED">
+                Published
+              </SelectItem>
+              <SelectItem className="selectOption" value="UNPUBLISHED">
+                Unpublished
+              </SelectItem>
+              <SelectItem className="selectOption" value="DRAFT">
                 Draft
               </SelectItem>
             </SelectGroup>
@@ -289,16 +238,22 @@ export default function ContentTable() {
       </div>
 
       {/* table */}
-      <div>
-        <DataTable
-          columns={columns}
-          data={paginatedData}
-          page={page}
-          pageSize={pageSize}
-          total={total}
-          onPageChange={setPage}
-        />
-      </div>
+      <>
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <div>
+            <DataTable
+              columns={columns}
+              data={videoDetailsList}
+              page={page}
+              pageSize={pageSize}
+              total={total}
+              onPageChange={setPage}
+            />
+          </div>
+        )}
+      </>
     </>
   );
 }

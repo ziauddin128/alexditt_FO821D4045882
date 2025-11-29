@@ -4,7 +4,6 @@ import Image from "next/image";
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 
 import {
   Select,
@@ -14,30 +13,48 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAuth } from "@/provider/AuthProvider";
 
 import { Controller, useForm } from "react-hook-form";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import { toast } from "sonner";
-import Calendar from "@/components/icons/Calendar";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import LoadingSpinner from "@/app/(dashboard)/loading";
 
 interface FormData {
   name: string;
   email: string;
-  date_of_birth: string;
-  Address: string;
   phone_number: string;
-  country: string | null;
-  postal_code: string;
   description: string;
   gender: string;
 }
 
-export default function EditUser({ params }: { params: any }) {
-  const { user } = useAuth();
+export default function EditUser({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = React.use(params);
 
-  const [image, setImage] = useState<File | undefined>();
+  const router = useRouter();
+
+  // Fetch Data
+  const { data: userDet, isLoading } = useQuery({
+    queryKey: ["userDet", id],
+    queryFn: async () => {
+      const res = await privateAxios.get(`/admin/user/user-view/${id}`);
+      return res.data;
+    },
+  });
+
+  if (userDet?.data === null) {
+    router.push("/dashboard/users");
+  }
+
+  const userDetails = userDet?.data || [];
+
   // Image Preview Show
+  const [image, setImage] = useState<File | undefined>();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   // Handle file selection and show the image preview
@@ -45,7 +62,6 @@ export default function EditUser({ params }: { params: any }) {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      // Read the file as a data URL (base64 string)
       reader.onloadend = () => {
         setImagePreview(reader.result as string); // Update image preview state
       };
@@ -61,32 +77,21 @@ export default function EditUser({ params }: { params: any }) {
   useEffect(() => {
     const updateImage = async () => {
       const data = {
-        profilePicture: image,
+        avater: image,
       };
 
       try {
-        const response = await privateAxios.put("/users/update-image", data, {
+        const response = await privateAxios.patch(`/admin/user/${id}`, data, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
         if (response.data) {
-          toast.success("Image updated successfully", {
-            position: "top-right",
-            style: {
-              backgroundColor: "#4CAF50",
-              color: "#fff",
-            },
-          });
+          toast.success(response?.data?.message);
         }
-      } catch (errorData: any) {
-        toast.error("Image updated failed", {
-          position: "top-right",
-          style: {
-            backgroundColor: "#f44336",
-            color: "#fff",
-          },
-        });
+      } catch (error: any) {
+        const errorMessage = error?.response?.data?.message?.message;
+        toast.error(errorMessage);
       }
     };
 
@@ -95,12 +100,7 @@ export default function EditUser({ params }: { params: any }) {
     }
   }, [image]);
 
-  // Handle delete action (reset the image preview)
-  /*  const handleDelete = () => {
-     setImagePreview(null);  // Reset the preview image
-     setImage(undefined);
-   }; */
-
+  // Form Submission
   const {
     register,
     formState: { errors },
@@ -110,236 +110,192 @@ export default function EditUser({ params }: { params: any }) {
   } = useForm<FormData>();
 
   const onSubmit = async (data: FormData) => {
-    console.log(data);
-
-    /* try {
-      const date_of_birth = new Date(data.date_of_birth).toISOString();
-      data.date_of_birth = date_of_birth;
-
-      const response = await privateAxios.put(
-        "/users/update-user-details",
-        data
-      );
+    try {
+      const response = await privateAxios.patch(`/admin/user/${id}`, data);
       if (response.data) {
-        toast.success("Data updated successfully", {
-          position: "top-right",
-          style: {
-            backgroundColor: "#4CAF50",
-            color: "#fff",
-          },
-        });
+        toast.success(response?.data?.message);
       }
-    } catch (errorData: any) {
-      toast.error("Data updated failed", {
-        position: "top-right",
-        style: {
-          backgroundColor: "#f44336",
-          color: "#fff",
-        },
-      });
-    } */
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message?.message;
+      toast.error(errorMessage);
+    }
   };
-
-  // Convert dob in normal
-  const formattedDate = user?.date_of_birth
-    ? new Date(user.date_of_birth).toLocaleDateString("en-CA")
-    : "";
 
   return (
     <>
-      <h4 className="text-xl md:text-2xl font-medium mb-4">
-        Personal Info Edit
-      </h4>
-
-      {/* Image Upload */}
-      <div className="flex flex-wrap items-center gap-2 sm:gap-5 ">
+      {isLoading ? (
+        <LoadingSpinner />
+      ) : (
         <div>
-          <div className="h-[100px] w-[100px]">
-            {imagePreview ? (
-              <Image
-                src={imagePreview}
-                alt="Preview"
-                className="h-full w-full object-cover rounded-full"
-                width={100}
-                height={100}
-              />
-            ) : user?.imageUrl ? (
-              <Image
-                src={user.imageUrl}
-                alt="Admin"
-                className="h-[100px] w-[100px]"
-                width={100}
-                height={100}
-              />
-            ) : (
-              <Image
-                src="/images/user.svg"
-                alt="Admin"
-                className="h-[100px] w-[100px]"
-                width={100}
-                height={100}
-              />
-            )}
-          </div>
-        </div>
-        <label
-          htmlFor="profileImage"
-          className="cursor-pointer py-[14px] px-5 border border-white rounded-[100px]"
-        >
-          <input
-            type="file"
-            hidden
-            id="profileImage"
-            accept="image/*"
-            onChange={handleImageChange}
-          />
-          <span className="text-sm font-medium">Upload New Picture</span>
-        </label>
-      </div>
+          <h4 className="text-xl md:text-2xl font-medium mb-4">
+            Personal Info Edit
+          </h4>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        {/* Personal Details Form */}
-        <div className="bg-[#131824] p-4 rounded-[8px] mt-4">
-          <div className="grid sm:grid-cols-2 gap-4">
-            {/* Name */}
-            <div className="mb-3">
-              <Label className="custom-label mb-3">Name</Label>
-              <Input
-                defaultValue={user?.name}
-                {...register("name", { required: "Name is required" })}
-                className="custom-input"
-                placeholder="Cameron Williamson"
-              />
-
-              {errors.name && (
-                <p className="error-msg">{errors.name.message}</p>
-              )}
-            </div>
-
-            {/* Email */}
-            <div className="mb-3">
-              <Label className="custom-label mb-3">Email</Label>
-              <Input
-                defaultValue={user?.email}
-                {...register("email", {
-                  required: "Email is required",
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "Please enter a valid email address",
-                  },
-                })}
-                className="custom-input "
-                placeholder="cameron.graham@example.com"
-              />
-
-              {errors.email && (
-                <p className="error-msg">{errors.email.message}</p>
-              )}
-            </div>
-
-            {/* Date of Birth */}
-            <div className="mb-3">
-              <Label className="custom-label mb-3">Date of Birth</Label>
-              <div className="relative">
-                <Input
-                  {...register("date_of_birth")}
-                  type="text"
-                  placeholder="1 Feb, 1990"
-                  onFocus={(e) => (e.target.type = "date")}
-                  onBlur={(e) => {
-                    if (!e.target.value) e.target.type = "text";
-                  }}
-                  defaultValue={formattedDate}
-                  className="custom-input"
-                  id="datepicker"
-                />
-
-                {/* Calendar Icon */}
-                <Calendar className="absolute right-3 top-1/4  w-5 h-5 text-gray-400 pointer-events-none" />
+          {/* Image Upload */}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-5 ">
+            <div>
+              <div className="h-[100px] w-[100px]">
+                {imagePreview ? (
+                  <Image
+                    src={imagePreview}
+                    alt="Preview"
+                    className="h-full w-full object-cover rounded-full"
+                    width={100}
+                    height={100}
+                  />
+                ) : userDetails?.avatar ? (
+                  <>
+                    {/* Future ey ata uncomment kore dile real image asbe */}
+                    {/* <Image
+                      src={userDetails.avatar}
+                      alt="Admin"
+                      className="h-[100px] w-[100px]"
+                      width={100}
+                      height={100}
+                    /> */}
+                    <Image
+                      src="/images/user.svg"
+                      alt="Admin"
+                      className="h-[100px] w-[100px]"
+                      width={100}
+                      height={100}
+                    />
+                  </>
+                ) : (
+                  <Image
+                    src="/images/user.svg"
+                    alt="Admin"
+                    className="h-[100px] w-[100px]"
+                    width={100}
+                    height={100}
+                  />
+                )}
               </div>
             </div>
-
-            {/* Gender */}
-            <div className="mb-3">
-              <Label className="custom-label mb-3">Gender</Label>
-              <Controller
-                name="gender"
-                control={control}
-                defaultValue=""
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
-                    <SelectTrigger className="custom-input cursor-pointer">
-                      <SelectValue placeholder="Select Gender" />
-                    </SelectTrigger>
-                    <SelectContent className="border border-gray3-bg bg-dark-bg rounded">
-                      <SelectGroup className="space-y-2">
-                        <SelectItem
-                          value="Male"
-                          className="selectOption !justify-start"
-                        >
-                          Male
-                        </SelectItem>
-                        <SelectItem
-                          value="Female"
-                          className="selectOption !justify-start"
-                        >
-                          Female
-                        </SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                )}
+            <label
+              htmlFor="profileImage"
+              className="cursor-pointer py-[14px] px-5 border border-white rounded-[100px]"
+            >
+              <input
+                type="file"
+                hidden
+                id="profileImage"
+                accept="image/*"
+                onChange={handleImageChange}
               />
-            </div>
+              <span className="text-sm font-medium">Upload New Picture</span>
+            </label>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4 mt-4">
-            {/* address */}
-            <div className="mb-3">
-              <Label className="custom-label mb-3">Address</Label>
-              <Input
-                {...register("Address")}
-                defaultValue={user?.Address}
-                className="custom-input"
-                placeholder="Address"
-              />
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="bg-[#131824] p-4 rounded-[8px] mt-4">
+              <div className="grid sm:grid-cols-2 gap-4">
+                {/* Name */}
+                <div className="mb-3">
+                  <Label className="custom-label mb-3">Name</Label>
+                  <Input
+                    defaultValue={userDetails?.name}
+                    {...register("name", { required: "Name is required" })}
+                    className="custom-input"
+                    placeholder="Name"
+                  />
+
+                  {errors.name && (
+                    <p className="error-msg">{errors.name.message}</p>
+                  )}
+                </div>
+
+                {/* Email */}
+                <div className="mb-3">
+                  <Label className="custom-label mb-3">Email</Label>
+                  <Input
+                    defaultValue={userDetails?.email}
+                    {...register("email", {
+                      required: "Email is required",
+                      pattern: {
+                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                        message: "Please enter a valid email address",
+                      },
+                    })}
+                    className="custom-input "
+                    placeholder="Email"
+                  />
+
+                  {errors.email && (
+                    <p className="error-msg">{errors.email.message}</p>
+                  )}
+                </div>
+
+                {/* Phone number */}
+                <div className="mb-3 sm:col-span-2">
+                  <Label className="custom-label mb-3">Phone</Label>
+                  <Input
+                    defaultValue={userDetails?.phone_number}
+                    {...register("phone_number")}
+                    className="custom-input"
+                    placeholder="Phone Number"
+                  />
+                </div>
+
+                {/* Gender */}
+                <div className="mb-3">
+                  <Label className="custom-label mb-3">Gender</Label>
+                  <Controller
+                    name="gender"
+                    control={control}
+                    defaultValue={userDetails?.gender}
+                    render={({ field }) => (
+                      <Select
+                        {...field}
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="custom-input cursor-pointer">
+                          <SelectValue placeholder="Select Gender" />
+                        </SelectTrigger>
+                        <SelectContent className="border border-gray3-bg bg-dark-bg rounded">
+                          <SelectGroup className="space-y-2">
+                            <SelectItem
+                              value="Male"
+                              className="selectOption !justify-start"
+                            >
+                              Male
+                            </SelectItem>
+                            <SelectItem
+                              value="Female"
+                              className="selectOption !justify-start"
+                            >
+                              Female
+                            </SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+
+                {/* Description */}
+                <div className="mb-3">
+                  <Label className="custom-label mb-3">Description</Label>
+                  <Input
+                    {...register("description")}
+                    defaultValue={userDetails?.description}
+                    className="custom-input"
+                    placeholder="Description"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="mt-6 bg-primary-color rounded-full text-white py-[14px] max-w-[400px] w-full text-base font-medium cursor-pointer block mx-auto border border-white"
+              >
+                Update
+              </button>
             </div>
-
-            {/* Phone */}
-            <div className="mb-3">
-              <Label className="custom-label mb-3">Phone</Label>
-              <Input
-                {...register("phone_number")}
-                defaultValue={user?.phone_number}
-                className="custom-input"
-                placeholder="(704) 555-0127"
-              />
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="mt-4 mb-6">
-            <Label className="custom-label mb-3">Description</Label>
-            <Textarea
-              {...register("description")}
-              defaultValue={user?.bio}
-              className="!h-[100px] custom-input"
-              placeholder="Description"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="bg-primary-color rounded-full text-white py-[14px] max-w-[400px] w-full text-base font-medium cursor-pointer block mx-auto border border-white"
-          >
-            Update
-          </button>
+          </form>
         </div>
-      </form>
+      )}
     </>
   );
 }

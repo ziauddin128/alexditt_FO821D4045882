@@ -2,7 +2,6 @@
 
 import { publicAxios } from "@/components/axiosInstance/axios";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { storage } from "@/lib/storage";
 import Image from "next/image";
 import Link from "next/link";
@@ -77,7 +76,6 @@ export default function ForgotPassword() {
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-12">
-            {/* <Label className="font-base font-medium mb-3">Email</Label> */}
             <Input
               {...register("email", {
                 required: "Email is required",
@@ -97,14 +95,12 @@ export default function ForgotPassword() {
             )}
           </div>
 
-          <Link href="/auth/verify-code">
-            <button
-              type="submit"
-              className="h-11 w-full rounded bg-primary-color font-base font-medium cursor-pointer"
-            >
-              Send Email
-            </button>
-          </Link>
+          <button
+            type="submit"
+            className="h-11 w-full rounded bg-primary-color font-base font-medium cursor-pointer"
+          >
+            Send Email
+          </button>
         </form>
       </div>
       <div className="hidden lg:block">

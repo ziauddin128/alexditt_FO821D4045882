@@ -1,16 +1,13 @@
 "use client";
 
-import { publicAxios } from "@/components/axiosInstance/axios";
 import EyeIcon from "@/components/icons/EyeIcon";
 import EyeSlash from "@/components/icons/EyeSlash";
-import SocialBtn from "@/components/pages/auth/SocialBtn";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { storage } from "@/lib/storage";
 import { useAuth } from "@/provider/AuthProvider";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState, Suspense } from "react";
 import { Controller, useForm } from "react-hook-form";
 
@@ -33,7 +30,6 @@ function getCookie(name: string): string {
 function SignInContent() {
   const { error, login, user, isLoading } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   // if user already login redirect to dashboard
   if (!isLoading && user) {
@@ -41,7 +37,6 @@ function SignInContent() {
   }
 
   const [type, setType] = React.useState<"password" | "text">("password");
-
   const [savedEmail, setSavedEmail] = useState("");
   const [savedPassword, setSavedPassword] = useState("");
 
@@ -67,9 +62,11 @@ function SignInContent() {
     }
   }, [setValue]);
 
+  // Sign in form submission
   const onSubmit = async (data: formData) => {
     try {
       const response = await login(data);
+
       if (response !== undefined) {
         router.push("/dashboard");
         const { email, password, remember_me } = data;
@@ -214,14 +211,12 @@ function SignInContent() {
             {error && <p className="error-msg text-center">{error}</p>}
           </div>
 
-          <Link href="/dashboard">
-            <button
-              type="submit"
-              className="h-11 w-full rounded bg-primary-color font-base font-medium cursor-pointer"
-            >
-              Log In
-            </button>
-          </Link>
+          <button
+            type="submit"
+            className="h-11 w-full rounded bg-primary-color font-base font-medium cursor-pointer"
+          >
+            Log In
+          </button>
         </form>
       </div>
       <div className="hidden lg:block">
