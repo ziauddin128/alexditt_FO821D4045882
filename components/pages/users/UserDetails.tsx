@@ -5,7 +5,6 @@ import { useState } from "react";
 import PersonalInfo from "@/components/pages/users/PersonalInfo";
 import Subscription from "@/components/pages/users/Subscription";
 import Payments from "@/components/pages/users/Payments";
-import UserDetTop from "@/components/pages/users/UserDetTop";
 import { useQuery } from "@tanstack/react-query";
 import { privateAxios } from "@/components/axiosInstance/axios";
 
@@ -42,8 +41,6 @@ export default function UserDetails({ params }: { params: any }) {
 
   return (
     <>
-      <UserDetTop id={id} userDet={userDet} />
-
       <div className="my-4">
         <Tabs defaultValue="personal-info" className="usersTab">
           <TabsList className="bg-transparent w-full sm:w-fit overflow-x-auto tabs_wrapper">
@@ -66,7 +63,7 @@ export default function UserDetails({ params }: { params: any }) {
 
           <div className="mt-2">
             <TabsContent value="personal-info" className="space-y-4">
-              <PersonalInfo userDet={userDet} />
+              {/* <PersonalInfo userDet={userDet} /> */}
             </TabsContent>
             <TabsContent value="subscription" className="space-y-4">
               <Subscription />
