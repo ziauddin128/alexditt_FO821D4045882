@@ -1,5 +1,6 @@
 import React from "react";
+import AddMovie from "@/components/pages/film-management/movie/AddMovie";
 
 export default function MoviePage() {
-  return <div>MoviePage</div>;
+  return <AddMovie />;
 }
