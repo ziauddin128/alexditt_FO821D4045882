@@ -199,12 +199,12 @@ function SignInContent() {
                 </Label>
               </div>
             </div>
-            <Link
+            {/* <Link
               href="/auth/forgot-password"
               className="text-sm font-[300] underline"
             >
               Forgot Password?
-            </Link>
+            </Link> */}
           </div>
 
           <div className="mb-6">
