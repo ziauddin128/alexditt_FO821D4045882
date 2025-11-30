@@ -33,12 +33,14 @@ interface Category {
 type Inputs = {
   title: string;
   genre: string;
+  release_date: string;
+  duration: string;
   kids_mode: boolean;
   description: string;
   category_id: string;
   contentType: string;
   director_name: string;
-  director_thumbnail: string;
+  director_thumbnail: File | null;
   file: File | null;
   movie_thumbnail: File | null;
   trailer: File | null;
@@ -85,6 +87,7 @@ export default function AddMovie() {
       file: null,
       movie_thumbnail: null,
       trailer: null,
+      director_thumbnail: null,
       casts: [{ cast: "", cast_img: null }],
     },
   });
@@ -102,6 +105,7 @@ export default function AddMovie() {
   const category_id = watch("category_id");
   const contentType = watch("contentType");
   const kids_mode = watch("kids_mode");
+  const director_thumbnail = watch("director_thumbnail");
   const trailer = watch("trailer");
   const thumbnail = watch("movie_thumbnail");
   const vidFile = watch("file");
@@ -128,7 +132,10 @@ export default function AddMovie() {
         //formData.append("type", data.contentType);
 
         formData.append("director_name", data.director_name);
-        formData.append("director_thumbnail", data.director_thumbnail);
+
+        if (data.director_thumbnail) {
+          formData.append("director_thumbnail", data.director_thumbnail);
+        }
 
         console.log("FormData Contents:");
         formData.forEach((value, key) => {
@@ -153,48 +160,81 @@ export default function AddMovie() {
     },
   });
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
     console.log("All File Data", data);
 
-    return;
+    try {
+      const formData = new FormData();
 
-    // New approach for get cast
-    /* const formData = new FormData();
-    data.casts.forEach((cast: any, i: number) => {
-      formData.append(`casts[${i}][cast]`, cast.cast);
-      formData.append(`casts[${i}][cast_img]`, cast.cast_img[0]);
-    });
+      // Append Movie, Thumbnail, Trailer File
+      if (data.file) formData.append("video", data.file);
+      if (data.movie_thumbnail)
+        formData.append("movie_thumbnail", data.movie_thumbnail);
+      if (data.trailer) formData.append("movie_trailer", data.trailer);
 
-    data.series.forEach((tv: any, i: number) => {
-      formData.append(`series[${i}][series_name]`, tv.series_name);
-      formData.append(`series[${i}][episode_name]`, tv.episode_name);
-      formData.append(`series[${i}][episode_number]`, tv.episode_number);
-      formData.append(`series[${i}][episode_file]`, tv.episode_file[0]);
-      formData.append(
-        `series[${i}][episode_thumbnail]`,
-        tv.episode_thumbnail[0]
-      );
-    });
+      // Form Data
+      formData.append("title", data.title);
+      formData.append("genre", data.genre);
 
-    for (let [key, value] of formData.entries()) {
-      if (value instanceof File) {
-        console.log(key, value); // Full File object
-      } else {
-        console.log(key, value); // Normal string
+      const releaseDate = new Date(data.release_date);
+      formData.append("release_date", releaseDate.toISOString());
+
+      formData.append("duration", data.duration);
+      formData.append("kids_mode", data.kids_mode ? "true" : "false");
+      formData.append("description", data.description);
+      formData.append("category_id", data.category_id);
+
+      //formData.append("type", data.contentType);
+
+      formData.append("director_name", data.director_name);
+
+      if (data.director_thumbnail) {
+        formData.append("director_thumbnail", data.director_thumbnail);
       }
-    } */
 
-    uploadContent.mutate(data, {
-      onSuccess: () => {
-        console.log("UPdate done");
-        // toast.success("Content Updated Successfully!");
-        // Optional: Reset form or redirect
-      },
-      onError: (error: Error) => {
-        // toast.error(error.message || "Failed to upload content");
-        console.log("Error form update content");
-      },
-    });
+      // Casts
+      const castArray = data.casts.map((cast: any, i: number) => ({
+        key: `cast_member_${i}`,
+        name: cast.cast,
+      }));
+
+      formData.append("cast", JSON.stringify(castArray));
+
+      data.casts.forEach((cast, i) => {
+        if (cast.cast_img instanceof File) {
+          formData.append(`cast_member_${i}`, cast.cast_img);
+        }
+      });
+
+      console.log("FormData Contents:");
+
+      formData.forEach((value, key) => {
+        if (value instanceof File) {
+          console.log(
+            `${key}: name=${value.name}, size=${value.size} bytes, type=${value.type}`
+          );
+        } else {
+          console.log(`${key}: ${value}`);
+        }
+      });
+
+      // return;
+
+      const response = await privateAxios.post(
+        `/admin/movie/create`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log(response.data);
+    } catch (error: any) {
+      const message = error?.response?.data?.message || "Something went wrong!";
+      throw new Error(message);
+    }
   };
 
   // Drag handlers
@@ -219,6 +259,7 @@ export default function AddMovie() {
   };
 
   // File picker handler
+
   const handleFilePick: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const file = e.target.files?.[0] ?? null;
 
@@ -365,6 +406,40 @@ export default function AddMovie() {
 
               {errors.genre && (
                 <p className="error-msg">{errors.genre.message}</p>
+              )}
+            </div>
+
+            {/* Release Date */}
+            <div>
+              <Label className="custom-label mb-3">Release Date</Label>
+              <div className="relative">
+                <Input
+                  type="date"
+                  placeholder="Type your movie name"
+                  className="custom-content-input white-calendar"
+                  {...register("release_date", {
+                    required: "Release Date is required",
+                  })}
+                />
+              </div>
+
+              {errors.release_date && (
+                <p className="error-msg">{errors.release_date.message}</p>
+              )}
+            </div>
+
+            {/* Duration */}
+            <div>
+              <Label className="custom-label mb-3">Duration</Label>
+              <Input
+                placeholder="Ex: 2hour 30min"
+                className="custom-content-input"
+                {...register("duration", {
+                  required: "Duration Date is required",
+                })}
+              />
+              {errors.duration && (
+                <p className="error-msg">{errors.duration.message}</p>
               )}
             </div>
           </div>
@@ -530,18 +605,27 @@ export default function AddMovie() {
 
             <div>
               <Label className="custom-label mb-3">Director Image</Label>
-              <div>
-                <input
-                  type="file"
-                  className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white  file:px-2"
-                  {...register("director_thumbnail", {
-                    required: "Director image is required",
-                  })}
-                />
-              </div>
-              {errors.director_thumbnail && (
-                <p className="error-msg">{errors.director_thumbnail.message}</p>
-              )}
+              <Controller
+                control={control}
+                name="director_thumbnail"
+                rules={{ required: "Director image is required" }}
+                render={({ field, fieldState }) => (
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] ?? null;
+                        field.onChange(file); 
+                      }}
+                    />
+                    {fieldState.error && (
+                      <p className="text-red-500">{fieldState.error.message}</p>
+                    )}
+                  </div>
+                )}
+              />
             </div>
           </div>
 
@@ -569,18 +653,29 @@ export default function AddMovie() {
 
               <div>
                 <Label className="custom-label mb-3">Cast Image</Label>
-                <input
-                  type="file"
-                  className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
-                  {...register(`casts.${index}.cast_img`, {
-                    required: "Cast image is required",
-                  })}
+                <Controller
+                  name={`casts.${index}.cast_img`}
+                  control={control}
+                  rules={{ required: "Cast image is required" }}
+                  render={({ field: controllerField, fieldState }) => (
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] ?? null;
+                          controllerField.onChange(file);
+                        }}
+                        className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                      />
+                      {fieldState.error && (
+                        <p className="text-red-500">
+                          {fieldState.error.message}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 />
-                {errors?.casts?.[index]?.cast_img && (
-                  <p className="error-msg">
-                    {errors.casts[index].cast_img?.message as string}
-                  </p>
-                )}
               </div>
 
               {index > 0 && (

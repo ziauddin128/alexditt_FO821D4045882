@@ -21,10 +21,10 @@ import convertDateStr from "@/hooks/convertDateStr";
 
 interface Content {
   id: string | number;
+  type: string;
   title: string;
   genre: string;
   category: string;
-  type: string;
   duration: string;
   status: string;
   uploaded: string;
@@ -90,6 +90,11 @@ export default function ContentTable() {
       ),
     },
     {
+      accessorKey: "type",
+      header: "Type",
+      cell: ({ row }) => <span className="">{row.original.type}</span>,
+    },
+    {
       accessorKey: "title",
       header: "Title",
       cell: ({ row }) => <span className="">{row.original.title}</span>,
@@ -126,12 +131,22 @@ export default function ContentTable() {
       header: "Actions",
       cell: ({ row }) => (
         <div className="flex gap-4">
-          <Link
-            href="#"
-            className="h-6 w-6 bg-[#111] hover:bg-primary-color flex items-center justify-center rounded-[2px]"
-          >
-            <EditIcon className="text-white h-4 w-4" />
-          </Link>
+          {row.original.type === "Movie" ? (
+            <Link
+              href={`/dashboard/film-management/movie/${row.original.id}`}
+              className="h-6 w-6 bg-[#111] hover:bg-primary-color flex items-center justify-center rounded-[2px]"
+            >
+              <EditIcon className="text-white h-4 w-4" />
+            </Link>
+          ) : (
+            <Link
+              href={`/dashboard/film-management/series/${row.original.id}`}
+              className="h-6 w-6 bg-[#111] hover:bg-primary-color flex items-center justify-center rounded-[2px]"
+            >
+              <EditIcon className="text-white h-4 w-4" />
+            </Link>
+          )}
+
           <DeleteContent categoryId={row.original.id} />
         </div>
       ),

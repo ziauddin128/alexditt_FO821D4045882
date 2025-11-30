@@ -242,6 +242,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   color: red;
 }
 
+input[type="date"].white-calendar::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
 /* Custom Label & Input */
 .custom-label {
   @apply text-base font-normal;

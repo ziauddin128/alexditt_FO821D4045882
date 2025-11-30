@@ -610,7 +610,7 @@ export default function AddSeries() {
               htmlFor="series-mode"
               className="text-base font-medium cursor-pointer"
             >
-              Enable Series Mode
+              Enable Season Mode
             </Label>
           </div>
 
@@ -622,7 +622,7 @@ export default function AddSeries() {
                 className="grid md:grid-cols-2 xl:grid-cols-4 gap-4 relative border border-gray3-bg p-2"
               >
                 <div className="md:col-span-2 xl:col-span-4">
-                  <Label className="custom-label mb-3">Series Name</Label>
+                  <Label className="custom-label mb-3">Season Name</Label>
                   <Input
                     placeholder="Series name"
                     className="custom-content-input"
