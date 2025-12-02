@@ -24,7 +24,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-
+ 
 interface Category {
   id: string;
   category_name: string;
@@ -47,7 +47,9 @@ type Inputs = {
   casts: { cast: string; cast_img: File | null }[];
 };
 
+ 
 export default function AddMovie() {
+  
   const [dragActive, setDragActive] = useState(false);
 
   // Genre
@@ -369,7 +371,13 @@ export default function AddMovie() {
             <div>
               <Label className="custom-label mb-3">Genre</Label>
 
-              <Controller
+             {/*  <MultiSelect
+                options={options}
+                onValueChange={setSelectedValues}
+                defaultValue={selectedValues}
+              /> */}
+
+              {/* <Controller
                 name="genre"
                 control={control}
                 defaultValue=""
@@ -402,7 +410,7 @@ export default function AddMovie() {
                     </SelectContent>
                   </Select>
                 )}
-              />
+              /> */}
 
               {errors.genre && (
                 <p className="error-msg">{errors.genre.message}</p>
@@ -617,7 +625,7 @@ export default function AddMovie() {
                       className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white file:px-2"
                       onChange={(e) => {
                         const file = e.target.files?.[0] ?? null;
-                        field.onChange(file); 
+                        field.onChange(file);
                       }}
                     />
                     {fieldState.error && (
