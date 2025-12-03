@@ -257,13 +257,50 @@ input[type="date"].white-calendar::-webkit-calendar-picker-indicator {
 
 
 /* Custom React Select */
-.basic-multi-select .select__control 
+
+.custom-multi-select.basic-multi-select .select__control 
 {
-  background-color: transparent
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  border: 1px solid var(--color-gray3-bg) !important;
+}
+
+.custom-multi-select.basic-multi-select .select__menu 
+{
+  background-color: var(--color-dark-bg) !important;
+  border: 1px solid var(--color-gray3-bg) !important;
+}
+
+.custom-multi-select.basic-multi-select .select__option {
+  background-color: transparent !important;
+  color: white !important;
+  cursor: pointer;
+}
+
+.select__multi-value__remove svg 
+{
+  fill: var(--color-red-bg);
 }
 
 
-.custom-multi-select 
-{
-   @apply !bg-red-500;
-}
+/* Option default background */
+/* .select__option {
+  background-color: green !important;
+  color: white !important;
+} */
+
+/* Hover / focused option */
+/* .select__option--is-focused {
+  background-color: #0ca80c !important;
+  color: white !important;
+} */
+
+/* Selected option */
+/* .select__option--is-selected {
+  background-color: #067306 !important;
+  color: white !important;
+} */
+
+
+

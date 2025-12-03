@@ -20,11 +20,12 @@ import {
   useFieldArray,
   Controller,
 } from "react-hook-form";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import ReactSelect from "react-select";
+import { toast } from "sonner";
 
 interface Category {
   id: string;
@@ -33,7 +34,7 @@ interface Category {
 
 type Inputs = {
   title: string;
-  genre: string;
+  genres: string;
   release_date: string;
   duration: string;
   kids_mode: boolean;
@@ -49,6 +50,7 @@ type Inputs = {
 };
 
 export default function AddMovie() {
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
   // Genre
@@ -60,6 +62,11 @@ export default function AddMovie() {
     },
   });
 
+  const genreOption = allGenre?.data?.map((item: string) => ({
+    value: item,
+    label: item,
+  }));
+
   // Category
   const { data: allCategory, isLoading: isCategoryLoading } = useQuery({
     queryKey: ["category"],
@@ -69,8 +76,6 @@ export default function AddMovie() {
     },
   });
 
-  const queryClient = useQueryClient();
-
   const {
     register,
     handleSubmit,
@@ -78,12 +83,13 @@ export default function AddMovie() {
     watch,
     control,
     formState: { errors },
+    reset,
   } = useForm<Inputs>({
     defaultValues: {
       title: "",
       description: "",
       category_id: "",
-      genre: "",
+      genres: "",
       contentType: "",
       file: null,
       movie_thumbnail: null,
@@ -102,7 +108,7 @@ export default function AddMovie() {
     name: "casts",
   });
 
-  const genre = watch("genre");
+  const genres = watch("genres");
   const category_id = watch("category_id");
   const contentType = watch("contentType");
   const kids_mode = watch("kids_mode");
@@ -111,58 +117,9 @@ export default function AddMovie() {
   const thumbnail = watch("movie_thumbnail");
   const vidFile = watch("file");
 
-  // send to the server
-  const uploadContent = useMutation({
-    mutationFn: async (data: Inputs) => {
-      try {
-        const formData = new FormData();
-
-        // Append Movie, Thumbnail, Trailer File
-        if (data.file) formData.append("video", data.file);
-        if (data.movie_thumbnail)
-          formData.append("movie_thumbnail", data.movie_thumbnail);
-        if (data.trailer) formData.append("movie_trailer", data.trailer);
-
-        // Form Data
-        formData.append("title", data.title);
-        formData.append("genre", data.genre);
-        formData.append("kids_mode", data.kids_mode ? "true" : "false");
-        formData.append("description", data.description);
-        formData.append("category_id", data.category_id);
-
-        //formData.append("type", data.contentType);
-
-        formData.append("director_name", data.director_name);
-
-        if (data.director_thumbnail) {
-          formData.append("director_thumbnail", data.director_thumbnail);
-        }
-
-        console.log("FormData Contents:");
-        formData.forEach((value, key) => {
-          console.log(`${key}: ${value}`);
-        });
-
-        return;
-
-        // You can replace this with your actual API endpoint
-        const response = await privateAxios.post(`/uploads/video`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-
-        console.log(response.data);
-      } catch (error: any) {
-        const message =
-          error?.response?.data?.message || "Something went wrong!";
-        throw new Error(message);
-      }
-    },
-  });
-
+  // Form Submission
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    console.log("All File Data", data);
+    setSubmitLoading(true);
 
     try {
       const formData = new FormData();
@@ -175,7 +132,11 @@ export default function AddMovie() {
 
       // Form Data
       formData.append("title", data.title);
-      formData.append("genre", data.genre);
+
+      const genresArray = data.genres as unknown as { value: string }[];
+      const genreString = genresArray?.map((g) => g.value).join(", ");
+
+      formData.append("genres", genreString);
 
       const releaseDate = new Date(data.release_date);
       formData.append("release_date", releaseDate.toISOString());
@@ -184,8 +145,6 @@ export default function AddMovie() {
       formData.append("kids_mode", data.kids_mode ? "true" : "false");
       formData.append("description", data.description);
       formData.append("category_id", data.category_id);
-
-      //formData.append("type", data.contentType);
 
       formData.append("director_name", data.director_name);
 
@@ -207,20 +166,6 @@ export default function AddMovie() {
         }
       });
 
-      console.log("FormData Contents:");
-
-      formData.forEach((value, key) => {
-        if (value instanceof File) {
-          console.log(
-            `${key}: name=${value.name}, size=${value.size} bytes, type=${value.type}`
-          );
-        } else {
-          console.log(`${key}: ${value}`);
-        }
-      });
-
-      return;
-
       const response = await privateAxios.post(
         `/admin/movie/create`,
         formData,
@@ -230,11 +175,13 @@ export default function AddMovie() {
           },
         }
       );
-
-      console.log(response.data);
+      reset();
+      toast.success(response.data?.message || "Movie updated successfully!");
     } catch (error: any) {
       const message = error?.response?.data?.message || "Something went wrong!";
       throw new Error(message);
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
@@ -277,15 +224,8 @@ export default function AddMovie() {
 
   const handleVideoPick: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const vidFile = e.target.files?.[0] ?? null;
-
     setValue("file", vidFile, { shouldValidate: true, shouldDirty: true });
   };
-
-  const genreOption = [
-    { value: "chocolate", label: "Chocolate" },
-    { value: "strawberry", label: "Strawberry" },
-    { value: "vanilla", label: "Vanilla" },
-  ];
 
   return (
     <div>
@@ -328,6 +268,11 @@ export default function AddMovie() {
                   className="hidden"
                 />
               </label>
+
+              <input
+                type="hidden"
+                {...register("file", { required: "Movie file is required" })}
+              />
 
               {vidFile && (
                 <p className="text-sm text-gray-black-200">
@@ -376,7 +321,7 @@ export default function AddMovie() {
             <div>
               <Label className="custom-label mb-3">Genre</Label>
               <Controller
-                name="genre"
+                name="genres"
                 control={control}
                 rules={{ required: "Select at least one genre" }}
                 render={({ field, fieldState }) => (
@@ -461,7 +406,6 @@ export default function AddMovie() {
               className="custom-content-input"
               {...register("description", {
                 required: "Description is required",
-                minLength: { value: 10, message: "Min 10 characters" },
               })}
             />
             {errors.description && (
@@ -470,7 +414,7 @@ export default function AddMovie() {
           </div>
 
           {/* Content Type */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1  gap-4">
             {/* Content Type */}
             <div>
               <Label className="custom-label mb-3">Content Category</Label>
@@ -513,64 +457,6 @@ export default function AddMovie() {
 
               {errors.category_id && (
                 <p className="error-msg">{errors.category_id.message}</p>
-              )}
-            </div>
-
-            {/* Content Status */}
-            <div>
-              <Label className="custom-label mb-3">Content Status</Label>
-
-              <Controller
-                name="contentType"
-                control={control}
-                defaultValue=""
-                rules={{
-                  validate: (value) =>
-                    value !== "" || "Content type is required",
-                }}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
-                    <SelectTrigger className="custom-content-input cursor-pointer">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
-                      <SelectGroup className="space-y-2">
-                        <SelectItem
-                          value="published"
-                          className="selectOption !justify-start"
-                        >
-                          Published
-                        </SelectItem>
-                        <SelectItem
-                          value="draft"
-                          className="selectOption !justify-start"
-                        >
-                          Draft
-                        </SelectItem>
-                        <SelectItem
-                          value="private"
-                          className="selectOption !justify-start"
-                        >
-                          Private
-                        </SelectItem>
-                        <SelectItem
-                          value="scheduled"
-                          className="selectOption !justify-start"
-                        >
-                          Scheduled
-                        </SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-
-              {errors.contentType && (
-                <p className="error-msg">{errors.contentType.message}</p>
               )}
             </div>
           </div>
@@ -773,18 +659,10 @@ export default function AddMovie() {
           <div>
             <Button
               type="submit"
-              className={`w-full px-6 py-6 ${
-                uploadContent.isError
-                  ? "bg-red-600 hover:bg-red-700"
-                  : "bg-primary-color hover:bg-primary-color"
-              } cursor-pointer rounded text-base font-medium`}
-              disabled={uploadContent.isPending}
+              className={`w-full px-6 py-6 bg-primary-color hover:bg-primary-color cursor-pointer rounded text-base font-medium`}
+              disabled={submitLoading}
             >
-              {uploadContent.isPending
-                ? "Uploading..."
-                : uploadContent.isError
-                ? "Try Again"
-                : "Submit"}
+              {submitLoading ? "Uploading..." : "Submit"}
             </Button>
           </div>
         </div>

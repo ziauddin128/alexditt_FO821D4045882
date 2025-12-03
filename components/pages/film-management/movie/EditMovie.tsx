@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,12 +20,14 @@ import {
   useFieldArray,
   Controller,
 } from "react-hook-form";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import LoadingSpinner from "@/app/(dashboard)/loading";
 import { toast } from "sonner";
+import ReactSelect from "react-select";
+import DeleteCast from "./DeleteCast";
 
 interface Category {
   id: string;
@@ -35,7 +37,7 @@ interface Category {
 type Inputs = {
   id?: string;
   title: string;
-  genre: string;
+  genres: { value: string; label: string }[];
   release_date: string;
   duration: string;
   kids_mode: boolean;
@@ -72,8 +74,6 @@ export default function EditMovie({
   const [submitLoading, setSubmitLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
-  // console.log('Movie Data', movieData);
-
   // Genre
   const { data: allGenre, isLoading: isGenreLoading } = useQuery({
     queryKey: ["genre"],
@@ -82,6 +82,11 @@ export default function EditMovie({
       return response.data;
     },
   });
+
+  const genreOption = allGenre?.data?.map((item: string) => ({
+    value: item,
+    label: item,
+  }));
 
   // Category
   const { data: allCategory, isLoading: isCategoryLoading } = useQuery({
@@ -112,23 +117,6 @@ export default function EditMovie({
     },
   });
 
-  /* useEffect(() => {
-    if (movieData) {
-      const mappedCasts =
-        movieData.casts?.map((c) => ({
-          id: c.id,
-          name: c.name,
-          cast_thumbnail: c.cast_thumbnail,
-        })) || [];
-
-      reset({
-        category_id: movieData?.category_id?.toString() ?? "",
-        status: movieData?.status ?? "",
-        casts: mappedCasts,
-      });
-    }
-  }, [movieData]); */
-
   const {
     fields: castFields,
     append: appendCast,
@@ -138,73 +126,15 @@ export default function EditMovie({
     name: "casts",
   });
 
-  // Remove Cast Will be handle from here
-  const handleRemoveCast = (index: number, id: string) => {
-    console.log(id);
-    removeCast(index);
-  };
-
-  const genre = watch("genre");
+  const genres = watch("genres");
   const kids_mode = watch("kids_mode");
   const director_thumbnail = watch("director_thumbnail");
   const trailer = watch("trailer");
   const thumbnail = watch("movie_thumbnail");
   const vidFile = watch("file");
 
-  // send to the server
-  const uploadContent = useMutation({
-    mutationFn: async (data: Inputs) => {
-      try {
-        const formData = new FormData();
-
-        // Append Movie, Thumbnail, Trailer File
-        if (data.file) formData.append("video", data.file);
-        if (data.movie_thumbnail)
-          formData.append("movie_thumbnail", data.movie_thumbnail);
-        if (data.trailer) formData.append("movie_trailer", data.trailer);
-
-        // Form Data
-        formData.append("title", data.title);
-        formData.append("genre", data.genre);
-        formData.append("kids_mode", data.kids_mode ? "true" : "false");
-        formData.append("description", data.description);
-        formData.append("category_id", data.category_id);
-
-        //formData.append("type", data.contentType);
-
-        formData.append("director_name", data.director_name);
-
-        if (data.director_thumbnail) {
-          formData.append("director_thumbnail", data.director_thumbnail);
-        }
-
-        console.log("FormData Contents:");
-        formData.forEach((value, key) => {
-          console.log(`${key}: ${value}`);
-        });
-
-        return;
-
-        // You can replace this with your actual API endpoint
-        const response = await privateAxios.post(`/uploads/video`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-
-        console.log(response.data);
-      } catch (error: any) {
-        const message =
-          error?.response?.data?.message || "Something went wrong!";
-        throw new Error(message);
-      }
-    },
-  });
-
-  // Form Submit
+  // Form Submission
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    console.log("All File Data", data);
-
     setSubmitLoading(true);
 
     try {
@@ -218,7 +148,11 @@ export default function EditMovie({
 
       // Form Data
       formData.append("title", data.title);
-      formData.append("genre", data.genre);
+
+      const genresArray = data.genres as unknown as { value: string }[];
+      const genreString = genresArray?.map((g) => g.value).join(", ");
+
+      formData.append("genres", genreString);
 
       const releaseDate = new Date(data.release_date);
       formData.append("release_date", releaseDate.toISOString());
@@ -265,7 +199,7 @@ export default function EditMovie({
         }
       });
 
-      console.log("FormData Contents:");
+      /* console.log("FormData Contents:");
       formData.forEach((value, key) => {
         //console.log(`${key}: ${value}`);
 
@@ -278,7 +212,7 @@ export default function EditMovie({
         }
       });
 
-      // return;
+      return; */
 
       const response = await privateAxios.patch(
         `/admin/movie/${movieData?.id}`,
@@ -442,45 +376,33 @@ export default function EditMovie({
                   <Label className="custom-label mb-3">Genre</Label>
 
                   <Controller
-                    name="genre"
+                    name="genres"
                     control={control}
-                    defaultValue=""
-                    rules={{
-                      validate: (value) => value !== "" || "Genre is required",
-                    }}
-                    render={({ field }) => (
-                      <Select
-                        {...field}
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <SelectTrigger className="custom-content-input cursor-pointer">
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
-                          <SelectGroup className="space-y-2">
-                            <SelectGroup className="space-y-2">
-                              {allGenre?.data.map(
-                                (item: string, idx: number) => (
-                                  <SelectItem
-                                    key={idx}
-                                    className="selectOption !justify-start"
-                                    value={item}
-                                  >
-                                    {item}
-                                  </SelectItem>
-                                )
-                              )}
-                            </SelectGroup>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
+                    rules={{ required: "Select at least one genre" }}
+                    defaultValue={
+                      genreOption?.filter((option: any) =>
+                        movieData?.genres?.includes(option.value)
+                      ) || []
+                    }
+                    render={({ field, fieldState }) => (
+                      <div>
+                        <ReactSelect
+                          isMulti
+                          options={genreOption}
+                          className="basic-multi-select custom-multi-select"
+                          classNamePrefix="select"
+                          value={field.value}
+                          onChange={(selected) => field.onChange(selected)}
+                        />
+
+                        {fieldState.error && (
+                          <p className="error-msg">
+                            {fieldState.error.message}
+                          </p>
+                        )}
+                      </div>
                     )}
                   />
-
-                  {errors.genre && (
-                    <p className="error-msg">{errors.genre.message}</p>
-                  )}
                 </div>
 
                 {/* Release Date */}
@@ -730,23 +652,6 @@ export default function EditMovie({
                         defaultValue={cast?.id}
                       />
 
-                      {/*  <div>
-                        <Label className="custom-label mb-3">Cast</Label>
-                        <Input
-                          placeholder="Cast name"
-                          className="custom-content-input"
-                          {...register(`cast_update.${index}.name`, {
-                            required: "Cast name is required",
-                          })}
-                          defaultValue={cast?.name}
-                        />
-                        {errors?.casts?.[index]?.name && (
-                          <p className="error-msg">
-                            {errors.casts[index].name?.message as string}
-                          </p>
-                        )}
-                      </div> */}
-
                       <div>
                         <Label className="custom-label mb-3">Cast</Label>
                         <Input
@@ -757,9 +662,9 @@ export default function EditMovie({
                           })}
                           defaultValue={cast?.name}
                         />
-                        {errors?.casts?.[index]?.name && (
+                        {errors?.cast_update?.[index]?.name && (
                           <p className="error-msg">
-                            {errors.casts[index].name?.message as string}
+                            {errors.cast_update[index].name?.message as string}
                           </p>
                         )}
                       </div>
@@ -789,13 +694,7 @@ export default function EditMovie({
                         />
                       </div>
 
-                      <button
-                        type="button"
-                        className="absolute top-2 right-2 cursor-pointer bg-secondary-color text-white p-1 rounded-sm"
-                        onClick={() => handleRemoveCast(index, "2")}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <DeleteCast movieId={movieData?.id || ""} id={cast?.id} />
                     </div>
                   ))
                 : null}
@@ -857,9 +756,7 @@ export default function EditMovie({
                   <button
                     type="button"
                     className="absolute top-2 right-2 cursor-pointer bg-secondary-color text-white p-1 rounded-sm"
-                    onClick={() =>
-                      handleRemoveCast(index, castFields[index].id)
-                    }
+                    onClick={() => removeCast(index)}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
