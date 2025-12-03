@@ -55,6 +55,11 @@ type Inputs = {
     name: string;
     cast_thumbnail: File | null | string;
   }[];
+  cast_update: {
+    id: string;
+    name: string;
+    cast_thumbnail: File | null | string;
+  }[];
 };
 
 export default function EditMovie({
@@ -66,6 +71,8 @@ export default function EditMovie({
 }) {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+
+  // console.log('Movie Data', movieData);
 
   // Genre
   const { data: allGenre, isLoading: isGenreLoading } = useQuery({
@@ -105,7 +112,7 @@ export default function EditMovie({
     },
   });
 
-  useEffect(() => {
+  /* useEffect(() => {
     if (movieData) {
       const mappedCasts =
         movieData.casts?.map((c) => ({
@@ -115,13 +122,12 @@ export default function EditMovie({
         })) || [];
 
       reset({
-        /* ...movieData, */
         category_id: movieData?.category_id?.toString() ?? "",
         status: movieData?.status ?? "",
         casts: mappedCasts,
       });
     }
-  }, [movieData]);
+  }, [movieData]); */
 
   const {
     fields: castFields,
@@ -230,7 +236,22 @@ export default function EditMovie({
         formData.append("director_thumbnail", data.director_thumbnail);
       }
 
-      // Casts
+      // Updated Cast
+      const updatedCastArray = data.cast_update.map((cast: any, i: number) => ({
+        id: cast.id,
+        name: cast.name,
+        key: `updated_cast_member_${i}`,
+      }));
+
+      formData.append("cast_update", JSON.stringify(updatedCastArray));
+
+      data.cast_update.forEach((cast, i) => {
+        if (cast.cast_thumbnail instanceof File) {
+          formData.append(`updated_cast_member_${i}`, cast.cast_thumbnail);
+        }
+      });
+
+      // New Casts
       const castArray = data.casts.map((cast: any, i: number) => ({
         key: `cast_member_${i}`,
         name: cast.name,
@@ -246,14 +267,15 @@ export default function EditMovie({
 
       console.log("FormData Contents:");
       formData.forEach((value, key) => {
-        console.log(`${key}: ${value}`);
-        /*  if (value instanceof File) {
+        //console.log(`${key}: ${value}`);
+
+        if (value instanceof File) {
           console.log(
             `${key}: name=${value.name}, size=${value.size} bytes, type=${value.type}`
           );
         } else {
           console.log(`${key}: ${value}`);
-        } */
+        }
       });
 
       // return;
@@ -299,7 +321,6 @@ export default function EditMovie({
   };
 
   // File picker handler
-
   const handleFilePick: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const file = e.target.files?.[0] ?? null;
 
@@ -533,7 +554,6 @@ export default function EditMovie({
                   className="custom-content-input"
                   {...register("description", {
                     required: "Description is required",
-                    minLength: { value: 10, message: "Min 10 characters" },
                   })}
                   defaultValue={movieData?.description || ""}
                 />
@@ -692,6 +712,93 @@ export default function EditMovie({
                   />
                 </div>
               </div>
+
+              {/* Cast From API */}
+              {movieData?.casts && movieData?.casts.length > 0
+                ? movieData.casts.map((cast, index) => (
+                    <div
+                      key={cast.id}
+                      className="grid grid-cols-1 md:grid-cols-2 gap-4 relative border border-gray3-bg p-2"
+                    >
+                      <Input
+                        hidden
+                        placeholder="Cast ID"
+                        className="custom-content-input"
+                        {...register(`cast_update.${index}.id`, {
+                          required: "Cast id is required",
+                        })}
+                        defaultValue={cast?.id}
+                      />
+
+                      {/*  <div>
+                        <Label className="custom-label mb-3">Cast</Label>
+                        <Input
+                          placeholder="Cast name"
+                          className="custom-content-input"
+                          {...register(`cast_update.${index}.name`, {
+                            required: "Cast name is required",
+                          })}
+                          defaultValue={cast?.name}
+                        />
+                        {errors?.casts?.[index]?.name && (
+                          <p className="error-msg">
+                            {errors.casts[index].name?.message as string}
+                          </p>
+                        )}
+                      </div> */}
+
+                      <div>
+                        <Label className="custom-label mb-3">Cast</Label>
+                        <Input
+                          placeholder="Cast name"
+                          className="custom-content-input"
+                          {...register(`cast_update.${index}.name`, {
+                            required: "Cast name is required",
+                          })}
+                          defaultValue={cast?.name}
+                        />
+                        {errors?.casts?.[index]?.name && (
+                          <p className="error-msg">
+                            {errors.casts[index].name?.message as string}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <Label className="custom-label mb-3">Cast Image</Label>
+                        <Controller
+                          name={`cast_update.${index}.cast_thumbnail`}
+                          control={control}
+                          render={({ field: controllerField, fieldState }) => (
+                            <div>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0] ?? null;
+                                  controllerField.onChange(file);
+                                }}
+                                className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                              />
+
+                              <p className="text-green-500 text-sm mt-1">
+                                {cast?.cast_thumbnail as string}
+                              </p>
+                            </div>
+                          )}
+                        />
+                      </div>
+
+                      <button
+                        type="button"
+                        className="absolute top-2 right-2 cursor-pointer bg-secondary-color text-white p-1 rounded-sm"
+                        onClick={() => handleRemoveCast(index, "2")}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))
+                : null}
 
               {/* Cast */}
               {castFields.map((item, index) => (

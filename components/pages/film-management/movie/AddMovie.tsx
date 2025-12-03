@@ -24,7 +24,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
- 
+import ReactSelect from "react-select";
+
 interface Category {
   id: string;
   category_name: string;
@@ -47,9 +48,7 @@ type Inputs = {
   casts: { cast: string; cast_img: File | null }[];
 };
 
- 
 export default function AddMovie() {
-  
   const [dragActive, setDragActive] = useState(false);
 
   // Genre
@@ -220,7 +219,7 @@ export default function AddMovie() {
         }
       });
 
-      // return;
+      return;
 
       const response = await privateAxios.post(
         `/admin/movie/create`,
@@ -281,6 +280,12 @@ export default function AddMovie() {
 
     setValue("file", vidFile, { shouldValidate: true, shouldDirty: true });
   };
+
+  const genreOption = [
+    { value: "chocolate", label: "Chocolate" },
+    { value: "strawberry", label: "Strawberry" },
+    { value: "vanilla", label: "Vanilla" },
+  ];
 
   return (
     <div>
@@ -370,51 +375,26 @@ export default function AddMovie() {
             {/* Genre */}
             <div>
               <Label className="custom-label mb-3">Genre</Label>
-
-             {/*  <MultiSelect
-                options={options}
-                onValueChange={setSelectedValues}
-                defaultValue={selectedValues}
-              /> */}
-
-              {/* <Controller
+              <Controller
                 name="genre"
                 control={control}
-                defaultValue=""
-                rules={{
-                  validate: (value) => value !== "" || "Genre is required",
-                }}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
-                    <SelectTrigger className="custom-content-input cursor-pointer">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
-                      <SelectGroup className="space-y-2">
-                        <SelectGroup className="space-y-2">
-                          {allGenre?.data.map((item: string, idx: number) => (
-                            <SelectItem
-                              key={idx}
-                              className="selectOption !justify-start"
-                              value={item}
-                            >
-                              {item}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                )}
-              /> */}
+                rules={{ required: "Select at least one genre" }}
+                render={({ field, fieldState }) => (
+                  <div>
+                    <ReactSelect
+                      isMulti
+                      options={genreOption}
+                      className="basic-multi-select custom-multi-select"
+                      classNamePrefix="select"
+                      onChange={(selected) => field.onChange(selected)}
+                    />
 
-              {errors.genre && (
-                <p className="error-msg">{errors.genre.message}</p>
-              )}
+                    {fieldState.error && (
+                      <p className="error-msg">{fieldState.error.message}</p>
+                    )}
+                  </div>
+                )}
+              />
             </div>
 
             {/* Release Date */}

@@ -254,3 +254,16 @@ input[type="date"].white-calendar::-webkit-calendar-picker-indicator {
 .custom-input {
   @apply h-[40px] w-full px-4 py-[14px] text-sm font-normal border border-dark-bg bg-dark-bg rounded outline-none focus-visible:ring-0 focus-visible:border-primary-color;
 }
+
+
+/* Custom React Select */
+.basic-multi-select .select__control 
+{
+  background-color: transparent
+}
+
+
+.custom-multi-select 
+{
+   @apply !bg-red-500;
+}
