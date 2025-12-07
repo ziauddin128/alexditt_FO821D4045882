@@ -432,9 +432,12 @@ export default function EditMovie({
 
                 {/* Duration */}
                 <div>
-                  <Label className="custom-label mb-3">Duration</Label>
+                  <Label className="custom-label mb-3">
+                    Duration (seconds)
+                  </Label>
                   <Input
-                    placeholder="Ex: 2hour 30min"
+                    type="number"
+                    placeholder="Duration"
                     className="custom-content-input"
                     {...register("duration", {
                       required: "Duration Date is required",

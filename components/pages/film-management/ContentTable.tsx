@@ -18,6 +18,7 @@ import DeleteContent from "./DeleteContent";
 import Link from "next/link";
 import LoadingSpinner from "@/app/(dashboard)/loading";
 import convertDateStr from "@/hooks/convertDateStr";
+import FormatDuration from "@/hooks/formatDuration";
 
 interface Content {
   id: string | number;
@@ -112,7 +113,15 @@ export default function ContentTable() {
     {
       accessorKey: "duration",
       header: "Duration",
-      cell: ({ row }) => <span className="">{row.original.duration}</span>,
+      cell: ({ row }) => (
+        <span className="">
+          {row.original.duration}
+
+          {row.original.duration
+            ? FormatDuration(Number(row.original.duration))
+            : ""}
+        </span>
+      ),
     },
     {
       accessorKey: "status",

@@ -22,36 +22,69 @@ import {
 } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { privateAxios } from "@/components/axiosInstance/axios";
-// import { fetchCategoris } from "../categories/CategoriesTable";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import ReactSelect from "react-select";
+import { toast } from "sonner";
+
+interface Category {
+  id: string;
+  category_name: string;
+}
 
 type Inputs = {
   title: string;
-  genre: string;
+  genres: string;
   kids_mode: boolean;
   description: string;
-  contentCategory: string;
-  contentType: string;
+  category_id: string;
   director_name: string;
-  director_img: string;
-  file: File | null;
+  director_thumbnail: File | null;
   thumbnailImg: File | null;
   trailer: File | null;
   casts: { cast: string; cast_img: File | null }[];
+  season_mode?: boolean;
+  season_name?: string;
+  release_date?: string;
+  season_thumbnail?: string;
   series: {
-    series_name: string;
     episode_name: string;
     episode_number: string;
+    episode_duration: string;
     episode_file: File | null;
     episode_thumbnail: File | null;
+    episode_description: string;
   }[];
 };
 
 export default function AddSeries() {
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [isSeries, setIsSeries] = useState(false);
   const queryClient = useQueryClient();
+
+  // Genre
+  const { data: allGenre, isLoading: isGenreLoading } = useQuery({
+    queryKey: ["genre"],
+    queryFn: async () => {
+      const response = await privateAxios.get("/dashborad/genre-list");
+      return response.data;
+    },
+  });
+
+  const genreOption = allGenre?.data?.map((item: string) => ({
+    value: item,
+    label: item,
+  }));
+
+  // Category
+  const { data: allCategory, isLoading: isCategoryLoading } = useQuery({
+    queryKey: ["category"],
+    queryFn: async () => {
+      const response = await privateAxios.get("/dashborad/category-list");
+      return response.data;
+    },
+  });
 
   const {
     register,
@@ -59,25 +92,25 @@ export default function AddSeries() {
     setValue,
     watch,
     control,
+    reset,
     formState: { errors },
   } = useForm<Inputs>({
     defaultValues: {
       title: "",
-      genre: "",
+      genres: "",
       description: "",
-      contentCategory: "",
-      contentType: "published",
-      file: null,
+      category_id: "",
       thumbnailImg: null,
       trailer: null,
       casts: [{ cast: "", cast_img: null }],
       series: [
         {
-          series_name: "",
           episode_name: "",
           episode_number: "",
+          episode_duration: "",
           episode_file: null,
           episode_thumbnail: null,
+          episode_description: "",
         },
       ],
     },
@@ -102,15 +135,11 @@ export default function AddSeries() {
     name: "series",
   });
 
-  const genre = watch("genre");
-  const contentCategory = watch("contentCategory");
-  const contentType = watch("contentType");
   const trailer = watch("trailer");
   const thumbnail = watch("thumbnailImg");
-  const vidFile = watch("file");
 
   // send to the server
-  const uploadContent = useMutation({
+  /* const uploadContent = useMutation({
     mutationFn: async (data: Inputs) => {
       try {
         const formData = new FormData();
@@ -121,8 +150,8 @@ export default function AddSeries() {
         // Append other fields as regular form data
         formData.append("title", data.title);
         formData.append("description", data.description);
-        formData.append("genre", data.genre);
-        formData.append("category_id", data.contentCategory);
+        formData.append("genres", data.genres);
+        formData.append("category_id", data.category_id);
         formData.append("type", data.contentType);
 
         console.log("FormData Contents:");
@@ -144,49 +173,117 @@ export default function AddSeries() {
         throw new Error(message);
       }
     },
-  });
+  }); */
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
-    console.log(data);
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    console.log("All File Data", data);
 
-    // New approach for get cast
-    /* const formData = new FormData();
-    data.casts.forEach((cast: any, i: number) => {
-      formData.append(`casts[${i}][cast]`, cast.cast);
-      formData.append(`casts[${i}][cast_img]`, cast.cast_img[0]);
-    });
+    setSubmitLoading(true);
 
-    data.series.forEach((tv: any, i: number) => {
-      formData.append(`series[${i}][series_name]`, tv.series_name);
-      formData.append(`series[${i}][episode_name]`, tv.episode_name);
-      formData.append(`series[${i}][episode_number]`, tv.episode_number);
-      formData.append(`series[${i}][episode_file]`, tv.episode_file[0]);
-      formData.append(
-        `series[${i}][episode_thumbnail]`,
-        tv.episode_thumbnail[0]
-      );
-    });
+    try {
+      const formData = new FormData();
 
-    for (let [key, value] of formData.entries()) {
-      if (value instanceof File) {
-        console.log(key, value); // Full File object
-      } else {
-        console.log(key, value); // Normal string
+      // Append Movie, Thumbnail, Trailer File
+      if (data.thumbnailImg)
+        formData.append("series_thumbnail", data.thumbnailImg);
+      if (data.trailer) formData.append("series_trailer", data.trailer);
+
+      // Form Data
+      formData.append("title", data.title);
+
+      const genresArray = data.genres as unknown as { value: string }[];
+      const genreString = genresArray?.map((g) => g.value).join(", ");
+
+      formData.append("genres", genreString);
+
+      formData.append("kids_mode", data.kids_mode ? "true" : "false");
+
+      formData.append("description", data.description);
+      formData.append("category_id", data.category_id);
+
+      formData.append("director_name", data.director_name);
+
+      if (data.director_thumbnail) {
+        formData.append("director_thumbnail", data.director_thumbnail);
       }
-    } */
 
-    /*
-    uploadContent.mutate(data, {
-      onSuccess: () => {
-        console.log("UPdate done");
-        // toast.success("Content Updated Successfully!");
-        // Optional: Reset form or redirect
-      },
-      onError: (error: Error) => {
-        // toast.error(error.message || "Failed to upload content");
-        console.log("Error form update content");
-      },
-    });*/
+      // Casts
+      const castArray = data.casts.map((cast: any, i: number) => ({
+        key: `cast_member_${i}`,
+        name: cast.cast,
+      }));
+
+      formData.append("cast", JSON.stringify(castArray));
+
+      data.casts.forEach((cast, i) => {
+        if (cast.cast_img instanceof File) {
+          formData.append(`cast_member_${i}`, cast.cast_img);
+        }
+      });
+
+      // Season Info
+      if (data.season_mode) {
+        const releaseDate = new Date(data.release_date || "");
+
+        const seasonInfo = {
+          title: data.season_name || "",
+          release_date: releaseDate.toISOString(),
+        };
+
+        formData.append("season_info", JSON.stringify(seasonInfo));
+
+        if (data.season_thumbnail && data.season_thumbnail?.length > 0) {
+          formData.append("season_thumbnail", data.season_thumbnail[0]);
+        }
+      }
+
+      // Episodes
+      const episodeArray = data.series.map((episode: any, i: number) => ({
+        key: `ep${i}`,
+        episode_number: episode.episode_number,
+        title: episode.episode_name,
+        description: episode.episode_description,
+        duration: episode.episode_duration,
+      }));
+
+      formData.append("episodes", JSON.stringify(episodeArray));
+
+      data.series.forEach((episode, i) => {
+        if (episode.episode_file instanceof File) {
+          formData.append(`episode_ep${i}_video`, episode.episode_file);
+        }
+
+        if (episode.episode_thumbnail instanceof File) {
+          formData.append(
+            `episode_ep${i}_thumbnail`,
+            episode.episode_thumbnail
+          );
+        }
+      });
+
+      // Print Form Data
+      /*  formData.forEach((value, key) => {
+        console.log(`${key}: ${value}`);
+      });
+
+      return */ const response = await privateAxios.post(
+        `/admin/series/create`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      reset();
+      toast.success(response.data?.message || "Series added successfully!");
+    } catch (error: any) {
+      const message = error?.response?.data?.message || "Something went wrong!";
+      throw new Error(message);
+    } finally {
+      setSubmitLoading(false);
+    }
   };
 
   // Drag handlers
@@ -197,7 +294,7 @@ export default function AddSeries() {
     if (e.type === "dragleave") setDragActive(false);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  /* const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
@@ -208,7 +305,7 @@ export default function AddSeries() {
         shouldDirty: true,
       });
     }
-  };
+  }; */
 
   // File picker handler
   const handleFilePick: React.ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -222,16 +319,11 @@ export default function AddSeries() {
     setValue("trailer", vidFile, { shouldValidate: true, shouldDirty: true });
   };
 
-  const handleVideoPick: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+  /* const handleVideoPick: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const vidFile = e.target.files?.[0] ?? null;
 
     setValue("file", vidFile, { shouldValidate: true, shouldDirty: true });
-  };
-
-  /*  const { data: categoriesList, isLoading: categoriesLoading } = useQuery({
-    queryKey: ["categories"],
-    queryFn: fetchCategoris,
-  }); */
+  }; */
 
   return (
     <div>
@@ -239,70 +331,6 @@ export default function AddSeries() {
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1  gap-6"
       >
-        {/* Upload Area */}
-        {/* <div className="space-y-6 h-fit">
-          <div
-            className={`border border-dashed flex flex-col items-center justify-between h-fit rounded-lg p-8 text-center transition-colors bg-[#131824] ${
-              dragActive
-                ? "border-primary-color bg-primary-color/5"
-                : "border-slate-700 hover:border-slate-600"
-            }`}
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-          >
-            <div className="flex flex-col items-center space-y-4">
-              <div className="flex md:w-[134px] md:h-[134px] justify-center items-center gap-2.5 bg-[#0D121E] p-[35px] rounded-full">
-                <Upload className="w-12 h-12 text-white" />
-              </div>
-              <div className="space-y-2">
-                <p className="text-lg font-medium">
-                  Drag and drop video files to upload
-                </p>
-                <p className="text-gray-black-200 text-base">
-                  Your videos will be private until <br /> you publish them.
-                </p>
-              </div>
-
-              <label className="bg-primary-color text-white px-6 py-3 rounded cursor-pointer">
-                Select files
-                <input
-                  type="file"
-                  accept="video/*"
-                  onChange={handleVideoPick}
-                  className="hidden"
-                />
-              </label>
-
-              {vidFile && (
-                <p className="text-sm text-gray-black-200">
-                  Selected: <span className="text-white">{vidFile.name}</span>
-                </p>
-              )}
-              {errors.file && (
-                <p className="text-xs text-red-500">
-                  {errors.file.message as string}
-                </p>
-              )}
-            </div>
-
-            <div className="text-sm text-gray-black-200 mt-18">
-              By submitting your videos to streaming app, you acknowledge that
-              you agree to streaming{" "}
-              <span className="text-primary-color hover:underline cursor-pointer">
-                Terms of Service
-              </span>{" "}
-              and{" "}
-              <span className="text-primary-color hover:underline cursor-pointer">
-                Community Guidelines
-              </span>
-              .
-            </div>
-          </div>
-        </div>*/}
-
-        {/* Form Fields */}
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Title */}
@@ -321,48 +349,26 @@ export default function AddSeries() {
             {/* Genre */}
             <div>
               <Label className="custom-label mb-3">Genre</Label>
-              <Select value={genre}>
-                <SelectTrigger className="custom-content-input cursor-pointer">
-                  <SelectValue placeholder="Select genre" />
-                </SelectTrigger>
-                <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
-                  <SelectGroup className="space-y-2">
-                    <SelectItem
-                      value="comedy"
-                      className="selectOption !justify-start"
-                    >
-                      Comedy
-                    </SelectItem>
-                    <SelectItem
-                      value="drama"
-                      className="selectOption !justify-start"
-                    >
-                      Drama
-                    </SelectItem>
-                    <SelectItem
-                      value="action"
-                      className="selectOption !justify-start"
-                    >
-                      Action
-                    </SelectItem>
-                    <SelectItem
-                      value="horror"
-                      className="selectOption !justify-start"
-                    >
-                      Horror
-                    </SelectItem>
-                    <SelectItem
-                      value="romance"
-                      className="selectOption !justify-start"
-                    >
-                      Romance
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              {errors.genre && (
-                <p className="error-msg">{errors.genre.message}</p>
-              )}
+              <Controller
+                name="genres"
+                control={control}
+                rules={{ required: "Select at least one genre" }}
+                render={({ field, fieldState }) => (
+                  <div>
+                    <ReactSelect
+                      isMulti
+                      options={genreOption}
+                      className="basic-multi-select custom-multi-select"
+                      classNamePrefix="select"
+                      onChange={(selected) => field.onChange(selected)}
+                    />
+
+                    {fieldState.error && (
+                      <p className="error-msg">{fieldState.error.message}</p>
+                    )}
+                  </div>
+                )}
+              />
             </div>
           </div>
 
@@ -395,7 +401,6 @@ export default function AddSeries() {
               className="custom-content-input"
               {...register("description", {
                 required: "Description is required",
-                minLength: { value: 10, message: "Min 10 characters" },
               })}
             />
             {errors.description && (
@@ -404,13 +409,13 @@ export default function AddSeries() {
           </div>
 
           {/* Content Type */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Content Type */}
+          <div className="grid grid-cols-1 gap-4">
+            {/* Type */}
             <div>
               <Label className="custom-label mb-3">Content Category</Label>
 
               <Controller
-                name="contentCategory"
+                name="category_id"
                 control={control}
                 defaultValue=""
                 rules={{
@@ -428,30 +433,31 @@ export default function AddSeries() {
                     </SelectTrigger>
                     <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
                       <SelectGroup className="space-y-2">
-                        {/*  {categoriesList?.data?.map((cat: any) => (
-                          <SelectItem
-                            key={cat.id}
-                            value={cat.id}
-                            className="selectOption !justify-start"
-                          >
-                            {cat.name}
-                          </SelectItem>
-                        ))} */}
+                        {allCategory?.data?.map(
+                          (item: Category, idx: number) => (
+                            <SelectItem
+                              key={idx}
+                              className="selectOption !justify-start"
+                              value={item?.id}
+                            >
+                              {item?.category_name}
+                            </SelectItem>
+                          )
+                        )}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
                 )}
               />
 
-              {errors.contentCategory && (
-                <p className="error-msg">{errors.contentCategory.message}</p>
+              {errors.category_id && (
+                <p className="error-msg">{errors.category_id.message}</p>
               )}
             </div>
 
-            {/* Content Status */}
-            <div>
+            {/* Status */}
+            {/* <div>
               <Label className="custom-label mb-3">Content Status</Label>
-
               <Controller
                 name="contentType"
                 control={control}
@@ -472,28 +478,16 @@ export default function AddSeries() {
                     <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
                       <SelectGroup className="space-y-2">
                         <SelectItem
-                          value="published"
+                          value="PUBLISHED"
                           className="selectOption !justify-start"
                         >
-                          Published
+                          PUBLISHED
                         </SelectItem>
                         <SelectItem
-                          value="draft"
+                          value="DRAFT"
                           className="selectOption !justify-start"
                         >
-                          Draft
-                        </SelectItem>
-                        <SelectItem
-                          value="private"
-                          className="selectOption !justify-start"
-                        >
-                          Private
-                        </SelectItem>
-                        <SelectItem
-                          value="scheduled"
-                          className="selectOption !justify-start"
-                        >
-                          Scheduled
+                          DRAFT
                         </SelectItem>
                       </SelectGroup>
                     </SelectContent>
@@ -504,7 +498,7 @@ export default function AddSeries() {
               {errors.contentType && (
                 <p className="error-msg">{errors.contentType.message}</p>
               )}
-            </div>
+            </div> */}
           </div>
 
           {/* Director */}
@@ -529,13 +523,14 @@ export default function AddSeries() {
                 <input
                   type="file"
                   className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white  file:px-2"
-                  {...register("director_img", {
+                  accept="image/*"
+                  {...register("director_thumbnail", {
                     required: "Director image is required",
                   })}
                 />
               </div>
-              {errors.director_img && (
-                <p className="error-msg">{errors.director_img.message}</p>
+              {errors.director_thumbnail && (
+                <p className="error-msg">{errors.director_thumbnail.message}</p>
               )}
             </div>
           </div>
@@ -564,18 +559,29 @@ export default function AddSeries() {
 
               <div>
                 <Label className="custom-label mb-3">Cast Image</Label>
-                <input
-                  type="file"
-                  className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
-                  {...register(`casts.${index}.cast_img`, {
-                    required: "Cast image is required",
-                  })}
+                <Controller
+                  name={`casts.${index}.cast_img`}
+                  control={control}
+                  rules={{ required: "Cast image is required" }}
+                  render={({ field: controllerField, fieldState }) => (
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] ?? null;
+                          controllerField.onChange(file);
+                        }}
+                        className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                      />
+                      {fieldState.error && (
+                        <p className="text-red-500">
+                          {fieldState.error.message}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 />
-                {errors?.casts?.[index]?.cast_img && (
-                  <p className="error-msg">
-                    {errors.casts[index].cast_img?.message as string}
-                  </p>
-                )}
               </div>
 
               {index > 0 && (
@@ -599,141 +605,240 @@ export default function AddSeries() {
             <span>Add Cast</span>
           </button>
 
-          {/* Series Mode */}
+          {/* Season Mode */}
           <div className="flex items-center gap-2">
-            <Checkbox
+            {/* <Checkbox
               className="data-[state=checked]:bg-primary-color h-5 w-5 cursor-pointer"
-              id="series-mode"
+              id="season-mode"
               onCheckedChange={() => setIsSeries(!isSeries)}
+              {...register("season_mode")}
             />
             <Label
-              htmlFor="series-mode"
+              htmlFor="season-mode"
+              className="text-base font-medium cursor-pointer"
+            >
+              Enable Season Mode
+            </Label> */}
+
+            <Checkbox
+              className="data-[state=checked]:bg-primary-color h-5 w-5 cursor-pointer"
+              id="season-mode"
+              checked={isSeries} // control the checkbox with state
+              onCheckedChange={(checked) => {
+                const value = checked === true; // true or false
+                setIsSeries(value);
+                setValue("season_mode", value, { shouldValidate: true }); // set RHF boolean
+              }}
+            />
+            <Label
+              htmlFor="season-mode"
               className="text-base font-medium cursor-pointer"
             >
               Enable Season Mode
             </Label>
           </div>
 
-          {/* Series Item */}
-          {isSeries &&
-            seriesFields.map((item, index) => (
-              <div
-                key={item.id}
-                className="grid md:grid-cols-2 xl:grid-cols-4 gap-4 relative border border-gray3-bg p-2"
-              >
-                <div className="md:col-span-2 xl:col-span-4">
-                  <Label className="custom-label mb-3">Season Name</Label>
-                  <Input
-                    placeholder="Series name"
-                    className="custom-content-input"
-                    {...register(`series.${index}.series_name`, {
-                      required: "Series name is required",
-                    })}
-                  />
-                  {errors?.series?.[index]?.series_name && (
-                    <p className="error-msg">
-                      {errors.series[index].series_name?.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label className="custom-label mb-3">Episode Name</Label>
-                  <Input
-                    placeholder="Episode name"
-                    className="custom-content-input"
-                    {...register(`series.${index}.episode_name`, {
-                      required: "Episode name is required",
-                    })}
-                  />
-                  {errors?.series?.[index]?.episode_name && (
-                    <p className="error-msg">
-                      {errors.series[index].episode_name?.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label className="custom-label mb-3">Episode Number</Label>
-                  <Input
-                    placeholder="Episode number"
-                    className="custom-content-input"
-                    {...register(`series.${index}.episode_number`, {
-                      required: "Episode number is required",
-                    })}
-                  />
-                  {errors?.series?.[index]?.episode_number && (
-                    <p className="error-msg">
-                      {errors.series[index].episode_number?.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label className="custom-label mb-3">Episode File</Label>
-                  <input
-                    type="file"
-                    className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white file:px-2"
-                    {...register(`series.${index}.episode_file`, {
-                      required: "Episode file is required",
-                    })}
-                  />
-                  {errors?.series?.[index]?.episode_file && (
-                    <p className="error-msg">
-                      {errors.series[index].episode_file?.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label className="custom-label mb-3">Episode Thumbnail</Label>
-                  <input
-                    type="file"
-                    className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white file:px-2"
-                    {...register(`series.${index}.episode_thumbnail`, {
-                      required: "Episode thumbnail is required",
-                    })}
-                  />
-                  {errors?.series?.[index]?.episode_thumbnail && (
-                    <p className="error-msg">
-                      {
-                        errors.series[index].episode_thumbnail
-                          ?.message as string
-                      }
-                    </p>
-                  )}
-                </div>
-
-                {index > 0 && (
-                  <button
-                    type="button"
-                    className="absolute top-2 right-2 cursor-pointer bg-secondary-color text-white p-1 rounded-sm"
-                    onClick={() => removeSeries(index)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+          {isSeries && (
+            <div className="grid md:grid-cols-3 gap-4">
+              <div>
+                <Label className="custom-label mb-3">Season Name</Label>
+                <Input
+                  placeholder="Season name"
+                  className="custom-content-input"
+                  {...register(`season_name`, {
+                    required: "Season name is required",
+                  })}
+                />
+                {errors.season_name && (
+                  <p className="error-msg">{errors.season_name.message}</p>
                 )}
               </div>
-            ))}
 
-          {isSeries && (
-            <button
-              type="button"
-              onClick={() =>
-                appendSeries({
-                  series_name: "",
-                  episode_name: "",
-                  episode_number: "",
-                  episode_file: null,
-                  episode_thumbnail: null,
-                })
-              }
-              className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer"
-            >
-              <Plus className="w-5 h-5" />
-              <span>Add New Episode</span>
-            </button>
+              <div>
+                <Label className="custom-label mb-3">Release Date</Label>
+
+                <div className="relative">
+                  <Input
+                    type="date"
+                    placeholder="Release Date"
+                    className="custom-content-input white-calendar"
+                    {...register(`release_date`, {
+                      required: "Release date is required",
+                    })}
+                  />
+                </div>
+
+                {errors.release_date && (
+                  <p className="error-msg">{errors.release_date.message}</p>
+                )}
+              </div>
+
+              <div>
+                <Label className="custom-label mb-3">Season Thumbnail</Label>
+                <input
+                  type="file"
+                  className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                  accept="image/*"
+                  {...register(`season_thumbnail`, {
+                    required: "Season Thumbnail is required",
+                  })}
+                />
+                {errors.season_thumbnail && (
+                  <p className="error-msg">
+                    {errors.season_thumbnail.message as string}
+                  </p>
+                )}
+              </div>
+            </div>
           )}
+
+          {/* Series Item */}
+          {seriesFields.map((item, index) => (
+            <div
+              key={item.id}
+              className="grid md:grid-cols-2 xl:grid-cols-3 gap-4 relative border border-gray3-bg p-2"
+            >
+              <div>
+                <Label className="custom-label mb-3">Episode Name</Label>
+                <Input
+                  placeholder="Episode name"
+                  className="custom-content-input"
+                  {...register(`series.${index}.episode_name`, {
+                    required: "Episode name is required",
+                  })}
+                />
+                {errors?.series?.[index]?.episode_name && (
+                  <p className="error-msg">
+                    {errors.series[index].episode_name?.message as string}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label className="custom-label mb-3">Episode Number</Label>
+                <Input
+                  placeholder="Episode number"
+                  className="custom-content-input"
+                  {...register(`series.${index}.episode_number`, {
+                    required: "Episode number is required",
+                  })}
+                />
+                {errors?.series?.[index]?.episode_number && (
+                  <p className="error-msg">
+                    {errors.series[index].episode_number?.message as string}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label className="custom-label mb-3">Duration (seconds)</Label>
+                <Input
+                  type="number"
+                  placeholder="Duration"
+                  className="custom-content-input"
+                  {...register(`series.${index}.episode_duration`, {
+                    required: "Duration is required",
+                  })}
+                />
+                {errors?.series?.[index]?.episode_duration && (
+                  <p className="error-msg">
+                    {errors.series[index].episode_duration?.message as string}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label className="custom-label mb-3">Episode File</Label>
+                <Controller
+                  name={`series.${index}.episode_file`}
+                  control={control}
+                  rules={{ required: "Episode file is required" }}
+                  render={({ field: controllerField, fieldState }) => (
+                    <div>
+                      <input
+                        type="file"
+                        accept="video/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] ?? null;
+                          controllerField.onChange(file);
+                        }}
+                        className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                      />
+                      {fieldState.error && (
+                        <p className="text-red-500">
+                          {fieldState.error.message}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                />
+              </div>
+
+              <div>
+                <Label className="custom-label mb-3">Episode Thumbnail</Label>
+                <Controller
+                  name={`series.${index}.episode_thumbnail`}
+                  control={control}
+                  rules={{ required: "Episode thumbnail is required" }}
+                  render={({ field: controllerField, fieldState }) => (
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] ?? null;
+                          controllerField.onChange(file);
+                        }}
+                        className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                      />
+                      {fieldState.error && (
+                        <p className="text-red-500">
+                          {fieldState.error.message}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                />
+              </div>
+
+              <div>
+                <Label className="custom-label mb-3">Description</Label>
+                <Input
+                  placeholder="Description"
+                  className="custom-content-input"
+                  {...register(`series.${index}.episode_description`)}
+                />
+              </div>
+
+              {index > 0 && (
+                <button
+                  type="button"
+                  className="absolute top-2 right-2 cursor-pointer bg-secondary-color text-white p-1 rounded-sm"
+                  onClick={() => removeSeries(index)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={() =>
+              appendSeries({
+                episode_name: "",
+                episode_number: "",
+                episode_duration: "",
+                episode_file: null,
+                episode_thumbnail: null,
+                episode_description: "",
+              })
+            }
+            className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Add New Episode</span>
+          </button>
 
           {/* Trailer */}
           <div>
@@ -821,18 +926,10 @@ export default function AddSeries() {
           <div>
             <Button
               type="submit"
-              className={`w-full px-6 py-6 ${
-                uploadContent.isError
-                  ? "bg-red-600 hover:bg-red-700"
-                  : "bg-primary-color hover:bg-primary-color"
-              } cursor-pointer rounded text-base font-medium`}
-              disabled={uploadContent.isPending}
+              className={`w-full px-6 py-6 bg-primary-color hover:bg-primary-color cursor-pointer rounded text-base font-medium`}
+              disabled={submitLoading}
             >
-              {uploadContent.isPending
-                ? "Uploading..."
-                : uploadContent.isError
-                ? "Try Again"
-                : "Submit"}
+              {submitLoading ? "Uploading..." : "Submit"}
             </Button>
           </div>
         </div>
