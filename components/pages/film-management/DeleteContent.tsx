@@ -6,31 +6,57 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import DeleteIcon from "@/components/icons/DeleteIcon";
 import { Button } from "@/components/ui/button";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useState } from "react";
+import { toast } from "sonner";
+import { privateAxios } from "@/components/axiosInstance/axios";
 
 export default function DeleteContent({
-  categoryId,
+  type,
+  id,
+  refetch,
 }: {
-  categoryId: string | number;
+  type: string;
+  id: string | number;
+  refetch: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const {
     formState: { errors },
     handleSubmit,
-    control,
   } = useForm<FormData>();
 
   const onSubmit = async (data: FormData) => {
-    console.log(data);
+    setLoading(true);
 
-    setOpen(false);
+    try {
+      if (type === "Movie") {
+        const response = await privateAxios.delete(`/admin/movie/${id}`);
+        if (response.data) {
+          toast.success(response?.data?.message);
+          refetch();
+        }
+      } else {
+        // Series
+        const response = await privateAxios.delete(`/admin/series/${id}`);
+        if (response.data) {
+          toast.success(response?.data?.message);
+          refetch();
+        }
+      }
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message?.message;
+      toast.error(errorMessage);
+    } finally {
+      setOpen(false);
+      setLoading(false);
+    }
   };
 
   return (
@@ -43,7 +69,7 @@ export default function DeleteContent({
 
       <DialogContent className="sm:max-w-[530px] bg-gray3-bg border-gray3-border settingDialog flex justify-center items-center mx-auto">
         <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogHeader className="pb-4 border-b border-[#222733]"></DialogHeader>
+          <DialogHeader className="pb-4"></DialogHeader>
           <DialogDescription className="">
             <div className="flex flex-col items-center justify-center space-y-3 text-center">
               {/* Delete Icon */}
@@ -78,7 +104,7 @@ export default function DeleteContent({
                 type="submit"
                 className="py-3 px-4 bg-secondary-color text-white font-sm font-medium cursor-pointer hover:bg-[#E70D0D] rounded-md"
               >
-                Delete
+                {loading ? "Deleing..." : "Delete"}
               </Button>
             </div>
           </DialogFooter>

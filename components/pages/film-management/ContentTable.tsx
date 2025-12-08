@@ -115,8 +115,6 @@ export default function ContentTable() {
       header: "Duration",
       cell: ({ row }) => (
         <span className="">
-          {row.original.duration}
-
           {row.original.duration
             ? FormatDuration(Number(row.original.duration))
             : ""}
@@ -156,7 +154,11 @@ export default function ContentTable() {
             </Link>
           )}
 
-          <DeleteContent categoryId={row.original.id} />
+          <DeleteContent
+            type={row.original.type}
+            id={row.original.id}
+            refetch={refetch}
+          />
         </div>
       ),
     },
