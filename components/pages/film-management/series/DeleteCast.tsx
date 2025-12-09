@@ -36,7 +36,7 @@ export default function DeleteCast({
 
     try {
       const response = await privateAxios.patch(
-        `/admin/movie/${movieId}`,
+        `/admin/series/${movieId}`,
         form_data
       );
 

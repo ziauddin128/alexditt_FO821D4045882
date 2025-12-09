@@ -48,28 +48,35 @@ type Inputs = {
   status: string;
   video?: string;
   director_thumbnail: File | null | string;
+  director_thumbnail_url: string;
+  movie_thumbnail_url: string;
   file: File | null;
   movie_thumbnail: File | null | string;
   trailer: File | null;
   movie_trailer?: File | null | string;
+  movie_trailer_url: string;
   casts: {
     id: string;
     name: string;
     cast_thumbnail: File | null | string;
+    cast_thumbnail_url: string;
   }[];
   cast_update: {
     id: string;
     name: string;
     cast_thumbnail: File | null | string;
+    cast_thumbnail_url: string;
   }[];
 };
 
 export default function EditMovie({
   movieData,
   isLoading,
+  refetch,
 }: {
   movieData: Inputs;
   isLoading: boolean;
+  refetch: () => void;
 }) {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -171,45 +178,43 @@ export default function EditMovie({
       }
 
       // Updated Cast
-      const updatedCastArray = data.cast_update.map((cast: any, i: number) => ({
-        id: cast.id,
-        name: cast.name,
-        key: `updated_cast_member_${i}`,
-      }));
+      const updatedCastArray = (data.cast_update || []).map(
+        (cast: any, i: number) => ({
+          id: cast.id,
+          name: cast.name,
+          key: `updated_cast_member_${i}`,
+        })
+      );
 
-      formData.append("cast_update", JSON.stringify(updatedCastArray));
+      if (updatedCastArray.length > 0) {
+        formData.append("cast_update", JSON.stringify(updatedCastArray));
 
-      data.cast_update.forEach((cast, i) => {
-        if (cast.cast_thumbnail instanceof File) {
-          formData.append(`updated_cast_member_${i}`, cast.cast_thumbnail);
-        }
-      });
+        (data.cast_update || []).forEach((cast, i) => {
+          if (cast.cast_thumbnail instanceof File) {
+            formData.append(`updated_cast_member_${i}`, cast.cast_thumbnail);
+          }
+        });
+      }
 
       // New Casts
-      const castArray = data.casts.map((cast: any, i: number) => ({
+      const castArray = (data.casts || []).map((cast: any, i: number) => ({
         key: `cast_member_${i}`,
         name: cast.name,
       }));
 
-      formData.append("cast", JSON.stringify(castArray));
+      if (castArray.length > 0) {
+        formData.append("cast", JSON.stringify(castArray));
 
-      data.casts.forEach((cast, i) => {
-        if (cast.cast_thumbnail instanceof File) {
-          formData.append(`cast_member_${i}`, cast.cast_thumbnail);
-        }
-      });
+        (data.casts || []).forEach((cast, i) => {
+          if (cast.cast_thumbnail instanceof File) {
+            formData.append(`cast_member_${i}`, cast.cast_thumbnail);
+          }
+        });
+      }
 
-      /* console.log("FormData Contents:");
-      formData.forEach((value, key) => {
-        //console.log(`${key}: ${value}`);
-
-        if (value instanceof File) {
-          console.log(
-            `${key}: name=${value.name}, size=${value.size} bytes, type=${value.type}`
-          );
-        } else {
-          console.log(`${key}: ${value}`);
-        }
+      // Print Form Data
+      /*   formData.forEach((value, key) => {
+        console.log(`${key}: ${value}`);
       });
 
       return; */
@@ -328,8 +333,8 @@ export default function EditMovie({
                     </p>
                   )}
 
-                  <p className="text-green-500 text-sm mt-1">
-                    {(movieData?.video as string) || ""}
+                  <p className="text-green-500 text-sm mt-1 break-all">
+                    {(movieData?.movie_thumbnail_url as string) || ""}
                   </p>
 
                   {errors.file && (
@@ -624,8 +629,8 @@ export default function EditMovie({
                             field.onChange(file);
                           }}
                         />
-                        <p className="text-green-500 text-sm mt-1">
-                          {(movieData?.director_thumbnail as string) || ""}
+                        <p className="text-green-500 text-sm mt-1 break-all">
+                          {(movieData?.director_thumbnail_url as string) || ""}
                         </p>
                         {/* {fieldState.error && (
                           <p className="text-red-500">
@@ -689,15 +694,19 @@ export default function EditMovie({
                                 className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
                               />
 
-                              <p className="text-green-500 text-sm mt-1">
-                                {cast?.cast_thumbnail as string}
+                              <p className="text-green-500 text-sm mt-1 break-all">
+                                {cast?.cast_thumbnail_url as string}
                               </p>
                             </div>
                           )}
                         />
                       </div>
 
-                      <DeleteCast movieId={movieData?.id || ""} id={cast?.id} />
+                      <DeleteCast
+                        movieId={movieData?.id || ""}
+                        id={cast?.id}
+                        refetch={refetch}
+                      />
                     </div>
                   ))
                 : null}
@@ -741,11 +750,9 @@ export default function EditMovie({
                             }}
                             className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
                           />
-
-                          <p className="text-green-500 text-sm mt-1">
+                          <p className="text-green-500 text-sm mt-1 break-all">
                             {castFields[index].cast_thumbnail as string}
                           </p>
-
                           {/*  {fieldState.error && (
                             <p className="text-red-500">
                               {fieldState.error.message}
@@ -769,7 +776,12 @@ export default function EditMovie({
               <button
                 type="button"
                 onClick={() =>
-                  appendCast({ id: "", name: "", cast_thumbnail: null })
+                  appendCast({
+                    id: "",
+                    name: "",
+                    cast_thumbnail: null,
+                    cast_thumbnail_url: "",
+                  })
                 }
                 className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer"
               >
@@ -805,8 +817,8 @@ export default function EditMovie({
                       </div>
                     </div>
                     <input type="hidden" {...register("trailer")} />
-                    <p className="text-green-500 text-sm mt-1">
-                      {(movieData?.movie_trailer as string) || ""}
+                    <p className="text-green-500 text-sm mt-1 break-all">
+                      {(movieData?.movie_trailer_url as string) || ""}
                     </p>
                     {errors.trailer && (
                       <p className="mt-1 text-sm text-red-500">
@@ -838,10 +850,6 @@ export default function EditMovie({
                             Choose File
                           </span>
                           <span className="text-white">
-                            {/* {thumbnail
-                              ? (thumbnail.name)
-                              : "No file chosen"} */}
-
                             {thumbnail
                               ? typeof thumbnail === "string"
                                 ? thumbnail
@@ -852,8 +860,8 @@ export default function EditMovie({
                       </div>
                     </div>
                     <input type="hidden" {...register("movie_thumbnail")} />
-                    <p className="text-green-500 text-sm mt-1">
-                      {(movieData?.movie_thumbnail as string) || ""}
+                    <p className="text-green-500 text-sm mt-1 break-all">
+                      {(movieData?.movie_thumbnail_url as string) || ""}
                     </p>
                     {errors.movie_thumbnail && (
                       <p className="mt-1 text-sm text-red-500">

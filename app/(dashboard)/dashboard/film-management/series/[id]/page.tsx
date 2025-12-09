@@ -11,7 +11,7 @@ export default function EditSeriesPage({ params }: { params: any }) {
   const router = useRouter();
 
   // Fetch Data
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ["movieDet", id],
     queryFn: async () => {
       try {
@@ -23,5 +23,11 @@ export default function EditSeriesPage({ params }: { params: any }) {
     },
   });
 
-  return <EditSeries movieData={data?.data} isLoading={isLoading} />;
+  return (
+    <EditSeries
+      movieData={data?.data}
+      isLoading={isLoading}
+      refetch={refetch}
+    />
+  );
 }

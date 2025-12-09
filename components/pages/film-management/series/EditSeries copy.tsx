@@ -26,6 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import ReactSelect from "react-select";
 import { toast } from "sonner";
+import DeleteCast from "./DeleteCast";
 
 interface Category {
   id: string;
@@ -33,20 +34,34 @@ interface Category {
 }
 
 type Inputs = {
+  id?: string;
   title: string;
   genres: string;
   kids_mode: boolean;
   description: string;
   category_id: string;
+  status: string;
   director_name: string;
-  director_thumbnail: File | null;
+  director_thumbnail: File | null | string;
   thumbnailImg: File | null;
+  series_thumbnail: File | null | string;
   trailer: File | null;
-  casts: { cast: string; cast_img: File | null }[];
+  series_trailer: File | null | string;
+  seasons: [];
   season_mode?: boolean;
   season_name?: string;
   release_date?: string;
   season_thumbnail?: string;
+  casts: {
+    id: string;
+    name: string;
+    cast_thumbnail: File | null | string;
+  }[];
+  cast_update: {
+    id: string;
+    name: string;
+    cast_thumbnail: File | null | string;
+  }[];
   series: {
     episode_name: string;
     episode_number: string;
@@ -55,13 +70,28 @@ type Inputs = {
     episode_thumbnail: File | null;
     episode_description: string;
   }[];
+  episodes: {
+    id: string;
+    episode_number: string;
+    title: string;
+    description: string;
+    duration: string;
+    episode_thumbnails: string;
+    episode_videos: string;
+    series_id: string;
+  }[];
 };
 
-export default function AddSeries() {
+export default function EditSeries({
+  movieData,
+  isLoading,
+}: {
+  movieData: Inputs;
+  isLoading: boolean;
+}) {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [isSeries, setIsSeries] = useState(false);
-  const queryClient = useQueryClient();
 
   // Genre
   const { data: allGenre, isLoading: isGenreLoading } = useQuery({
@@ -96,23 +126,12 @@ export default function AddSeries() {
     formState: { errors },
   } = useForm<Inputs>({
     defaultValues: {
-      title: "",
-      genres: "",
-      description: "",
-      category_id: "",
+      category_id: movieData?.category_id,
+      status: movieData?.status,
       thumbnailImg: null,
       trailer: null,
-      casts: [{ cast: "", cast_img: null }],
-      series: [
-        {
-          episode_name: "",
-          episode_number: "",
-          episode_duration: "",
-          episode_file: null,
-          episode_thumbnail: null,
-          episode_description: "",
-        },
-      ],
+      casts: [],
+      series: [],
     },
   });
 
@@ -176,8 +195,6 @@ export default function AddSeries() {
   }); */
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    // console.log("All File Data", data);
-
     setSubmitLoading(true);
 
     try {
@@ -216,8 +233,8 @@ export default function AddSeries() {
       formData.append("cast", JSON.stringify(castArray));
 
       data.casts.forEach((cast, i) => {
-        if (cast.cast_img instanceof File) {
-          formData.append(`cast_member_${i}`, cast.cast_img);
+        if (cast.cast_thumbnail instanceof File) {
+          formData.append(`cast_member_${i}`, cast.cast_thumbnail);
         }
       });
 
@@ -266,9 +283,7 @@ export default function AddSeries() {
         console.log(`${key}: ${value}`);
       });
 
-      return; */
-
-      const response = await privateAxios.post(
+      return */ const response = await privateAxios.post(
         `/admin/series/create`,
         formData,
         {
@@ -342,6 +357,7 @@ export default function AddSeries() {
                 placeholder="Type your movie name"
                 className="custom-content-input"
                 {...register("title", { required: "Title is required" })}
+                defaultValue={movieData?.title || ""}
               />
               {errors.title && (
                 <p className="error-msg">{errors.title.message}</p>
@@ -355,6 +371,11 @@ export default function AddSeries() {
                 name="genres"
                 control={control}
                 rules={{ required: "Select at least one genre" }}
+                defaultValue={
+                  genreOption?.filter((option: any) =>
+                    movieData?.genres?.includes(option.value)
+                  ) || []
+                }
                 render={({ field, fieldState }) => (
                   <div>
                     <ReactSelect
@@ -362,6 +383,7 @@ export default function AddSeries() {
                       options={genreOption}
                       className="basic-multi-select custom-multi-select"
                       classNamePrefix="select"
+                      value={field.value}
                       onChange={(selected) => field.onChange(selected)}
                     />
 
@@ -383,7 +405,7 @@ export default function AddSeries() {
             <Controller
               name="kids_mode"
               control={control}
-              defaultValue={false}
+              defaultValue={movieData?.kids_mode}
               render={({ field }) => (
                 <Checkbox
                   id="kids_mode"
@@ -404,6 +426,7 @@ export default function AddSeries() {
               {...register("description", {
                 required: "Description is required",
               })}
+              defaultValue={movieData?.description || ""}
             />
             {errors.description && (
               <p className="error-msg">{errors.description.message}</p>
@@ -411,7 +434,7 @@ export default function AddSeries() {
           </div>
 
           {/* Content Type */}
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             {/* Type */}
             <div>
               <Label className="custom-label mb-3">Content Category</Label>
@@ -419,17 +442,13 @@ export default function AddSeries() {
               <Controller
                 name="category_id"
                 control={control}
-                defaultValue=""
+                defaultValue={movieData?.category_id?.toString() ?? ""}
                 rules={{
                   validate: (value) =>
                     value !== "" || "Content category is required",
                 }}
                 render={({ field }) => (
-                  <Select
-                    {...field}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger className="custom-content-input cursor-pointer">
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
@@ -458,32 +477,39 @@ export default function AddSeries() {
             </div>
 
             {/* Status */}
-            {/* <div>
+            <div>
               <Label className="custom-label mb-3">Content Status</Label>
               <Controller
-                name="contentType"
+                name="status"
                 control={control}
-                defaultValue=""
+                defaultValue={movieData?.status || ""}
                 rules={{
-                  validate: (value) =>
-                    value !== "" || "Content type is required",
+                  validate: (value) => value !== "" || "Status is required",
                 }}
                 render={({ field }) => (
-                  <Select
-                    {...field}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger className="custom-content-input cursor-pointer">
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
                       <SelectGroup className="space-y-2">
                         <SelectItem
+                          value="LIVE"
+                          className="selectOption !justify-start"
+                        >
+                          LIVE
+                        </SelectItem>
+                        <SelectItem
                           value="PUBLISHED"
                           className="selectOption !justify-start"
                         >
                           PUBLISHED
+                        </SelectItem>
+                        <SelectItem
+                          value="UNPUBLISHED"
+                          className="selectOption !justify-start"
+                        >
+                          UNPUBLISHED
                         </SelectItem>
                         <SelectItem
                           value="DRAFT"
@@ -497,10 +523,10 @@ export default function AddSeries() {
                 )}
               />
 
-              {errors.contentType && (
-                <p className="error-msg">{errors.contentType.message}</p>
+              {errors.status && (
+                <p className="error-msg">{errors.status.message}</p>
               )}
-            </div> */}
+            </div>
           </div>
 
           {/* Director */}
@@ -513,6 +539,7 @@ export default function AddSeries() {
                 {...register("director_name", {
                   required: "Director name is required",
                 })}
+                defaultValue={movieData?.director_name || ""}
               />
               {errors.director_name && (
                 <p className="error-msg">{errors.director_name.message}</p>
@@ -521,44 +548,94 @@ export default function AddSeries() {
 
             <div>
               <Label className="custom-label mb-3">Director Image</Label>
-
-              <Controller
-                control={control}
-                name="director_thumbnail"
-                rules={{ required: "Director image is required" }}
-                render={({ field, fieldState }) => (
-                  <div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white file:px-2"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0] ?? null;
-                        field.onChange(file);
-                      }}
-                    />
-                    {fieldState.error && (
-                      <p className="text-red-500">{fieldState.error.message}</p>
-                    )}
-                  </div>
-                )}
-              />
-
-              {/* <div>
-                <input
-                  type="file"
-                  className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white  file:px-2"
-                  accept="image/*"
-                  {...register("director_thumbnail", {
-                    required: "Director image is required",
-                  })}
+              <div>
+                <Controller
+                  control={control}
+                  name="director_thumbnail"
+                  render={({ field, fieldState }) => (
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] ?? null;
+                          field.onChange(file);
+                        }}
+                      />
+                      <p className="text-green-500 text-sm mt-1">
+                        {(movieData?.director_thumbnail as string) || ""}
+                      </p>
+                    </div>
+                  )}
                 />
               </div>
-              {errors.director_thumbnail && (
-                <p className="error-msg">{errors.director_thumbnail.message}</p>
-              )} */}
             </div>
           </div>
+
+          {/* Cast From API */}
+          {movieData?.casts && movieData?.casts.length > 0
+            ? movieData.casts.map((cast, index) => (
+                <div
+                  key={cast.id}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4 relative border border-gray3-bg p-2"
+                >
+                  <Input
+                    hidden
+                    placeholder="Cast ID"
+                    className="custom-content-input"
+                    {...register(`cast_update.${index}.id`, {
+                      required: "Cast id is required",
+                    })}
+                    defaultValue={cast?.id}
+                  />
+
+                  <div>
+                    <Label className="custom-label mb-3">Cast</Label>
+                    <Input
+                      placeholder="Cast name"
+                      className="custom-content-input"
+                      {...register(`cast_update.${index}.name`, {
+                        required: "Cast name is required",
+                      })}
+                      defaultValue={cast?.name}
+                    />
+                    {errors?.cast_update?.[index]?.name && (
+                      <p className="error-msg">
+                        {errors.cast_update[index].name?.message as string}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label className="custom-label mb-3">Cast Image</Label>
+                    <Controller
+                      name={`cast_update.${index}.cast_thumbnail`}
+                      control={control}
+                      render={({ field: controllerField, fieldState }) => (
+                        <div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0] ?? null;
+                              controllerField.onChange(file);
+                            }}
+                            className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                          />
+
+                          <p className="text-green-500 text-sm mt-1">
+                            {cast?.cast_thumbnail as string}
+                          </p>
+                        </div>
+                      )}
+                    />
+                  </div>
+
+                  <DeleteCast movieId={movieData?.id || ""} id={cast?.id} />
+                </div>
+              ))
+            : null}
 
           {/* Cast */}
           {castFields.map((item, index) => (
@@ -571,13 +648,13 @@ export default function AddSeries() {
                 <Input
                   placeholder="Cast name"
                   className="custom-content-input"
-                  {...register(`casts.${index}.cast`, {
+                  {...register(`casts.${index}.name`, {
                     required: "Cast name is required",
                   })}
                 />
-                {errors?.casts?.[index]?.cast && (
+                {errors?.casts?.[index]?.name && (
                   <p className="error-msg">
-                    {errors.casts[index].cast?.message as string}
+                    {errors.casts[index].name?.message as string}
                   </p>
                 )}
               </div>
@@ -585,9 +662,9 @@ export default function AddSeries() {
               <div>
                 <Label className="custom-label mb-3">Cast Image</Label>
                 <Controller
-                  name={`casts.${index}.cast_img`}
+                  name={`casts.${index}.cast_thumbnail`}
                   control={control}
-                  rules={{ required: "Cast image is required" }}
+                  // rules={{ required: "Cast image is required" }}
                   render={({ field: controllerField, fieldState }) => (
                     <div>
                       <input
@@ -599,11 +676,16 @@ export default function AddSeries() {
                         }}
                         className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
                       />
-                      {fieldState.error && (
+
+                      <p className="text-green-500 text-sm mt-1">
+                        {castFields[index].cast_thumbnail as string}
+                      </p>
+
+                      {/*   {fieldState.error && (
                         <p className="text-red-500">
                           {fieldState.error.message}
                         </p>
-                      )}
+                      )} */}
                     </div>
                   )}
                 />
@@ -623,246 +705,13 @@ export default function AddSeries() {
 
           <button
             type="button"
-            onClick={() => appendCast({ cast: "", cast_img: null })}
-            className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Add Cast</span>
-          </button>
-
-          {/* Season Mode */}
-          <div className="flex items-center gap-2">
-            {/* <Checkbox
-              className="data-[state=checked]:bg-primary-color h-5 w-5 cursor-pointer"
-              id="season-mode"
-              onCheckedChange={() => setIsSeries(!isSeries)}
-              {...register("season_mode")}
-            />
-            <Label
-              htmlFor="season-mode"
-              className="text-base font-medium cursor-pointer"
-            >
-              Enable Season Mode
-            </Label> */}
-
-            <Checkbox
-              className="data-[state=checked]:bg-primary-color h-5 w-5 cursor-pointer"
-              id="season-mode"
-              checked={isSeries} // control the checkbox with state
-              onCheckedChange={(checked) => {
-                const value = checked === true; // true or false
-                setIsSeries(value);
-                setValue("season_mode", value, { shouldValidate: true }); // set RHF boolean
-              }}
-            />
-            <Label
-              htmlFor="season-mode"
-              className="text-base font-medium cursor-pointer"
-            >
-              Enable Season Mode
-            </Label>
-          </div>
-
-          {isSeries && (
-            <div className="grid md:grid-cols-3 gap-4">
-              <div>
-                <Label className="custom-label mb-3">Season Name</Label>
-                <Input
-                  placeholder="Season name"
-                  className="custom-content-input"
-                  {...register(`season_name`, {
-                    required: "Season name is required",
-                  })}
-                />
-                {errors.season_name && (
-                  <p className="error-msg">{errors.season_name.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label className="custom-label mb-3">Release Date</Label>
-
-                <div className="relative">
-                  <Input
-                    type="date"
-                    placeholder="Release Date"
-                    className="custom-content-input white-calendar"
-                    {...register(`release_date`, {
-                      required: "Release date is required",
-                    })}
-                  />
-                </div>
-
-                {errors.release_date && (
-                  <p className="error-msg">{errors.release_date.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label className="custom-label mb-3">Season Thumbnail</Label>
-                <input
-                  type="file"
-                  className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white file:px-2"
-                  accept="image/*"
-                  {...register(`season_thumbnail`, {
-                    required: "Season Thumbnail is required",
-                  })}
-                />
-                {errors.season_thumbnail && (
-                  <p className="error-msg">
-                    {errors.season_thumbnail.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Series Item */}
-          {seriesFields.map((item, index) => (
-            <div
-              key={item.id}
-              className="grid md:grid-cols-2 xl:grid-cols-3 gap-4 relative border border-gray3-bg p-2"
-            >
-              <div>
-                <Label className="custom-label mb-3">Episode Name</Label>
-                <Input
-                  placeholder="Episode name"
-                  className="custom-content-input"
-                  {...register(`series.${index}.episode_name`, {
-                    required: "Episode name is required",
-                  })}
-                />
-                {errors?.series?.[index]?.episode_name && (
-                  <p className="error-msg">
-                    {errors.series[index].episode_name?.message as string}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <Label className="custom-label mb-3">Episode Number</Label>
-                <Input
-                  placeholder="Episode number"
-                  className="custom-content-input"
-                  {...register(`series.${index}.episode_number`, {
-                    required: "Episode number is required",
-                  })}
-                />
-                {errors?.series?.[index]?.episode_number && (
-                  <p className="error-msg">
-                    {errors.series[index].episode_number?.message as string}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <Label className="custom-label mb-3">Duration (seconds)</Label>
-                <Input
-                  type="number"
-                  placeholder="Duration"
-                  className="custom-content-input"
-                  {...register(`series.${index}.episode_duration`, {
-                    required: "Duration is required",
-                  })}
-                />
-                {errors?.series?.[index]?.episode_duration && (
-                  <p className="error-msg">
-                    {errors.series[index].episode_duration?.message as string}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <Label className="custom-label mb-3">Episode File</Label>
-                <Controller
-                  name={`series.${index}.episode_file`}
-                  control={control}
-                  rules={{ required: "Episode file is required" }}
-                  render={({ field: controllerField, fieldState }) => (
-                    <div>
-                      <input
-                        type="file"
-                        accept="video/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0] ?? null;
-                          controllerField.onChange(file);
-                        }}
-                        className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
-                      />
-                      {fieldState.error && (
-                        <p className="text-red-500">
-                          {fieldState.error.message}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                />
-              </div>
-
-              <div>
-                <Label className="custom-label mb-3">Episode Thumbnail</Label>
-                <Controller
-                  name={`series.${index}.episode_thumbnail`}
-                  control={control}
-                  rules={{ required: "Episode thumbnail is required" }}
-                  render={({ field: controllerField, fieldState }) => (
-                    <div>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0] ?? null;
-                          controllerField.onChange(file);
-                        }}
-                        className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
-                      />
-                      {fieldState.error && (
-                        <p className="text-red-500">
-                          {fieldState.error.message}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                />
-              </div>
-
-              <div>
-                <Label className="custom-label mb-3">Description</Label>
-                <Input
-                  placeholder="Description"
-                  className="custom-content-input"
-                  {...register(`series.${index}.episode_description`)}
-                />
-              </div>
-
-              {index > 0 && (
-                <button
-                  type="button"
-                  className="absolute top-2 right-2 cursor-pointer bg-secondary-color text-white p-1 rounded-sm"
-                  onClick={() => removeSeries(index)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          ))}
-
-          <button
-            type="button"
             onClick={() =>
-              appendSeries({
-                episode_name: "",
-                episode_number: "",
-                episode_duration: "",
-                episode_file: null,
-                episode_thumbnail: null,
-                episode_description: "",
-              })
+              appendCast({ id: "", name: "", cast_thumbnail: null })
             }
             className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer"
           >
             <Plus className="w-5 h-5" />
-            <span>Add New Episode</span>
+            <span>Add Cast</span>
           </button>
 
           {/* Trailer */}
@@ -892,12 +741,10 @@ export default function AddSeries() {
                     </div>
                   </div>
                 </div>
-                <input
-                  type="hidden"
-                  {...register("trailer", {
-                    required: "Trailer is required",
-                  })}
-                />
+                <input type="hidden" {...register("trailer")} />
+                <p className="text-green-500 text-sm mt-1">
+                  {(movieData?.series_trailer as string) || ""}
+                </p>
                 {errors.trailer && (
                   <p className="mt-1 text-sm text-red-500">
                     {errors.trailer.message as string}
@@ -928,20 +775,23 @@ export default function AddSeries() {
                         Choose File
                       </span>
                       <span className="text-white">
-                        {thumbnail ? thumbnail.name : "No file chosen"}
+                        {/* {thumbnail ? thumbnail.name : "No file chosen"} */}
+                        {thumbnail
+                          ? typeof thumbnail === "string"
+                            ? thumbnail
+                            : thumbnail.name
+                          : "No file chosen"}
                       </span>
                     </div>
                   </div>
                 </div>
-                <input
-                  type="hidden"
-                  {...register("thumbnailImg", {
-                    required: "Thumbnail image is required",
-                  })}
-                />
-                {errors.thumbnailImg && (
+                <input type="hidden" {...register("series_thumbnail")} />
+                <p className="text-green-500 text-sm mt-1">
+                  {(movieData?.series_thumbnail as string) || ""}
+                </p>
+                {errors.series_thumbnail && (
                   <p className="mt-1 text-sm text-red-500">
-                    {errors.thumbnailImg.message as string}
+                    {errors.series_thumbnail.message as string}
                   </p>
                 )}
               </div>

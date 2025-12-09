@@ -26,6 +26,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import ReactSelect from "react-select";
 import { toast } from "sonner";
+import LoadingSpinner from "@/app/(dashboard)/loading";
+import DeleteCast from "./DeleteCast";
 
 interface Category {
   id: string;
@@ -33,20 +35,34 @@ interface Category {
 }
 
 type Inputs = {
+  id?: string;
   title: string;
   genres: string;
   kids_mode: boolean;
   description: string;
   category_id: string;
+  status: string;
   director_name: string;
-  director_thumbnail: File | null;
+  director_thumbnail: File | null | string;
   thumbnailImg: File | null;
+  series_thumbnail: File | null | string;
   trailer: File | null;
-  casts: { cast: string; cast_img: File | null }[];
+  series_trailer: File | null | string;
+  seasons: [];
   season_mode?: boolean;
   season_name?: string;
   release_date?: string;
   season_thumbnail?: string;
+  casts: {
+    id: string;
+    name: string;
+    cast_thumbnail: File | null | string;
+  }[];
+  cast_update: {
+    id: string;
+    name: string;
+    cast_thumbnail: File | null | string;
+  }[];
   series: {
     episode_name: string;
     episode_number: string;
@@ -55,21 +71,29 @@ type Inputs = {
     episode_thumbnail: File | null;
     episode_description: string;
   }[];
+  episodes: {
+    id: string;
+    episode_number: string;
+    title: string;
+    description: string;
+    duration: string;
+    episode_thumbnails: string;
+    episode_videos: string;
+    series_id: string;
+  }[];
 };
 
 export default function EditSeries({
   movieData,
   isLoading,
+  refetch,
 }: {
   movieData: Inputs;
   isLoading: boolean;
+  refetch: () => void;
 }) {
-  console.log("Series Data", movieData);
-
   const [submitLoading, setSubmitLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-  const [isSeries, setIsSeries] = useState(false);
-  const queryClient = useQueryClient();
 
   // Genre
   const { data: allGenre, isLoading: isGenreLoading } = useQuery({
@@ -104,23 +128,12 @@ export default function EditSeries({
     formState: { errors },
   } = useForm<Inputs>({
     defaultValues: {
-      title: "",
-      genres: "",
-      description: "",
-      category_id: "",
+      category_id: movieData?.category_id,
+      status: movieData?.status,
       thumbnailImg: null,
       trailer: null,
-      casts: [{ cast: "", cast_img: null }],
-      series: [
-        {
-          episode_name: "",
-          episode_number: "",
-          episode_duration: "",
-          episode_file: null,
-          episode_thumbnail: null,
-          episode_description: "",
-        },
-      ],
+      casts: [],
+      series: [],
     },
   });
 
@@ -131,16 +144,6 @@ export default function EditSeries({
   } = useFieldArray({
     control,
     name: "casts",
-  });
-
-  // For series
-  const {
-    fields: seriesFields,
-    append: appendSeries,
-    remove: removeSeries,
-  } = useFieldArray({
-    control,
-    name: "series",
   });
 
   const trailer = watch("trailer");
@@ -184,8 +187,6 @@ export default function EditSeries({
   }); */
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    console.log("All File Data", data);
-
     setSubmitLoading(true);
 
     try {
@@ -205,77 +206,60 @@ export default function EditSeries({
       formData.append("genres", genreString);
 
       formData.append("kids_mode", data.kids_mode ? "true" : "false");
-
       formData.append("description", data.description);
+
       formData.append("category_id", data.category_id);
+      formData.append("status", data.status);
 
       formData.append("director_name", data.director_name);
-
       if (data.director_thumbnail) {
         formData.append("director_thumbnail", data.director_thumbnail);
       }
 
-      // Casts
-      const castArray = data.casts.map((cast: any, i: number) => ({
-        key: `cast_member_${i}`,
-        name: cast.cast,
-      }));
+      // Updated Cast
+      const updatedCastArray = (data.cast_update || []).map(
+        (cast: any, i: number) => ({
+          id: cast.id,
+          name: cast.name,
+          key: `updated_cast_member_${i}`,
+        })
+      );
 
-      formData.append("cast", JSON.stringify(castArray));
+      if (updatedCastArray.length > 0) {
+        formData.append("cast_update", JSON.stringify(updatedCastArray));
 
-      data.casts.forEach((cast, i) => {
-        if (cast.cast_img instanceof File) {
-          formData.append(`cast_member_${i}`, cast.cast_img);
-        }
-      });
-
-      // Season Info
-      if (data.season_mode) {
-        const releaseDate = new Date(data.release_date || "");
-
-        const seasonInfo = {
-          title: data.season_name || "",
-          release_date: releaseDate.toISOString(),
-        };
-
-        formData.append("season_info", JSON.stringify(seasonInfo));
-
-        if (data.season_thumbnail && data.season_thumbnail?.length > 0) {
-          formData.append("season_thumbnail", data.season_thumbnail[0]);
-        }
+        (data.cast_update || []).forEach((cast, i) => {
+          if (cast.cast_thumbnail instanceof File) {
+            formData.append(`updated_cast_member_${i}`, cast.cast_thumbnail);
+          }
+        });
       }
 
-      // Episodes
-      const episodeArray = data.series.map((episode: any, i: number) => ({
-        key: `ep${i}`,
-        episode_number: episode.episode_number,
-        title: episode.episode_name,
-        description: episode.episode_description,
-        duration: episode.episode_duration,
+      // New Casts
+      const castArray = (data.casts || []).map((cast: any, i: number) => ({
+        key: `cast_member_${i}`,
+        name: cast.name,
       }));
 
-      formData.append("episodes", JSON.stringify(episodeArray));
+      if (castArray.length > 0) {
+        formData.append("cast", JSON.stringify(castArray));
 
-      data.series.forEach((episode, i) => {
-        if (episode.episode_file instanceof File) {
-          formData.append(`episode_ep${i}_video`, episode.episode_file);
-        }
-
-        if (episode.episode_thumbnail instanceof File) {
-          formData.append(
-            `episode_ep${i}_thumbnail`,
-            episode.episode_thumbnail
-          );
-        }
-      });
+        (data.casts || []).forEach((cast, i) => {
+          if (cast.cast_thumbnail instanceof File) {
+            formData.append(`cast_member_${i}`, cast.cast_thumbnail);
+          }
+        });
+      }
 
       // Print Form Data
       /*  formData.forEach((value, key) => {
         console.log(`${key}: ${value}`);
       });
 
-      return */ const response = await privateAxios.post(
-        `/admin/series/create`,
+      return; */
+
+      const response = await privateAxios.patch(
+        `/admin/series/${movieData?.id}`,
         formData,
         {
           headers: {
@@ -283,9 +267,7 @@ export default function EditSeries({
           },
         }
       );
-
-      reset();
-      toast.success(response.data?.message || "Series added successfully!");
+      toast.success(response.data?.message || "Series updated successfully!");
     } catch (error: any) {
       const message = error?.response?.data?.message || "Something went wrong!";
       throw new Error(message);
@@ -334,614 +316,488 @@ export default function EditSeries({
   }; */
 
   return (
-    <div>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-1  gap-6"
-      >
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Title */}
-            <div>
-              <Label className="custom-label mb-3">Title</Label>
-              <Input
-                placeholder="Type your movie name"
-                className="custom-content-input"
-                {...register("title", { required: "Title is required" })}
-              />
-              {errors.title && (
-                <p className="error-msg">{errors.title.message}</p>
-              )}
-            </div>
+    <>
+      {isLoading ? (
+        <LoadingSpinner />
+      ) : (
+        <div>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="grid grid-cols-1  gap-6"
+          >
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Title */}
+                <div>
+                  <Label className="custom-label mb-3">Title</Label>
+                  <Input
+                    placeholder="Type your movie name"
+                    className="custom-content-input"
+                    {...register("title", { required: "Title is required" })}
+                    defaultValue={movieData?.title || ""}
+                  />
+                  {errors.title && (
+                    <p className="error-msg">{errors.title.message}</p>
+                  )}
+                </div>
 
-            {/* Genre */}
-            <div>
-              <Label className="custom-label mb-3">Genre</Label>
-              <Controller
-                name="genres"
-                control={control}
-                rules={{ required: "Select at least one genre" }}
-                render={({ field, fieldState }) => (
-                  <div>
-                    <ReactSelect
-                      isMulti
-                      options={genreOption}
-                      className="basic-multi-select custom-multi-select"
-                      classNamePrefix="select"
-                      onChange={(selected) => field.onChange(selected)}
+                {/* Genre */}
+                <div>
+                  <Label className="custom-label mb-3">Genre</Label>
+                  <Controller
+                    name="genres"
+                    control={control}
+                    rules={{ required: "Select at least one genre" }}
+                    defaultValue={
+                      genreOption?.filter((option: any) =>
+                        movieData?.genres?.includes(option.value)
+                      ) || []
+                    }
+                    render={({ field, fieldState }) => (
+                      <div>
+                        <ReactSelect
+                          isMulti
+                          options={genreOption}
+                          className="basic-multi-select custom-multi-select"
+                          classNamePrefix="select"
+                          value={field.value}
+                          onChange={(selected) => field.onChange(selected)}
+                        />
+
+                        {fieldState.error && (
+                          <p className="error-msg">
+                            {fieldState.error.message}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Kids Mode */}
+              <Label
+                htmlFor="kids_mode"
+                className="text-base flex items-center justify-between gap-3 border-gray3-bg bg-secondary-bg rounded px-4 py-5 cursor-pointer w-full"
+              >
+                <span> Kids Mode</span>
+                <Controller
+                  name="kids_mode"
+                  control={control}
+                  defaultValue={movieData?.kids_mode}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="kids_mode"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className="data-[state=checked]:bg-primary-color data-[state=checked]:border-primary-color rounded-full h-5 w-5"
                     />
+                  )}
+                />
+              </Label>
 
-                    {fieldState.error && (
-                      <p className="error-msg">{fieldState.error.message}</p>
+              {/* Description */}
+              <div>
+                <Label className="custom-label mb-3">Description</Label>
+                <Textarea
+                  placeholder="Enter a short description"
+                  className="custom-content-input"
+                  {...register("description", {
+                    required: "Description is required",
+                  })}
+                  defaultValue={movieData?.description || ""}
+                />
+                {errors.description && (
+                  <p className="error-msg">{errors.description.message}</p>
+                )}
+              </div>
+
+              {/* Content Type */}
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Type */}
+                <div>
+                  <Label className="custom-label mb-3">Content Category</Label>
+
+                  <Controller
+                    name="category_id"
+                    control={control}
+                    defaultValue={movieData?.category_id?.toString() ?? ""}
+                    rules={{
+                      validate: (value) =>
+                        value !== "" || "Content category is required",
+                    }}
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="custom-content-input cursor-pointer">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
+                          <SelectGroup className="space-y-2">
+                            {allCategory?.data?.map(
+                              (item: Category, idx: number) => (
+                                <SelectItem
+                                  key={idx}
+                                  className="selectOption !justify-start"
+                                  value={item?.id}
+                                >
+                                  {item?.category_name}
+                                </SelectItem>
+                              )
+                            )}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+
+                  {errors.category_id && (
+                    <p className="error-msg">{errors.category_id.message}</p>
+                  )}
+                </div>
+
+                {/* Status */}
+                <div>
+                  <Label className="custom-label mb-3">Content Status</Label>
+                  <Controller
+                    name="status"
+                    control={control}
+                    defaultValue={movieData?.status || ""}
+                    rules={{
+                      validate: (value) => value !== "" || "Status is required",
+                    }}
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="custom-content-input cursor-pointer">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
+                          <SelectGroup className="space-y-2">
+                            <SelectItem
+                              value="LIVE"
+                              className="selectOption !justify-start"
+                            >
+                              LIVE
+                            </SelectItem>
+                            <SelectItem
+                              value="PUBLISHED"
+                              className="selectOption !justify-start"
+                            >
+                              PUBLISHED
+                            </SelectItem>
+                            <SelectItem
+                              value="UNPUBLISHED"
+                              className="selectOption !justify-start"
+                            >
+                              UNPUBLISHED
+                            </SelectItem>
+                            <SelectItem
+                              value="DRAFT"
+                              className="selectOption !justify-start"
+                            >
+                              DRAFT
+                            </SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+
+                  {errors.status && (
+                    <p className="error-msg">{errors.status.message}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Director */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="custom-label mb-3">Director Name</Label>
+                  <Input
+                    placeholder="Director name"
+                    className="custom-content-input"
+                    {...register("director_name", {
+                      required: "Director name is required",
+                    })}
+                    defaultValue={movieData?.director_name || ""}
+                  />
+                  {errors.director_name && (
+                    <p className="error-msg">{errors.director_name.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label className="custom-label mb-3">Director Image</Label>
+                  <div>
+                    <Controller
+                      control={control}
+                      name="director_thumbnail"
+                      render={({ field, fieldState }) => (
+                        <div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0] ?? null;
+                              field.onChange(file);
+                            }}
+                          />
+                          <p className="text-green-500 text-sm mt-1">
+                            {(movieData?.director_thumbnail as string) || ""}
+                          </p>
+                        </div>
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Cast From API */}
+              {movieData?.casts && movieData?.casts.length > 0
+                ? movieData.casts.map((cast, index) => (
+                    <div
+                      key={cast.id}
+                      className="grid grid-cols-1 md:grid-cols-2 gap-4 relative border border-gray3-bg p-2"
+                    >
+                      <Input
+                        hidden
+                        placeholder="Cast ID"
+                        className="custom-content-input"
+                        {...register(`cast_update.${index}.id`, {
+                          required: "Cast id is required",
+                        })}
+                        defaultValue={cast?.id}
+                      />
+
+                      <div>
+                        <Label className="custom-label mb-3">Cast</Label>
+                        <Input
+                          placeholder="Cast name"
+                          className="custom-content-input"
+                          {...register(`cast_update.${index}.name`, {
+                            required: "Cast name is required",
+                          })}
+                          defaultValue={cast?.name}
+                        />
+                        {errors?.cast_update?.[index]?.name && (
+                          <p className="error-msg">
+                            {errors.cast_update[index].name?.message as string}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <Label className="custom-label mb-3">Cast Image</Label>
+                        <Controller
+                          name={`cast_update.${index}.cast_thumbnail`}
+                          control={control}
+                          render={({ field: controllerField, fieldState }) => (
+                            <div>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0] ?? null;
+                                  controllerField.onChange(file);
+                                }}
+                                className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                              />
+
+                              <p className="text-green-500 text-sm mt-1">
+                                {cast?.cast_thumbnail as string}
+                              </p>
+                            </div>
+                          )}
+                        />
+                      </div>
+
+                      <DeleteCast
+                        movieId={movieData?.id || ""}
+                        id={cast?.id}
+                        refetch={refetch}
+                      />
+                    </div>
+                  ))
+                : null}
+
+              {/* Cast */}
+              {castFields.map((item, index) => (
+                <div
+                  key={item.id}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4 relative border border-gray3-bg p-2"
+                >
+                  <div>
+                    <Label className="custom-label mb-3">Cast</Label>
+                    <Input
+                      placeholder="Cast name"
+                      className="custom-content-input"
+                      {...register(`casts.${index}.name`, {
+                        required: "Cast name is required",
+                      })}
+                    />
+                    {errors?.casts?.[index]?.name && (
+                      <p className="error-msg">
+                        {errors.casts[index].name?.message as string}
+                      </p>
                     )}
                   </div>
-                )}
-              />
-            </div>
-          </div>
 
-          {/* Kids Mode */}
-          <Label
-            htmlFor="kids_mode"
-            className="text-base flex items-center justify-between gap-3 border-gray3-bg bg-secondary-bg rounded px-4 py-5 cursor-pointer w-full"
-          >
-            <span> Kids Mode</span>
-            <Controller
-              name="kids_mode"
-              control={control}
-              defaultValue={false}
-              render={({ field }) => (
-                <Checkbox
-                  id="kids_mode"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  className="data-[state=checked]:bg-primary-color data-[state=checked]:border-primary-color rounded-full h-5 w-5"
-                />
-              )}
-            />
-          </Label>
+                  <div>
+                    <Label className="custom-label mb-3">Cast Image</Label>
+                    <Controller
+                      name={`casts.${index}.cast_thumbnail`}
+                      control={control}
+                      // rules={{ required: "Cast image is required" }}
+                      render={({ field: controllerField, fieldState }) => (
+                        <div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0] ?? null;
+                              controllerField.onChange(file);
+                            }}
+                            className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                          />
 
-          {/* Description */}
-          <div>
-            <Label className="custom-label mb-3">Description</Label>
-            <Textarea
-              placeholder="Enter a short description"
-              className="custom-content-input"
-              {...register("description", {
-                required: "Description is required",
-              })}
-            />
-            {errors.description && (
-              <p className="error-msg">{errors.description.message}</p>
-            )}
-          </div>
+                          <p className="text-green-500 text-sm mt-1">
+                            {castFields[index].cast_thumbnail as string}
+                          </p>
 
-          {/* Content Type */}
-          <div className="grid grid-cols-1 gap-4">
-            {/* Type */}
-            <div>
-              <Label className="custom-label mb-3">Content Category</Label>
-
-              <Controller
-                name="category_id"
-                control={control}
-                defaultValue=""
-                rules={{
-                  validate: (value) =>
-                    value !== "" || "Content category is required",
-                }}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
-                    <SelectTrigger className="custom-content-input cursor-pointer">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
-                      <SelectGroup className="space-y-2">
-                        {allCategory?.data?.map(
-                          (item: Category, idx: number) => (
-                            <SelectItem
-                              key={idx}
-                              className="selectOption !justify-start"
-                              value={item?.id}
-                            >
-                              {item?.category_name}
-                            </SelectItem>
-                          )
-                        )}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-
-              {errors.category_id && (
-                <p className="error-msg">{errors.category_id.message}</p>
-              )}
-            </div>
-
-            {/* Status */}
-            {/* <div>
-              <Label className="custom-label mb-3">Content Status</Label>
-              <Controller
-                name="contentType"
-                control={control}
-                defaultValue=""
-                rules={{
-                  validate: (value) =>
-                    value !== "" || "Content type is required",
-                }}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
-                    <SelectTrigger className="custom-content-input cursor-pointer">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
-                      <SelectGroup className="space-y-2">
-                        <SelectItem
-                          value="PUBLISHED"
-                          className="selectOption !justify-start"
-                        >
-                          PUBLISHED
-                        </SelectItem>
-                        <SelectItem
-                          value="DRAFT"
-                          className="selectOption !justify-start"
-                        >
-                          DRAFT
-                        </SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-
-              {errors.contentType && (
-                <p className="error-msg">{errors.contentType.message}</p>
-              )}
-            </div> */}
-          </div>
-
-          {/* Director */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label className="custom-label mb-3">Director Name</Label>
-              <Input
-                placeholder="Director name"
-                className="custom-content-input"
-                {...register("director_name", {
-                  required: "Director name is required",
-                })}
-              />
-              {errors.director_name && (
-                <p className="error-msg">{errors.director_name.message}</p>
-              )}
-            </div>
-
-            <div>
-              <Label className="custom-label mb-3">Director Image</Label>
-              <div>
-                <input
-                  type="file"
-                  className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white  file:px-2"
-                  accept="image/*"
-                  {...register("director_thumbnail", {
-                    required: "Director image is required",
-                  })}
-                />
-              </div>
-              {errors.director_thumbnail && (
-                <p className="error-msg">{errors.director_thumbnail.message}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Cast */}
-          {castFields.map((item, index) => (
-            <div
-              key={item.id}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4 relative border border-gray3-bg p-2"
-            >
-              <div>
-                <Label className="custom-label mb-3">Cast</Label>
-                <Input
-                  placeholder="Cast name"
-                  className="custom-content-input"
-                  {...register(`casts.${index}.cast`, {
-                    required: "Cast name is required",
-                  })}
-                />
-                {errors?.casts?.[index]?.cast && (
-                  <p className="error-msg">
-                    {errors.casts[index].cast?.message as string}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <Label className="custom-label mb-3">Cast Image</Label>
-                <Controller
-                  name={`casts.${index}.cast_img`}
-                  control={control}
-                  rules={{ required: "Cast image is required" }}
-                  render={({ field: controllerField, fieldState }) => (
-                    <div>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0] ?? null;
-                          controllerField.onChange(file);
-                        }}
-                        className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
-                      />
-                      {fieldState.error && (
+                          {/*   {fieldState.error && (
                         <p className="text-red-500">
                           {fieldState.error.message}
                         </p>
+                      )} */}
+                        </div>
                       )}
-                    </div>
-                  )}
-                />
-              </div>
+                    />
+                  </div>
 
-              {index > 0 && (
-                <button
-                  type="button"
-                  className="absolute top-2 right-2 cursor-pointer bg-secondary-color text-white p-1 rounded-sm"
-                  onClick={() => removeCast(index)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          ))}
-
-          <button
-            type="button"
-            onClick={() => appendCast({ cast: "", cast_img: null })}
-            className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Add Cast</span>
-          </button>
-
-          {/* Season Mode */}
-          <div className="flex items-center gap-2">
-            {/* <Checkbox
-              className="data-[state=checked]:bg-primary-color h-5 w-5 cursor-pointer"
-              id="season-mode"
-              onCheckedChange={() => setIsSeries(!isSeries)}
-              {...register("season_mode")}
-            />
-            <Label
-              htmlFor="season-mode"
-              className="text-base font-medium cursor-pointer"
-            >
-              Enable Season Mode
-            </Label> */}
-
-            <Checkbox
-              className="data-[state=checked]:bg-primary-color h-5 w-5 cursor-pointer"
-              id="season-mode"
-              checked={isSeries} // control the checkbox with state
-              onCheckedChange={(checked) => {
-                const value = checked === true; // true or false
-                setIsSeries(value);
-                setValue("season_mode", value, { shouldValidate: true }); // set RHF boolean
-              }}
-            />
-            <Label
-              htmlFor="season-mode"
-              className="text-base font-medium cursor-pointer"
-            >
-              Enable Season Mode
-            </Label>
-          </div>
-
-          {isSeries && (
-            <div className="grid md:grid-cols-3 gap-4">
-              <div>
-                <Label className="custom-label mb-3">Season Name</Label>
-                <Input
-                  placeholder="Season name"
-                  className="custom-content-input"
-                  {...register(`season_name`, {
-                    required: "Season name is required",
-                  })}
-                />
-                {errors.season_name && (
-                  <p className="error-msg">{errors.season_name.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label className="custom-label mb-3">Release Date</Label>
-
-                <div className="relative">
-                  <Input
-                    type="date"
-                    placeholder="Release Date"
-                    className="custom-content-input white-calendar"
-                    {...register(`release_date`, {
-                      required: "Release date is required",
-                    })}
-                  />
+                  <button
+                    type="button"
+                    className="absolute top-2 right-2 cursor-pointer bg-secondary-color text-white p-1 rounded-sm"
+                    onClick={() => removeCast(index)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
+              ))}
 
-                {errors.release_date && (
-                  <p className="error-msg">{errors.release_date.message}</p>
-                )}
-              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  appendCast({ id: "", name: "", cast_thumbnail: null })
+                }
+                className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer"
+              >
+                <Plus className="w-5 h-5" />
+                <span>Add Cast</span>
+              </button>
 
+              {/* Trailer */}
               <div>
-                <Label className="custom-label mb-3">Season Thumbnail</Label>
-                <input
-                  type="file"
-                  className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white file:px-2"
-                  accept="image/*"
-                  {...register(`season_thumbnail`, {
-                    required: "Season Thumbnail is required",
-                  })}
-                />
-                {errors.season_thumbnail && (
-                  <p className="error-msg">
-                    {errors.season_thumbnail.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
+                <Label className="custom-label mb-3"> Trailer File</Label>
 
-          {/* Series Item */}
-          {seriesFields.map((item, index) => (
-            <div
-              key={item.id}
-              className="grid md:grid-cols-2 xl:grid-cols-3 gap-4 relative border border-gray3-bg p-2"
-            >
-              <div>
-                <Label className="custom-label mb-3">Episode Name</Label>
-                <Input
-                  placeholder="Episode name"
-                  className="custom-content-input"
-                  {...register(`series.${index}.episode_name`, {
-                    required: "Episode name is required",
-                  })}
-                />
-                {errors?.series?.[index]?.episode_name && (
-                  <p className="error-msg">
-                    {errors.series[index].episode_name?.message as string}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <Label className="custom-label mb-3">Episode Number</Label>
-                <Input
-                  placeholder="Episode number"
-                  className="custom-content-input"
-                  {...register(`series.${index}.episode_number`, {
-                    required: "Episode number is required",
-                  })}
-                />
-                {errors?.series?.[index]?.episode_number && (
-                  <p className="error-msg">
-                    {errors.series[index].episode_number?.message as string}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <Label className="custom-label mb-3">Duration (seconds)</Label>
-                <Input
-                  type="number"
-                  placeholder="Duration"
-                  className="custom-content-input"
-                  {...register(`series.${index}.episode_duration`, {
-                    required: "Duration is required",
-                  })}
-                />
-                {errors?.series?.[index]?.episode_duration && (
-                  <p className="error-msg">
-                    {errors.series[index].episode_duration?.message as string}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <Label className="custom-label mb-3">Episode File</Label>
-                <Controller
-                  name={`series.${index}.episode_file`}
-                  control={control}
-                  rules={{ required: "Episode file is required" }}
-                  render={({ field: controllerField, fieldState }) => (
-                    <div>
+                <div className="flex items-center space-x-3">
+                  <div className="flex-1">
+                    <div className="relative">
                       <input
                         type="file"
                         accept="video/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0] ?? null;
-                          controllerField.onChange(file);
-                        }}
-                        className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        onChange={handleTrailerPick}
                       />
-                      {fieldState.error && (
-                        <p className="text-red-500">
-                          {fieldState.error.message}
-                        </p>
-                      )}
+                      <div className="flex flex-col justify-center items-center gap-2.5 rounded border border-gray3-bg bg-secondary-bg px-4 py-5">
+                        <div className="flex justify-center items-center  bg-dark-bg rounded-full h-[64px] w-[64px]">
+                          <Upload className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex gap-2">
+                          <span className="text-black font-sans text-sm flex items-center gap-2 bg-white px-2 py-1 rounded">
+                            Choose File
+                          </span>
+                          <span className="text-white">
+                            {trailer ? trailer.name : "No file chosen"}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  )}
-                />
+                    <input type="hidden" {...register("trailer")} />
+                    <p className="text-green-500 text-sm mt-1">
+                      {(movieData?.series_trailer as string) || ""}
+                    </p>
+                    {errors.trailer && (
+                      <p className="mt-1 text-sm text-red-500">
+                        {errors.trailer.message as string}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
 
+              {/* Thumbnail Image */}
               <div>
-                <Label className="custom-label mb-3">Episode Thumbnail</Label>
-                <Controller
-                  name={`series.${index}.episode_thumbnail`}
-                  control={control}
-                  rules={{ required: "Episode thumbnail is required" }}
-                  render={({ field: controllerField, fieldState }) => (
-                    <div>
+                <Label className="custom-label mb-3">Thumbnail Image</Label>
+                <div className="flex items-center space-x-3">
+                  <div className="flex-1">
+                    <div className="relative">
                       <input
                         type="file"
                         accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0] ?? null;
-                          controllerField.onChange(file);
-                        }}
-                        className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        onChange={handleFilePick}
                       />
-                      {fieldState.error && (
-                        <p className="text-red-500">
-                          {fieldState.error.message}
-                        </p>
-                      )}
+                      <div className="flex flex-col justify-center items-center gap-2.5 rounded border border-gray3-bg bg-secondary-bg px-4 py-5">
+                        <div className="flex justify-center items-center  bg-dark-bg rounded-full h-[64px] w-[64px]">
+                          <Upload className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex gap-2">
+                          <span className="text-black font-sans text-sm flex items-center gap-2 bg-white px-2 py-1 rounded">
+                            Choose File
+                          </span>
+                          <span className="text-white">
+                            {/* {thumbnail ? thumbnail.name : "No file chosen"} */}
+                            {thumbnail
+                              ? typeof thumbnail === "string"
+                                ? thumbnail
+                                : thumbnail.name
+                              : "No file chosen"}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  )}
-                />
+                    <input type="hidden" {...register("series_thumbnail")} />
+                    <p className="text-green-500 text-sm mt-1">
+                      {(movieData?.series_thumbnail as string) || ""}
+                    </p>
+                    {errors.series_thumbnail && (
+                      <p className="mt-1 text-sm text-red-500">
+                        {errors.series_thumbnail.message as string}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
 
               <div>
-                <Label className="custom-label mb-3">Description</Label>
-                <Input
-                  placeholder="Description"
-                  className="custom-content-input"
-                  {...register(`series.${index}.episode_description`)}
-                />
-              </div>
-
-              {index > 0 && (
-                <button
-                  type="button"
-                  className="absolute top-2 right-2 cursor-pointer bg-secondary-color text-white p-1 rounded-sm"
-                  onClick={() => removeSeries(index)}
+                <Button
+                  type="submit"
+                  className={`w-full px-6 py-6 bg-primary-color hover:bg-primary-color cursor-pointer rounded text-base font-medium`}
+                  disabled={submitLoading}
                 >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          ))}
-
-          <button
-            type="button"
-            onClick={() =>
-              appendSeries({
-                episode_name: "",
-                episode_number: "",
-                episode_duration: "",
-                episode_file: null,
-                episode_thumbnail: null,
-                episode_description: "",
-              })
-            }
-            className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Add New Episode</span>
-          </button>
-
-          {/* Trailer */}
-          <div>
-            <Label className="custom-label mb-3"> Trailer File</Label>
-
-            <div className="flex items-center space-x-3">
-              <div className="flex-1">
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept="video/*"
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    onChange={handleTrailerPick}
-                  />
-                  <div className="flex flex-col justify-center items-center gap-2.5 rounded border border-gray3-bg bg-secondary-bg px-4 py-5">
-                    <div className="flex justify-center items-center  bg-dark-bg rounded-full h-[64px] w-[64px]">
-                      <Upload className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="flex gap-2">
-                      <span className="text-black font-sans text-sm flex items-center gap-2 bg-white px-2 py-1 rounded">
-                        Choose File
-                      </span>
-                      <span className="text-white">
-                        {trailer ? trailer.name : "No file chosen"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <input
-                  type="hidden"
-                  {...register("trailer", {
-                    required: "Trailer is required",
-                  })}
-                />
-                {errors.trailer && (
-                  <p className="mt-1 text-sm text-red-500">
-                    {errors.trailer.message as string}
-                  </p>
-                )}
+                  {submitLoading ? "Uploading..." : "Submit"}
+                </Button>
               </div>
             </div>
-          </div>
-
-          {/* Thumbnail Image */}
-          <div>
-            <Label className="custom-label mb-3">Thumbnail Image</Label>
-            <div className="flex items-center space-x-3">
-              <div className="flex-1">
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    onChange={handleFilePick}
-                  />
-                  <div className="flex flex-col justify-center items-center gap-2.5 rounded border border-gray3-bg bg-secondary-bg px-4 py-5">
-                    <div className="flex justify-center items-center  bg-dark-bg rounded-full h-[64px] w-[64px]">
-                      <Upload className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="flex gap-2">
-                      <span className="text-black font-sans text-sm flex items-center gap-2 bg-white px-2 py-1 rounded">
-                        Choose File
-                      </span>
-                      <span className="text-white">
-                        {thumbnail ? thumbnail.name : "No file chosen"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <input
-                  type="hidden"
-                  {...register("thumbnailImg", {
-                    required: "Thumbnail image is required",
-                  })}
-                />
-                {errors.thumbnailImg && (
-                  <p className="mt-1 text-sm text-red-500">
-                    {errors.thumbnailImg.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <Button
-              type="submit"
-              className={`w-full px-6 py-6 bg-primary-color hover:bg-primary-color cursor-pointer rounded text-base font-medium`}
-              disabled={submitLoading}
-            >
-              {submitLoading ? "Uploading..." : "Submit"}
-            </Button>
-          </div>
+          </form>
         </div>
-      </form>
-    </div>
+      )}
+    </>
   );
 }
