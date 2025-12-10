@@ -1,11 +1,10 @@
 "use client";
-import React from "react";
-import { useParams, useRouter } from "next/navigation";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import { useQuery } from "@tanstack/react-query";
-import EditSeries from "@/components/pages/film-management/series/EditSeries";
+import { useParams, useRouter } from "next/navigation";
+import AddEpisode from "@/components/pages/film-management/series/AddEpisode";
 
-export default function EditSeriesPage() {
+export default function ManageEpisodePage() {
   const params = useParams();
   const id = params.id;
 
@@ -25,7 +24,7 @@ export default function EditSeriesPage() {
   });
 
   return (
-    <EditSeries
+    <AddEpisode
       movieData={data?.data}
       isLoading={isLoading}
       refetch={refetch}

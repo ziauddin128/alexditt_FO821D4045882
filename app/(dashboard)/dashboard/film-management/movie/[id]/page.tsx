@@ -1,12 +1,13 @@
 "use client";
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import { useQuery } from "@tanstack/react-query";
 import EditMovie from "@/components/pages/film-management/movie/EditMovie";
 
-export default function EditMoviePage({ params }: { params: any }) {
-  const id = params?.id;
+export default function EditMoviePage() {
+  const params = useParams();
+  const id = params.id;
 
   const router = useRouter();
 

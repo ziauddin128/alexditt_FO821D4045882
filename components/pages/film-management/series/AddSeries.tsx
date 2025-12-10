@@ -116,6 +116,7 @@ export default function AddSeries() {
     },
   });
 
+  // Casts
   const {
     fields: castFields,
     append: appendCast,
@@ -632,19 +633,6 @@ export default function AddSeries() {
 
           {/* Season Mode */}
           <div className="flex items-center gap-2">
-            {/* <Checkbox
-              className="data-[state=checked]:bg-primary-color h-5 w-5 cursor-pointer"
-              id="season-mode"
-              onCheckedChange={() => setIsSeries(!isSeries)}
-              {...register("season_mode")}
-            />
-            <Label
-              htmlFor="season-mode"
-              className="text-base font-medium cursor-pointer"
-            >
-              Enable Season Mode
-            </Label> */}
-
             <Checkbox
               className="data-[state=checked]:bg-primary-color h-5 w-5 cursor-pointer"
               id="season-mode"

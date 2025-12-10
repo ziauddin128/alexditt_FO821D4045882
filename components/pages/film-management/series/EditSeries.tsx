@@ -28,6 +28,9 @@ import ReactSelect from "react-select";
 import { toast } from "sonner";
 import LoadingSpinner from "@/app/(dashboard)/loading";
 import DeleteCast from "./DeleteCast";
+import DeleteEpisode from "./DeleteEpisode";
+import DeleteSeason from "./DeleteSeason";
+import Link from "next/link";
 
 interface Category {
   id: string;
@@ -48,7 +51,23 @@ type Inputs = {
   series_thumbnail: File | null | string;
   trailer: File | null;
   series_trailer: File | null | string;
-  seasons: [];
+  seasons: {
+    id: string;
+    title: string;
+    release_date?: string;
+    season_thumbnail?: string;
+    episodes: {
+      id: string;
+      episode_number: string;
+      title: string;
+      description: string;
+      duration: string;
+      episode_thumbnails: File | null | string;
+      episode_videos: File | null | string;
+      season_id: string;
+      series_id: string;
+    }[];
+  }[];
   season_mode?: boolean;
   season_name?: string;
   release_date?: string;
@@ -80,6 +99,21 @@ type Inputs = {
     episode_thumbnails: string;
     episode_videos: string;
     series_id: string;
+  }[];
+  episode_update: {
+    id: string;
+    episode_number: string;
+    title: string;
+    description: string;
+    duration: string;
+    episode_thumbnails: File | null;
+    episode_videos: File | null;
+  }[];
+  season_update: {
+    id: string;
+    title: string;
+    release_date: string;
+    season_thumbnail: File | null;
   }[];
 };
 
@@ -134,6 +168,7 @@ export default function EditSeries({
       trailer: null,
       casts: [],
       series: [],
+      season_update: [],
     },
   });
 
@@ -144,6 +179,16 @@ export default function EditSeries({
   } = useFieldArray({
     control,
     name: "casts",
+  });
+
+  // For series
+  const {
+    fields: seriesFields,
+    append: appendSeries,
+    remove: removeSeries,
+  } = useFieldArray({
+    control,
+    name: "series",
   });
 
   const trailer = watch("trailer");
@@ -189,6 +234,8 @@ export default function EditSeries({
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setSubmitLoading(true);
 
+    // console.log("Submitted data", data);
+
     try {
       const formData = new FormData();
 
@@ -216,43 +263,103 @@ export default function EditSeries({
         formData.append("director_thumbnail", data.director_thumbnail);
       }
 
-      // Updated Cast
+      // Cast Info
+      // Updated
       const updatedCastArray = (data.cast_update || []).map(
         (cast: any, i: number) => ({
           id: cast.id,
           name: cast.name,
-          key: `updated_cast_member_${i}`,
         })
       );
+      // New
+      const castArray = (data.casts || []).map((cast: any, i: number) => ({
+        key: `${i}`,
+        name: cast.name,
+      }));
 
+      const combinedCastArray = [...updatedCastArray, ...castArray];
+
+      if (combinedCastArray.length > 0) {
+        formData.append("cast_updates", JSON.stringify(combinedCastArray));
+      }
+
+      // Cast Thumbnail
+      // Updated
       if (updatedCastArray.length > 0) {
-        formData.append("cast_update", JSON.stringify(updatedCastArray));
+        // formData.append("cast_updates", JSON.stringify(updatedCastArray));
 
         (data.cast_update || []).forEach((cast, i) => {
           if (cast.cast_thumbnail instanceof File) {
-            formData.append(`updated_cast_member_${i}`, cast.cast_thumbnail);
+            formData.append(`cast_${cast.id}_thumbnail`, cast.cast_thumbnail);
+          }
+        });
+      }
+      // New
+      if (castArray.length > 0) {
+        // formData.append("cast_updates", JSON.stringify(castArray));
+
+        (data.casts || []).forEach((cast, i) => {
+          if (cast.cast_thumbnail instanceof File) {
+            formData.append(`cast_${i}_thumbnail`, cast.cast_thumbnail);
           }
         });
       }
 
-      // New Casts
-      const castArray = (data.casts || []).map((cast: any, i: number) => ({
-        key: `cast_member_${i}`,
-        name: cast.name,
-      }));
+      // Episode Update
+      const updatedEpisodeArray = (data.episode_update || []).map(
+        (episode: any, i: number) => ({
+          id: episode.id,
+          title: episode.title,
+          duration: episode.duration,
+          description: episode.description,
+          episode_number: episode.episode_number,
+        })
+      );
 
-      if (castArray.length > 0) {
-        formData.append("cast", JSON.stringify(castArray));
+      if (updatedEpisodeArray.length > 0) {
+        formData.append("episode_updates", JSON.stringify(updatedEpisodeArray));
 
-        (data.casts || []).forEach((cast, i) => {
-          if (cast.cast_thumbnail instanceof File) {
-            formData.append(`cast_member_${i}`, cast.cast_thumbnail);
+        (data.episode_update || []).forEach((episode, i) => {
+          if (episode.episode_thumbnails instanceof File) {
+            formData.append(
+              `episode_${episode.id}_thumbnail`,
+              episode.episode_thumbnails
+            );
+          }
+
+          if (episode.episode_videos instanceof File) {
+            formData.append(
+              `episode_${episode.id}_video`,
+              episode.episode_videos
+            );
+          }
+        });
+      }
+
+      // Season Info Update
+      const seasonInfoArray = (data.season_update || []).map(
+        (season: any, i: number) => ({
+          id: season.id,
+          title: season.title,
+          release_date: new Date(season.release_date).toISOString(),
+        })
+      );
+
+      if (seasonInfoArray.length > 0) {
+        formData.append("season_updates", JSON.stringify(seasonInfoArray));
+
+        (data.season_update || []).forEach((episode, i) => {
+          if (episode.season_thumbnail instanceof File) {
+            formData.append(
+              `season_${episode.id}_thumbnail`,
+              episode.season_thumbnail
+            );
           }
         });
       }
 
       // Print Form Data
-      /*  formData.forEach((value, key) => {
+      /* formData.forEach((value, key) => {
         console.log(`${key}: ${value}`);
       });
 
@@ -374,7 +481,6 @@ export default function EditSeries({
                   />
                 </div>
               </div>
-
               {/* Kids Mode */}
               <Label
                 htmlFor="kids_mode"
@@ -395,7 +501,6 @@ export default function EditSeries({
                   )}
                 />
               </Label>
-
               {/* Description */}
               <div>
                 <Label className="custom-label mb-3">Description</Label>
@@ -411,7 +516,6 @@ export default function EditSeries({
                   <p className="error-msg">{errors.description.message}</p>
                 )}
               </div>
-
               {/* Content Type */}
               <div className="grid md:grid-cols-2 gap-4">
                 {/* Type */}
@@ -513,7 +617,6 @@ export default function EditSeries({
                   )}
                 </div>
               </div>
-
               {/* Director */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -557,7 +660,6 @@ export default function EditSeries({
                   </div>
                 </div>
               </div>
-
               {/* Cast From API */}
               {movieData?.casts && movieData?.casts.length > 0
                 ? movieData.casts.map((cast, index) => (
@@ -625,7 +727,6 @@ export default function EditSeries({
                     </div>
                   ))
                 : null}
-
               {/* Cast */}
               {castFields.map((item, index) => (
                 <div
@@ -667,7 +768,8 @@ export default function EditSeries({
                           />
 
                           <p className="text-green-500 text-sm mt-1">
-                            {castFields[index].cast_thumbnail as string}
+                            {typeof castFields[index].cast_thumbnail ===
+                              "string" && castFields[index].cast_thumbnail}
                           </p>
 
                           {/*   {fieldState.error && (
@@ -689,7 +791,6 @@ export default function EditSeries({
                   </button>
                 </div>
               ))}
-
               <button
                 type="button"
                 onClick={() =>
@@ -700,6 +801,480 @@ export default function EditSeries({
                 <Plus className="w-5 h-5" />
                 <span>Add Cast</span>
               </button>
+
+              {/* Seasons with Episode */}
+              {movieData?.seasons?.length > 0
+                ? movieData?.seasons.map((season, seasonIndex) => (
+                    <div className="p-2 border border-gray3-bg space-y-3">
+                      <div
+                        key={`season_info${seasonIndex}`}
+                        className="grid md:grid-cols-3 gap-4 relative border border-gray3-bg p-2"
+                      >
+                        <Input
+                          hidden
+                          placeholder="Season ID"
+                          className="custom-content-input"
+                          {...register(`season_update.${seasonIndex}.id`)}
+                          defaultValue={season?.id}
+                        />
+
+                        <div>
+                          <Label className="custom-label mb-3">
+                            Season Name
+                          </Label>
+                          <Input
+                            placeholder="Season name"
+                            className="custom-content-input"
+                            {...register(`season_update.${seasonIndex}.title`, {
+                              required: "Season name is required",
+                            })}
+                            defaultValue={season?.title}
+                          />
+                          {errors?.season_update?.[seasonIndex]?.title && (
+                            <p className="error-msg">
+                              {
+                                errors.season_update[seasonIndex].title
+                                  ?.message as string
+                              }
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <Label className="custom-label mb-3">
+                            Release Date
+                          </Label>
+
+                          <div className="relative">
+                            <Input
+                              type="date"
+                              placeholder="Release Date"
+                              className="custom-content-input white-calendar"
+                              {...register(
+                                `season_update.${seasonIndex}.release_date`,
+                                {
+                                  required: "Release date is required",
+                                }
+                              )}
+                              defaultValue={
+                                season?.release_date
+                                  ? new Date(season.release_date)
+                                      .toISOString()
+                                      .split("T")[0]
+                                  : ""
+                              }
+                            />
+                          </div>
+
+                          {errors?.season_update?.[seasonIndex]
+                            ?.release_date && (
+                            <p className="error-msg">
+                              {
+                                errors.season_update[seasonIndex].release_date
+                                  ?.message as string
+                              }
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <Label className="custom-label mb-3">
+                            Season Thumbnail
+                          </Label>
+                          <Controller
+                            name={`season_update.${seasonIndex}.season_thumbnail`}
+                            control={control}
+                            render={({
+                              field: controllerField,
+                              fieldState,
+                            }) => (
+                              <div>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0] ?? null;
+                                    controllerField.onChange(file);
+                                  }}
+                                  className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                                />
+
+                                <p className="text-green-500 text-sm mt-1 break-all">
+                                  {season?.season_thumbnail as string}
+                                </p>
+                              </div>
+                            )}
+                          />
+                        </div>
+
+                        <DeleteSeason id={season?.id} refetch={refetch} />
+                      </div>
+
+                      {season.episodes?.map((item, index) => (
+                        <div
+                          key={item.id}
+                          className="grid md:grid-cols-2 xl:grid-cols-3 gap-4 relative border border-gray3-bg p-2"
+                        >
+                          <Input
+                            hidden
+                            placeholder="Episode"
+                            className="custom-content-input"
+                            {...register(`episode_update.${index}.id`, {
+                              required: "Episode id is required",
+                            })}
+                            defaultValue={item?.id}
+                          />
+
+                          <div>
+                            <Label className="custom-label mb-3">
+                              Episode Name
+                            </Label>
+                            <Input
+                              placeholder="Episode name"
+                              className="custom-content-input"
+                              {...register(`episode_update.${index}.title`, {
+                                required: "Episode name is required",
+                              })}
+                              defaultValue={item?.title}
+                            />
+                            {errors?.episode_update?.[index]?.title && (
+                              <p className="error-msg">
+                                {
+                                  errors.episode_update[index].title
+                                    ?.message as string
+                                }
+                              </p>
+                            )}
+                          </div>
+
+                          <div>
+                            <Label className="custom-label mb-3">
+                              Episode Number
+                            </Label>
+                            <Input
+                              placeholder="Episode number"
+                              className="custom-content-input"
+                              {...register(
+                                `episode_update.${index}.episode_number`,
+                                {
+                                  required: "Episode number is required",
+                                }
+                              )}
+                              defaultValue={item?.episode_number}
+                            />
+                            {errors?.episode_update?.[index]
+                              ?.episode_number && (
+                              <p className="error-msg">
+                                {
+                                  errors.episode_update[index].episode_number
+                                    ?.message as string
+                                }
+                              </p>
+                            )}
+                          </div>
+
+                          <div>
+                            <Label className="custom-label mb-3">
+                              Duration (seconds)
+                            </Label>
+                            <Input
+                              type="number"
+                              placeholder="Duration"
+                              className="custom-content-input"
+                              {...register(`episode_update.${index}.duration`, {
+                                required: "Duration is required",
+                              })}
+                              defaultValue={item?.duration}
+                            />
+                            {errors?.episode_update?.[index]?.duration && (
+                              <p className="error-msg">
+                                {
+                                  errors.episode_update[index].duration
+                                    ?.message as string
+                                }
+                              </p>
+                            )}
+                          </div>
+
+                          <div>
+                            <Label className="custom-label mb-3">
+                              Episode File
+                            </Label>
+                            <Controller
+                              name={`episode_update.${index}.episode_videos`}
+                              control={control}
+                              render={({
+                                field: controllerField,
+                                fieldState,
+                              }) => (
+                                <div>
+                                  <input
+                                    type="file"
+                                    accept="video/*"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0] ?? null;
+                                      controllerField.onChange(file);
+                                    }}
+                                    className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                                  />
+
+                                  <p className="text-green-500 text-sm mt-1 break-all">
+                                    {item?.episode_videos as string}
+                                  </p>
+                                </div>
+                              )}
+                            />
+                          </div>
+
+                          <div>
+                            <Label className="custom-label mb-3">
+                              Episode Thumbnail
+                            </Label>
+                            <Controller
+                              name={`episode_update.${index}.episode_thumbnails`}
+                              control={control}
+                              render={({
+                                field: controllerField,
+                                fieldState,
+                              }) => (
+                                <div>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0] ?? null;
+                                      controllerField.onChange(file);
+                                    }}
+                                    className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                                  />
+                                  <p className="text-green-500 text-sm mt-1 break-all">
+                                    {item?.episode_thumbnails as string}
+                                  </p>
+                                </div>
+                              )}
+                            />
+                          </div>
+
+                          <div>
+                            <Label className="custom-label mb-3">
+                              Description
+                            </Label>
+                            <Input
+                              placeholder="Description"
+                              className="custom-content-input"
+                              {...register(
+                                `episode_update.${index}.description`
+                              )}
+                              defaultValue={item.description}
+                            />
+                          </div>
+
+                          <DeleteEpisode id={item?.id} refetch={refetch} />
+                        </div>
+                      ))}
+
+                      <Link
+                        href={`/dashboard/film-management/series/episode/${movieData?.id}`}
+                        className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer w-fit"
+                      >
+                        <Plus className="w-5 h-5" />
+                        {/* <span>Add New Episode</span> */}
+                      </Link>
+                    </div>
+                  ))
+                : null}
+
+              {/* Only Episode */}
+              {movieData?.episodes && movieData?.episodes?.length > 0
+                ? movieData?.episodes.map((item, index) => (
+                    <>
+                      <div
+                        key={item.id}
+                        className="grid md:grid-cols-2 xl:grid-cols-3 gap-4 relative border border-gray3-bg p-2"
+                      >
+                        <Input
+                          hidden
+                          placeholder="Episode"
+                          className="custom-content-input"
+                          {...register(`episode_update.${index}.id`, {
+                            required: "Episode id is required",
+                          })}
+                          defaultValue={item?.id}
+                        />
+
+                        <div>
+                          <Label className="custom-label mb-3">
+                            Episode Name
+                          </Label>
+                          <Input
+                            placeholder="Episode name"
+                            className="custom-content-input"
+                            {...register(`episode_update.${index}.title`, {
+                              required: "Episode name is required",
+                            })}
+                            defaultValue={item?.title}
+                          />
+                          {errors?.episode_update?.[index]?.title && (
+                            <p className="error-msg">
+                              {
+                                errors.episode_update[index].title
+                                  ?.message as string
+                              }
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <Label className="custom-label mb-3">
+                            Episode Number
+                          </Label>
+                          <Input
+                            placeholder="Episode number"
+                            className="custom-content-input"
+                            {...register(
+                              `episode_update.${index}.episode_number`,
+                              {
+                                required: "Episode number is required",
+                              }
+                            )}
+                            defaultValue={item?.episode_number}
+                          />
+                          {errors?.episode_update?.[index]?.episode_number && (
+                            <p className="error-msg">
+                              {
+                                errors.episode_update[index].episode_number
+                                  ?.message as string
+                              }
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <Label className="custom-label mb-3">
+                            Duration (seconds)
+                          </Label>
+                          <Input
+                            type="number"
+                            placeholder="Duration"
+                            className="custom-content-input"
+                            {...register(`episode_update.${index}.duration`, {
+                              required: "Duration is required",
+                            })}
+                            defaultValue={item?.duration}
+                          />
+                          {errors?.episode_update?.[index]?.duration && (
+                            <p className="error-msg">
+                              {
+                                errors.episode_update[index].duration
+                                  ?.message as string
+                              }
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <Label className="custom-label mb-3">
+                            Episode File
+                          </Label>
+                          <Controller
+                            name={`episode_update.${index}.episode_videos`}
+                            control={control}
+                            render={({
+                              field: controllerField,
+                              fieldState,
+                            }) => (
+                              <div>
+                                <input
+                                  type="file"
+                                  accept="video/*"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0] ?? null;
+                                    controllerField.onChange(file);
+                                  }}
+                                  className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                                />
+
+                                <p className="text-green-500 text-sm mt-1 break-all">
+                                  {item?.episode_videos as string}
+                                </p>
+                              </div>
+                            )}
+                          />
+                        </div>
+
+                        <div>
+                          <Label className="custom-label mb-3">
+                            Episode Thumbnail
+                          </Label>
+                          <Controller
+                            name={`episode_update.${index}.episode_thumbnails`}
+                            control={control}
+                            render={({
+                              field: controllerField,
+                              fieldState,
+                            }) => (
+                              <div>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0] ?? null;
+                                    controllerField.onChange(file);
+                                  }}
+                                  className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                                />
+                                <p className="text-green-500 text-sm mt-1 break-all">
+                                  {item?.episode_thumbnails as string}
+                                </p>
+                              </div>
+                            )}
+                          />
+                        </div>
+
+                        <div>
+                          <Label className="custom-label mb-3">
+                            Description
+                          </Label>
+                          <Input
+                            placeholder="Description"
+                            className="custom-content-input"
+                            {...register(`episode_update.${index}.description`)}
+                            defaultValue={item.description}
+                          />
+                        </div>
+
+                        <DeleteEpisode id={item?.id} refetch={refetch} />
+                      </div>
+
+                      <Link
+                        href={`/dashboard/film-management/series/episode/${movieData?.id}`}
+                        className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer w-fit"
+                      >
+                        <Plus className="w-5 h-5" />
+                        {/* <span>Add New Episode</span> */}
+                      </Link>
+                    </>
+                  ))
+                : null}
+
+              {/* Add New Season & Episode Button */}
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  href={`/dashboard/film-management/series/season/${movieData?.id}`}
+                  className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer w-fit"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span>Add New Season</span>
+                </Link>
+
+                <Link
+                  href={`/dashboard/film-management/series/episode/${movieData?.id}`}
+                  className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer w-fit"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span>Add New Episode</span>
+                </Link>
+              </div>
 
               {/* Trailer */}
               <div>
@@ -740,7 +1315,6 @@ export default function EditSeries({
                   </div>
                 </div>
               </div>
-
               {/* Thumbnail Image */}
               <div>
                 <Label className="custom-label mb-3">Thumbnail Image</Label>
@@ -784,7 +1358,6 @@ export default function EditSeries({
                   </div>
                 </div>
               </div>
-
               <div>
                 <Button
                   type="submit"

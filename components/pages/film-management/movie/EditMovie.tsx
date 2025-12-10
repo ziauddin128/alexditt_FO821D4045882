@@ -751,7 +751,9 @@ export default function EditMovie({
                             className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
                           />
                           <p className="text-green-500 text-sm mt-1 break-all">
-                            {castFields[index].cast_thumbnail as string}
+
+                            {typeof castFields[index].cast_thumbnail ===
+                              "string" && castFields[index].cast_thumbnail}
                           </p>
                           {/*  {fieldState.error && (
                             <p className="text-red-500">

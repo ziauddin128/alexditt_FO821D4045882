@@ -19,6 +19,7 @@ import Link from "next/link";
 import LoadingSpinner from "@/app/(dashboard)/loading";
 import convertDateStr from "@/hooks/convertDateStr";
 import FormatDuration from "@/hooks/formatDuration";
+import { Video } from "lucide-react";
 
 interface Content {
   id: string | number;
@@ -142,16 +143,20 @@ export default function ContentTable() {
             <Link
               href={`/dashboard/film-management/movie/${row.original.id}`}
               className="h-6 w-6 bg-[#111] hover:bg-primary-color flex items-center justify-center rounded-[2px]"
+              title="Edit"
             >
               <EditIcon className="text-white h-4 w-4" />
             </Link>
           ) : (
-            <Link
-              href={`/dashboard/film-management/series/${row.original.id}`}
-              className="h-6 w-6 bg-[#111] hover:bg-primary-color flex items-center justify-center rounded-[2px]"
-            >
-              <EditIcon className="text-white h-4 w-4" />
-            </Link>
+            <>
+              <Link
+                href={`/dashboard/film-management/series/${row.original.id}`}
+                className="h-6 w-6 bg-[#111] hover:bg-primary-color flex items-center justify-center rounded-[2px]"
+                title="Edit"
+              >
+                <EditIcon className="text-white h-4 w-4" />
+              </Link>
+            </>
           )}
 
           <DeleteContent
