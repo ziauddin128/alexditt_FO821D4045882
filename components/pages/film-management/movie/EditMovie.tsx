@@ -329,6 +329,21 @@ export default function EditMovie({
                     />
                   </label>
 
+                  <input
+                    type="hidden"
+                    {...register("file", {
+                      validate: {
+                        isVideo: (file: File | null) => {
+                          if (!file) return true;
+                          return (
+                            file.type.startsWith("video/") ||
+                            "Only video files are allowed"
+                          );
+                        },
+                      },
+                    })}
+                  />
+
                   {vidFile && (
                     <p className="text-sm text-gray-black-200">
                       Selected:{" "}
@@ -619,7 +634,18 @@ export default function EditMovie({
                   <Controller
                     control={control}
                     name="director_thumbnail"
-                    /*  rules={{ required: "Director image is required" }} */
+                    rules={{
+                      validate: {
+                        isImage: (value: File | string | null) => {
+                          if (!value) return true;
+                          if (typeof value === "string") return true;
+                          return (
+                            value.type.startsWith("image/") ||
+                            "Only image files are allowed"
+                          );
+                        },
+                      },
+                    }}
                     render={({ field, fieldState }) => (
                       <div>
                         <input
@@ -634,14 +660,14 @@ export default function EditMovie({
                         <p className="text-gray-400 text-sm mt-1 break-all">
                           {(movieData?.director_thumbnail_url as string) || ""}
                         </p>
-                        {/* {fieldState.error && (
-                          <p className="text-red-500">
-                            {fieldState.error.message}
-                          </p>
-                        )} */}
                       </div>
                     )}
                   />
+                  {errors.director_thumbnail && (
+                    <p className="text-xs text-red-500">
+                      {errors.director_thumbnail.message as string}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -683,6 +709,17 @@ export default function EditMovie({
                         <Label className="custom-label mb-3">Cast Image</Label>
                         <Controller
                           name={`cast_update.${index}.cast_thumbnail`}
+                          rules={{
+                            validate: {
+                              isImage: (file: any) => {
+                                if (!file || typeof file === "string")
+                                  return true;
+                                return file.type.startsWith("image/")
+                                  ? true
+                                  : "Only image files are allowed";
+                              },
+                            },
+                          }}
                           control={control}
                           render={({ field: controllerField, fieldState }) => (
                             <div>
@@ -702,6 +739,14 @@ export default function EditMovie({
                             </div>
                           )}
                         />
+                        {errors?.cast_update?.[index]?.cast_thumbnail && (
+                          <p className="error-msg">
+                            {
+                              errors.cast_update[index].cast_thumbnail
+                                ?.message as string
+                            }
+                          </p>
+                        )}
                       </div>
 
                       <DeleteCast
@@ -740,7 +785,16 @@ export default function EditMovie({
                     <Controller
                       name={`casts.${index}.cast_thumbnail`}
                       control={control}
-                      /* rules={{ required: "Cast image is required" }} */
+                      rules={{
+                        validate: {
+                          isImage: (file: any) => {
+                            if (!file || typeof file === "string") return true;
+                            return file.type.startsWith("image/")
+                              ? true
+                              : "Only image files are allowed";
+                          },
+                        },
+                      }}
                       render={({ field: controllerField, fieldState }) => (
                         <div>
                           <input
@@ -756,11 +810,11 @@ export default function EditMovie({
                             {typeof castFields[index].cast_thumbnail ===
                               "string" && castFields[index].cast_thumbnail}
                           </p>
-                          {/*  {fieldState.error && (
-                            <p className="text-red-500">
+                          {fieldState.error && (
+                            <p className="error-msg">
                               {fieldState.error.message}
                             </p>
-                          )} */}
+                          )}
                         </div>
                       )}
                     />
@@ -819,7 +873,21 @@ export default function EditMovie({
                         </div>
                       </div>
                     </div>
-                    <input type="hidden" {...register("trailer")} />
+                    <input
+                      type="hidden"
+                      {...register("trailer", {
+                        validate: {
+                          isVideo: (value: File | string | null) => {
+                            if (!value || typeof value === "string")
+                              return true;
+
+                            return value.type.startsWith("video/")
+                              ? true
+                              : "Only video files are allowed";
+                          },
+                        },
+                      })}
+                    />
                     <p className="text-gray-400 text-sm mt-1 break-all">
                       {(movieData?.movie_trailer_url as string) || ""}
                     </p>
@@ -862,12 +930,25 @@ export default function EditMovie({
                         </div>
                       </div>
                     </div>
-                    <input type="hidden" {...register("movie_thumbnail")} />
+                    <input
+                      type="hidden"
+                      {...register("movie_thumbnail", {
+                        validate: {
+                          isImage: (value: File | string | null) => {
+                            if (!value || typeof value === "string")
+                              return true;
+                            return value.type.startsWith("image/")
+                              ? true
+                              : "Only image files are allowed";
+                          },
+                        },
+                      })}
+                    />
                     <p className="text-gray-400 text-sm mt-1 break-all">
                       {(movieData?.movie_thumbnail_url as string) || ""}
                     </p>
                     {errors.movie_thumbnail && (
-                      <p className="mt-1 text-sm text-red-500">
+                      <p className="error-msg">
                         {errors.movie_thumbnail.message as string}
                       </p>
                     )}

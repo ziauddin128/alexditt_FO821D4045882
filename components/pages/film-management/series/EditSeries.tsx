@@ -199,7 +199,7 @@ export default function EditSeries({
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setSubmitLoading(true);
 
-    // console.log("Submitted data", data);
+    console.log("Submitted data", data);
 
     try {
       const formData = new FormData();
@@ -324,7 +324,7 @@ export default function EditSeries({
       }
 
       // Print Form Data
-      /* formData.forEach((value, key) => {
+      /*   formData.forEach((value, key) => {
         console.log(`${key}: ${value}`);
       });
 
@@ -586,6 +586,18 @@ export default function EditSeries({
                     <Controller
                       control={control}
                       name="director_thumbnail"
+                      rules={{
+                        validate: {
+                          isImage: (value: File | string | null) => {
+                            if (!value) return true;
+                            if (typeof value === "string") return true;
+                            return (
+                              value.type.startsWith("image/") ||
+                              "Only image files are allowed"
+                            );
+                          },
+                        },
+                      }}
                       render={({ field, fieldState }) => (
                         <div>
                           <input
@@ -600,6 +612,11 @@ export default function EditSeries({
                           <p className="text-gray-400 text-sm mt-1">
                             {(movieData?.director_thumbnail as string) || ""}
                           </p>
+                          {fieldState.error && (
+                            <p className="error-msg">
+                              {fieldState.error.message}
+                            </p>
+                          )}
                         </div>
                       )}
                     />
@@ -644,6 +661,18 @@ export default function EditSeries({
                         <Label className="custom-label mb-3">Cast Image</Label>
                         <Controller
                           name={`cast_update.${index}.cast_thumbnail`}
+                          rules={{
+                            validate: {
+                              isImage: (value: File | string | null) => {
+                                if (!value) return true;
+                                if (typeof value === "string") return true;
+                                return (
+                                  value.type.startsWith("image/") ||
+                                  "Only image files are allowed"
+                                );
+                              },
+                            },
+                          }}
                           control={control}
                           render={({ field: controllerField, fieldState }) => (
                             <div>
@@ -660,6 +689,15 @@ export default function EditSeries({
                               <p className="text-gray-400 text-sm mt-1">
                                 {cast?.cast_thumbnail as string}
                               </p>
+
+                              {errors?.cast_update?.[index]?.cast_thumbnail && (
+                                <p className="error-msg">
+                                  {
+                                    errors.cast_update[index].cast_thumbnail
+                                      ?.message as string
+                                  }
+                                </p>
+                              )}
                             </div>
                           )}
                         />
@@ -700,7 +738,18 @@ export default function EditSeries({
                     <Controller
                       name={`casts.${index}.cast_thumbnail`}
                       control={control}
-                      // rules={{ required: "Cast image is required" }}
+                      rules={{
+                        validate: {
+                          isImage: (value: File | string | null) => {
+                            if (!value) return true;
+                            if (typeof value === "string") return true;
+                            return (
+                              value.type.startsWith("image/") ||
+                              "Only image files are allowed"
+                            );
+                          },
+                        },
+                      }}
                       render={({ field: controllerField, fieldState }) => (
                         <div>
                           <input
@@ -718,11 +767,11 @@ export default function EditSeries({
                               "string" && castFields[index].cast_thumbnail}
                           </p>
 
-                          {/*   {fieldState.error && (
-                        <p className="text-red-500">
-                          {fieldState.error.message}
-                        </p>
-                      )} */}
+                          {fieldState.error && (
+                            <p className="error-msg">
+                              {fieldState.error.message}
+                            </p>
+                          )}
                         </div>
                       )}
                     />
@@ -829,6 +878,17 @@ export default function EditSeries({
                           </Label>
                           <Controller
                             name={`season_update.${seasonIndex}.season_thumbnail`}
+                            rules={{
+                              validate: {
+                                isImage: (file: File | null) => {
+                                  if (!file) return true;
+                                  return (
+                                    file.type.startsWith("image/") ||
+                                    "Only image files are allowed"
+                                  );
+                                },
+                              },
+                            }}
                             control={control}
                             render={({
                               field: controllerField,
@@ -848,6 +908,11 @@ export default function EditSeries({
                                 <p className="text-gray-400 text-sm mt-1 break-all">
                                   {season?.season_thumbnail as string}
                                 </p>
+                                {fieldState.error && (
+                                  <p className="error-msg">
+                                    {fieldState.error.message}
+                                  </p>
+                                )}
                               </div>
                             )}
                           />
@@ -952,6 +1017,18 @@ export default function EditSeries({
                             </Label>
                             <Controller
                               name={`episode_update.${index}.episode_videos`}
+                              rules={{
+                                validate: {
+                                  isVideo: (file: File | null) => {
+                                    if (!file) return true;
+
+                                    return (
+                                      file.type.startsWith("video/") ||
+                                      "Only video files are allowed"
+                                    );
+                                  },
+                                },
+                              }}
                               control={control}
                               render={({
                                 field: controllerField,
@@ -971,6 +1048,12 @@ export default function EditSeries({
                                   <p className="text-gray-400 text-sm mt-1 break-all">
                                     {item?.episode_videos as string}
                                   </p>
+
+                                  {fieldState.error && (
+                                    <p className="error-msg">
+                                      {fieldState.error.message}
+                                    </p>
+                                  )}
                                 </div>
                               )}
                             />
@@ -982,6 +1065,17 @@ export default function EditSeries({
                             </Label>
                             <Controller
                               name={`episode_update.${index}.episode_thumbnails`}
+                              rules={{
+                                validate: {
+                                  isImage: (file: File | null) => {
+                                    if (!file) return true;
+                                    return (
+                                      file.type.startsWith("image/") ||
+                                      "Only image files are allowed"
+                                    );
+                                  },
+                                },
+                              }}
                               control={control}
                               render={({
                                 field: controllerField,
@@ -1000,6 +1094,11 @@ export default function EditSeries({
                                   <p className="text-gray-400 text-sm mt-1 break-all">
                                     {item?.episode_thumbnails as string}
                                   </p>
+                                  {fieldState.error && (
+                                    <p className="error-msg">
+                                      {fieldState.error.message}
+                                    </p>
+                                  )}
                                 </div>
                               )}
                             />
@@ -1132,6 +1231,18 @@ export default function EditSeries({
                           </Label>
                           <Controller
                             name={`episode_update.${index}.episode_videos`}
+                            rules={{
+                              validate: {
+                                isVideo: (file: File | null) => {
+                                  if (!file) return true;
+
+                                  return (
+                                    file.type.startsWith("video/") ||
+                                    "Only video files are allowed"
+                                  );
+                                },
+                              },
+                            }}
                             control={control}
                             render={({
                               field: controllerField,
@@ -1151,6 +1262,11 @@ export default function EditSeries({
                                 <p className="text-gray-400 text-sm mt-1 break-all">
                                   {item?.episode_videos as string}
                                 </p>
+                                {fieldState.error && (
+                                  <p className="error-msg">
+                                    {fieldState.error.message}
+                                  </p>
+                                )}
                               </div>
                             )}
                           />
@@ -1162,6 +1278,17 @@ export default function EditSeries({
                           </Label>
                           <Controller
                             name={`episode_update.${index}.episode_thumbnails`}
+                            rules={{
+                              validate: {
+                                isImage: (file: File | null) => {
+                                  if (!file) return true;
+                                  return (
+                                    file.type.startsWith("image/") ||
+                                    "Only image files are allowed"
+                                  );
+                                },
+                              },
+                            }}
                             control={control}
                             render={({
                               field: controllerField,
@@ -1180,6 +1307,12 @@ export default function EditSeries({
                                 <p className="text-gray-400 text-sm mt-1 break-all">
                                   {item?.episode_thumbnails as string}
                                 </p>
+
+                                {fieldState.error && (
+                                  <p className="error-msg">
+                                    {fieldState.error.message}
+                                  </p>
+                                )}
                               </div>
                             )}
                           />
@@ -1253,12 +1386,26 @@ export default function EditSeries({
                         </div>
                       </div>
                     </div>
-                    <input type="hidden" {...register("trailer")} />
+                    <input
+                      type="hidden"
+                      {...register("trailer", {
+                        validate: {
+                          isVideo: (value: File | string | null) => {
+                            if (!value || typeof value === "string")
+                              return true;
+
+                            return value.type.startsWith("video/")
+                              ? true
+                              : "Only video files are allowed";
+                          },
+                        },
+                      })}
+                    />
                     <p className="text-gray-400 text-sm mt-1">
                       {(movieData?.series_trailer as string) || ""}
                     </p>
                     {errors.trailer && (
-                      <p className="mt-1 text-sm text-red-500">
+                      <p className="error-msg">
                         {errors.trailer.message as string}
                       </p>
                     )}
@@ -1286,7 +1433,6 @@ export default function EditSeries({
                             Choose File
                           </span>
                           <span className="text-white">
-                            {/* {thumbnail ? thumbnail.name : "No file chosen"} */}
                             {thumbnail
                               ? typeof thumbnail === "string"
                                 ? thumbnail
@@ -1296,13 +1442,24 @@ export default function EditSeries({
                         </div>
                       </div>
                     </div>
-                    <input type="hidden" {...register("series_thumbnail")} />
+                    <input
+                      type="hidden"
+                      {...register("thumbnailImg", {
+                        validate: (value: File | string | null) => {
+                          if (!value || typeof value === "string") return true;
+                          return (
+                            value.type.startsWith("image/") ||
+                            "Only image files are allowed"
+                          );
+                        },
+                      })}
+                    />
                     <p className="text-gray-400 text-sm mt-1">
                       {(movieData?.series_thumbnail as string) || ""}
                     </p>
-                    {errors.series_thumbnail && (
-                      <p className="mt-1 text-sm text-red-500">
-                        {errors.series_thumbnail.message as string}
+                    {errors.thumbnailImg && (
+                      <p className="error-msg">
+                        {errors.thumbnailImg.message as string}
                       </p>
                     )}
                   </div>

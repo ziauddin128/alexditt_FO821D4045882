@@ -204,7 +204,14 @@ export default function AddEpisode({
                   <Controller
                     name={`series.${index}.episode_file`}
                     control={control}
-                    rules={{ required: "Episode file is required" }}
+                    rules={{
+                      required: "Episode file is required",
+                      validate: {
+                        isVideo: (file: File | null) =>
+                          file?.type?.startsWith("video/") ||
+                          "Only video files are allowed",
+                      },
+                    }}
                     render={({ field: controllerField, fieldState }) => (
                       <div>
                         <input
@@ -217,7 +224,7 @@ export default function AddEpisode({
                           className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
                         />
                         {fieldState.error && (
-                          <p className="text-red-500">
+                          <p className="error-msg">
                             {fieldState.error.message}
                           </p>
                         )}
@@ -231,7 +238,17 @@ export default function AddEpisode({
                   <Controller
                     name={`series.${index}.episode_thumbnail`}
                     control={control}
-                    rules={{ required: "Episode thumbnail is required" }}
+                    rules={{
+                      required: "Episode thumbnail is required",
+                      validate: {
+                        isImage: (file: File | null) =>
+                          file
+                            ? file.type.startsWith("image/")
+                              ? true
+                              : "Only image files are allowed"
+                            : true,
+                      },
+                    }}
                     render={({ field: controllerField, fieldState }) => (
                       <div>
                         <input
@@ -244,7 +261,7 @@ export default function AddEpisode({
                           className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
                         />
                         {fieldState.error && (
-                          <p className="text-red-500">
+                          <p className="error-msg">
                             {fieldState.error.message}
                           </p>
                         )}

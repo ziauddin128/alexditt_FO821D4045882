@@ -20,7 +20,7 @@ import {
   useFieldArray,
   Controller,
 } from "react-hook-form";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -141,8 +141,6 @@ export default function AddSeries() {
   const thumbnail = watch("thumbnailImg");
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    // console.log("All File Data", data);
-
     setSubmitLoading(true);
 
     try {
@@ -262,19 +260,6 @@ export default function AddSeries() {
     if (e.type === "dragleave") setDragActive(false);
   };
 
-  /* const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    const file = e.dataTransfer?.files?.[0];
-    if (file) {
-      setValue("thumbnailImg", file, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    }
-  }; */
-
   // File picker handler
   const handleFilePick: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const file = e.target.files?.[0] ?? null;
@@ -286,12 +271,6 @@ export default function AddSeries() {
     const vidFile = e.target.files?.[0] ?? null;
     setValue("trailer", vidFile, { shouldValidate: true, shouldDirty: true });
   };
-
-  /* const handleVideoPick: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-    const vidFile = e.target.files?.[0] ?? null;
-
-    setValue("file", vidFile, { shouldValidate: true, shouldDirty: true });
-  }; */
 
   return (
     <div>
@@ -491,7 +470,17 @@ export default function AddSeries() {
               <Controller
                 control={control}
                 name="director_thumbnail"
-                rules={{ required: "Director image is required" }}
+                rules={{
+                  required: "Director image is required",
+                  validate: {
+                    isImage: (file: File | null) =>
+                      file
+                        ? file.type.startsWith("image/")
+                          ? true
+                          : "Only image files are allowed"
+                        : true,
+                  },
+                }}
                 render={({ field, fieldState }) => (
                   <div>
                     <input
@@ -504,25 +493,11 @@ export default function AddSeries() {
                       }}
                     />
                     {fieldState.error && (
-                      <p className="text-red-500">{fieldState.error.message}</p>
+                      <p className="error-msg">{fieldState.error.message}</p>
                     )}
                   </div>
                 )}
               />
-
-              {/* <div>
-                <input
-                  type="file"
-                  className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white  file:px-2"
-                  accept="image/*"
-                  {...register("director_thumbnail", {
-                    required: "Director image is required",
-                  })}
-                />
-              </div>
-              {errors.director_thumbnail && (
-                <p className="error-msg">{errors.director_thumbnail.message}</p>
-              )} */}
             </div>
           </div>
 
@@ -553,7 +528,17 @@ export default function AddSeries() {
                 <Controller
                   name={`casts.${index}.cast_img`}
                   control={control}
-                  rules={{ required: "Cast image is required" }}
+                  rules={{
+                    required: "Cast image is required",
+                    validate: {
+                      isImage: (file: File | null) =>
+                        file
+                          ? file.type.startsWith("image/")
+                            ? true
+                            : "Only image files are allowed"
+                          : true,
+                    },
+                  }}
                   render={({ field: controllerField, fieldState }) => (
                     <div>
                       <input
@@ -566,9 +551,7 @@ export default function AddSeries() {
                         className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
                       />
                       {fieldState.error && (
-                        <p className="text-red-500">
-                          {fieldState.error.message}
-                        </p>
+                        <p className="error-msg">{fieldState.error.message}</p>
                       )}
                     </div>
                   )}
@@ -601,11 +584,11 @@ export default function AddSeries() {
             <Checkbox
               className="data-[state=checked]:bg-primary-color h-5 w-5 cursor-pointer"
               id="season-mode"
-              checked={isSeries} // control the checkbox with state
+              checked={isSeries}
               onCheckedChange={(checked) => {
-                const value = checked === true; // true or false
+                const value = checked === true;
                 setIsSeries(value);
-                setValue("season_mode", value, { shouldValidate: true }); // set RHF boolean
+                setValue("season_mode", value, { shouldValidate: true });
               }}
             />
             <Label
@@ -657,8 +640,20 @@ export default function AddSeries() {
                   type="file"
                   className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white file:px-2"
                   accept="image/*"
-                  {...register(`season_thumbnail`, {
-                    required: "Season Thumbnail is required",
+                  {...register("season_thumbnail", {
+                    validate: {
+                      isImage: (value: FileList | string | undefined) => {
+                        if (!value) return "Season Thumbnail is required";
+
+                        const file =
+                          value instanceof FileList ? value[0] : null;
+                        if (!file) return "Season Thumbnail is required";
+                        return (
+                          file.type.startsWith("image/") ||
+                          "Only image files are allowed"
+                        );
+                      },
+                    },
                   })}
                 />
                 {errors.season_thumbnail && (
@@ -732,7 +727,14 @@ export default function AddSeries() {
                 <Controller
                   name={`series.${index}.episode_file`}
                   control={control}
-                  rules={{ required: "Episode file is required" }}
+                  rules={{
+                    required: "Episode file is required",
+                    validate: {
+                      isVideo: (file: File | null) =>
+                        file?.type?.startsWith("video/") ||
+                        "Only video files are allowed",
+                    },
+                  }}
                   render={({ field: controllerField, fieldState }) => (
                     <div>
                       <input
@@ -745,9 +747,7 @@ export default function AddSeries() {
                         className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
                       />
                       {fieldState.error && (
-                        <p className="text-red-500">
-                          {fieldState.error.message}
-                        </p>
+                        <p className="error-msg">{fieldState.error.message}</p>
                       )}
                     </div>
                   )}
@@ -759,7 +759,17 @@ export default function AddSeries() {
                 <Controller
                   name={`series.${index}.episode_thumbnail`}
                   control={control}
-                  rules={{ required: "Episode thumbnail is required" }}
+                  rules={{
+                    required: "Episode thumbnail is required",
+                    validate: {
+                      isImage: (file: File | null) =>
+                        file
+                          ? file.type.startsWith("image/")
+                            ? true
+                            : "Only image files are allowed"
+                          : true,
+                    },
+                  }}
                   render={({ field: controllerField, fieldState }) => (
                     <div>
                       <input
@@ -772,9 +782,7 @@ export default function AddSeries() {
                         className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
                       />
                       {fieldState.error && (
-                        <p className="text-red-500">
-                          {fieldState.error.message}
-                        </p>
+                        <p className="error-msg">{fieldState.error.message}</p>
                       )}
                     </div>
                   )}
@@ -851,10 +859,15 @@ export default function AddSeries() {
                   type="hidden"
                   {...register("trailer", {
                     required: "Trailer is required",
+                    validate: {
+                      isVideo: (file: File | null) =>
+                        file?.type?.startsWith("video/") ||
+                        "Only video files are allowed",
+                    },
                   })}
                 />
                 {errors.trailer && (
-                  <p className="mt-1 text-sm text-red-500">
+                  <p className="error-msg">
                     {errors.trailer.message as string}
                   </p>
                 )}
@@ -892,10 +905,15 @@ export default function AddSeries() {
                   type="hidden"
                   {...register("thumbnailImg", {
                     required: "Thumbnail image is required",
+                    validate: {
+                      isImage: (file: File | null) =>
+                        file?.type?.startsWith("image/") ||
+                        "Only image files are allowed",
+                    },
                   })}
                 />
                 {errors.thumbnailImg && (
-                  <p className="mt-1 text-sm text-red-500">
+                  <p className="error-msg">
                     {errors.thumbnailImg.message as string}
                   </p>
                 )}

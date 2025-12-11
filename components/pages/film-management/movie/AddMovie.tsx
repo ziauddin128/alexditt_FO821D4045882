@@ -272,7 +272,15 @@ export default function AddMovie() {
 
               <input
                 type="hidden"
-                {...register("file", { required: "Movie file is required" })}
+                // {...register("file", { required: "Movie file is required" })}
+                {...register("file", {
+                  required: "Movie file is required",
+                  validate: {
+                    isVideo: (file: File | null) =>
+                      file?.type?.startsWith("video/") ||
+                      "Only video files are allowed",
+                  },
+                })}
               />
 
               {vidFile && (
@@ -485,7 +493,17 @@ export default function AddMovie() {
               <Controller
                 control={control}
                 name="director_thumbnail"
-                rules={{ required: "Director image is required" }}
+                rules={{
+                  required: "Director image is required",
+                  validate: {
+                    isImage: (file: File | null) =>
+                      file
+                        ? file.type.startsWith("image/")
+                          ? true
+                          : "Only image files are allowed"
+                        : true,
+                  },
+                }}
                 render={({ field, fieldState }) => (
                   <div>
                     <input
@@ -498,7 +516,7 @@ export default function AddMovie() {
                       }}
                     />
                     {fieldState.error && (
-                      <p className="text-red-500">{fieldState.error.message}</p>
+                      <p className="error-msg">{fieldState.error.message}</p>
                     )}
                   </div>
                 )}
@@ -533,7 +551,17 @@ export default function AddMovie() {
                 <Controller
                   name={`casts.${index}.cast_img`}
                   control={control}
-                  rules={{ required: "Cast image is required" }}
+                  rules={{
+                    required: "Cast image is required",
+                    validate: {
+                      isImage: (file: File | null) =>
+                        file
+                          ? file.type.startsWith("image/")
+                            ? true
+                            : "Only image files are allowed"
+                          : true,
+                    },
+                  }}
                   render={({ field: controllerField, fieldState }) => (
                     <div>
                       <input
@@ -607,6 +635,11 @@ export default function AddMovie() {
                   type="hidden"
                   {...register("trailer", {
                     required: "Trailer is required",
+                    validate: {
+                      isVideo: (file: File | null) =>
+                        file?.type?.startsWith("video/") ||
+                        "Only video files are allowed",
+                    },
                   })}
                 />
                 {errors.trailer && (
@@ -648,6 +681,11 @@ export default function AddMovie() {
                   type="hidden"
                   {...register("movie_thumbnail", {
                     required: "Thumbnail image is required",
+                    validate: {
+                      isImage: (file: File | null) =>
+                        file?.type?.startsWith("image/") ||
+                        "Only image files are allowed",
+                    },
                   })}
                 />
                 {errors.movie_thumbnail && (
