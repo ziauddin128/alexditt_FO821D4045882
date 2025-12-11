@@ -2,10 +2,10 @@
 import { privateAxios } from "@/components/axiosInstance/axios";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
-import AddEpisode from "@/components/pages/film-management/series/AddEpisode";
+import AddSeasonEpisode from "@/components/pages/film-management/series/AddSeasonEpisode";
 import { useEffect } from "react";
 
-export default function ManageEpisodePage() {
+export default function ManageSeasonEpisodePage() {
   const params = useParams();
   const id = params.id;
 
@@ -16,7 +16,7 @@ export default function ManageEpisodePage() {
     queryKey: ["movieDet", id],
     queryFn: async () => {
       try {
-        const res = await privateAxios.get(`/admin/series/${id}`);
+        const res = await privateAxios.get(`/admin/series/season/${id}`);
         return res.data;
       } catch (err: any) {
         router.push("/dashboard/film-management");
@@ -33,7 +33,7 @@ export default function ManageEpisodePage() {
   }, [data, isLoading, router]);
 
   return (
-    <AddEpisode
+    <AddSeasonEpisode
       movieData={data?.data}
       isLoading={isLoading}
       refetch={refetch}

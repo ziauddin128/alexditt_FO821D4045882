@@ -28,6 +28,8 @@ import LoadingSpinner from "@/app/(dashboard)/loading";
 import { toast } from "sonner";
 import ReactSelect from "react-select";
 import DeleteCast from "./DeleteCast";
+import ConvertToSeconds from "@/hooks/convertToSecond";
+import ConvertToMinute from "@/hooks/convertToMinute";
 
 interface Category {
   id: string;
@@ -39,7 +41,7 @@ type Inputs = {
   title: string;
   genres: { value: string; label: string }[];
   release_date: string;
-  duration: string;
+  duration: string | number;
   kids_mode: boolean;
   description: string;
   category_id: string;
@@ -47,6 +49,7 @@ type Inputs = {
   director_name: string;
   status: string;
   video?: string;
+  video_url: string;
   director_thumbnail: File | null | string;
   director_thumbnail_url: string;
   movie_thumbnail_url: string;
@@ -164,7 +167,7 @@ export default function EditMovie({
       const releaseDate = new Date(data.release_date);
       formData.append("release_date", releaseDate.toISOString());
 
-      formData.append("duration", data.duration);
+      formData.append("duration", String(ConvertToSeconds(data.duration)));
       formData.append("kids_mode", data.kids_mode ? "true" : "false");
       formData.append("description", data.description);
       formData.append("category_id", data.category_id);
@@ -333,8 +336,8 @@ export default function EditMovie({
                     </p>
                   )}
 
-                  <p className="text-green-500 text-sm mt-1 break-all">
-                    {(movieData?.movie_thumbnail_url as string) || ""}
+                  <p className="text-gray-400 text-sm mt-1 break-all">
+                    {(movieData?.video_url as string) || ""}
                   </p>
 
                   {errors.file && (
@@ -437,17 +440,16 @@ export default function EditMovie({
 
                 {/* Duration */}
                 <div>
-                  <Label className="custom-label mb-3">
-                    Duration (seconds)
-                  </Label>
+                  <Label className="custom-label mb-3">Duration (minute)</Label>
                   <Input
                     type="number"
+                    step="any"
                     placeholder="Duration"
                     className="custom-content-input"
                     {...register("duration", {
                       required: "Duration Date is required",
                     })}
-                    defaultValue={movieData?.duration || ""}
+                    defaultValue={ConvertToMinute(Number(movieData?.duration))}
                   />
                   {errors.duration && (
                     <p className="error-msg">{errors.duration.message}</p>
@@ -629,7 +631,7 @@ export default function EditMovie({
                             field.onChange(file);
                           }}
                         />
-                        <p className="text-green-500 text-sm mt-1 break-all">
+                        <p className="text-gray-400 text-sm mt-1 break-all">
                           {(movieData?.director_thumbnail_url as string) || ""}
                         </p>
                         {/* {fieldState.error && (
@@ -694,7 +696,7 @@ export default function EditMovie({
                                 className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
                               />
 
-                              <p className="text-green-500 text-sm mt-1 break-all">
+                              <p className="text-gray-400 text-sm mt-1 break-all">
                                 {cast?.cast_thumbnail_url as string}
                               </p>
                             </div>
@@ -750,8 +752,7 @@ export default function EditMovie({
                             }}
                             className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
                           />
-                          <p className="text-green-500 text-sm mt-1 break-all">
-
+                          <p className="text-gray-400 text-sm mt-1 break-all">
                             {typeof castFields[index].cast_thumbnail ===
                               "string" && castFields[index].cast_thumbnail}
                           </p>
@@ -819,7 +820,7 @@ export default function EditMovie({
                       </div>
                     </div>
                     <input type="hidden" {...register("trailer")} />
-                    <p className="text-green-500 text-sm mt-1 break-all">
+                    <p className="text-gray-400 text-sm mt-1 break-all">
                       {(movieData?.movie_trailer_url as string) || ""}
                     </p>
                     {errors.trailer && (
@@ -862,7 +863,7 @@ export default function EditMovie({
                       </div>
                     </div>
                     <input type="hidden" {...register("movie_thumbnail")} />
-                    <p className="text-green-500 text-sm mt-1 break-all">
+                    <p className="text-gray-400 text-sm mt-1 break-all">
                       {(movieData?.movie_thumbnail_url as string) || ""}
                     </p>
                     {errors.movie_thumbnail && (

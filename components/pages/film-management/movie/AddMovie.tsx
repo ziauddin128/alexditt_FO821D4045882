@@ -26,6 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import ReactSelect from "react-select";
 import { toast } from "sonner";
+import ConvertToSeconds from "@/hooks/convertToSecond";
 
 interface Category {
   id: string;
@@ -141,7 +142,7 @@ export default function AddMovie() {
       const releaseDate = new Date(data.release_date);
       formData.append("release_date", releaseDate.toISOString());
 
-      formData.append("duration", data.duration);
+      formData.append("duration", String(ConvertToSeconds(data.duration)));
       formData.append("kids_mode", data.kids_mode ? "true" : "false");
       formData.append("description", data.description);
       formData.append("category_id", data.category_id);
@@ -363,9 +364,10 @@ export default function AddMovie() {
 
             {/* Duration */}
             <div>
-              <Label className="custom-label mb-3">Duration (seconds)</Label>
+              <Label className="custom-label mb-3">Duration (minute)</Label>
               <Input
                 type="number"
+                step="any"
                 placeholder="Duration"
                 className="custom-content-input"
                 {...register("duration", {

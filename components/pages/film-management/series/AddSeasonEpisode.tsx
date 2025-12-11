@@ -12,16 +12,13 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Trash2 } from "lucide-react";
 import { Plus } from "lucide-react";
-import { privateAxios } from "@/components/axiosInstance/axios";
 import { toast } from "sonner";
+import { privateAxios } from "@/components/axiosInstance/axios";
 import ConvertToSeconds from "@/hooks/convertToSecond";
 
 type Inputs = {
   id: string;
   title: string;
-  season_name?: string;
-  release_date?: string;
-  season_thumbnail?: string;
   series: {
     episode_name: string;
     episode_number: number;
@@ -32,7 +29,7 @@ type Inputs = {
   }[];
 };
 
-export default function AddSeason({
+export default function AddSeasonEpisode({
   movieData,
   isLoading,
   refetch,
@@ -42,9 +39,12 @@ export default function AddSeason({
   refetch: () => void;
 }) {
   const [submitLoading, setSubmitLoading] = useState(false);
+
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     control,
     reset,
     formState: { errors },
@@ -79,18 +79,6 @@ export default function AddSeason({
     try {
       const formData = new FormData();
 
-      // Season Info
-      const releaseDate = new Date(data.release_date || "");
-      const seasonInfo = {
-        title: data.season_name || "",
-        release_date: releaseDate.toISOString(),
-      };
-
-      formData.append("season_info", JSON.stringify(seasonInfo));
-      if (data.season_thumbnail && data.season_thumbnail?.length > 0) {
-        formData.append("season_thumbnail", data.season_thumbnail[0]);
-      }
-
       // Episodes
       const episodeArray = data.series.map((episode: any, i: number) => ({
         key: `ep${i}`,
@@ -116,14 +104,14 @@ export default function AddSeason({
       });
 
       // Print Form Data
-      /*   formData.forEach((value, key) => {
+      /* formData.forEach((value, key) => {
         console.log(`${key}: ${value}`);
       });
 
       return; */
 
       const response = await privateAxios.post(
-        `/admin/series/${movieData.id}/season`,
+        `/admin/series/episodes/?seasonId=${movieData.id}`,
         formData,
         {
           headers: {
@@ -133,7 +121,7 @@ export default function AddSeason({
       );
 
       reset();
-      toast.success("Season added successfully!");
+      toast.success("Season episode added successfully!");
     } catch (error: any) {
       const message = error?.response?.data?.message || "Something went wrong!";
       throw new Error(message);
@@ -150,65 +138,10 @@ export default function AddSeason({
         <div>
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="grid grid-cols-1  gap-6"
+            className="grid grid-cols-1 gap-6"
           >
-            <h1 className="text-3xl font-medium">
-              Series Title: {movieData?.title}
-            </h1>
+            <h1 className="text-3xl font-medium">Season: {movieData?.title}</h1>
 
-            <div className="grid md:grid-cols-3 gap-4">
-              <div>
-                <Label className="custom-label mb-3">Season Name</Label>
-                <Input
-                  placeholder="Season name"
-                  className="custom-content-input"
-                  {...register(`season_name`, {
-                    required: "Season name is required",
-                  })}
-                />
-                {errors.season_name && (
-                  <p className="error-msg">{errors.season_name.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label className="custom-label mb-3">Release Date</Label>
-
-                <div className="relative">
-                  <Input
-                    type="date"
-                    placeholder="Release Date"
-                    className="custom-content-input white-calendar"
-                    {...register(`release_date`, {
-                      required: "Release date is required",
-                    })}
-                  />
-                </div>
-
-                {errors.release_date && (
-                  <p className="error-msg">{errors.release_date.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label className="custom-label mb-3">Season Thumbnail</Label>
-                <input
-                  type="file"
-                  className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white file:px-2"
-                  accept="image/*"
-                  {...register(`season_thumbnail`, {
-                    required: "Season Thumbnail is required",
-                  })}
-                />
-                {errors.season_thumbnail && (
-                  <p className="error-msg">
-                    {errors.season_thumbnail.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Series Item */}
             {seriesFields.map((item, index) => (
               <div
                 key={item.id}

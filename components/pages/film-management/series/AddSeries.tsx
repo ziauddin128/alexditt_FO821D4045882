@@ -26,6 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import ReactSelect from "react-select";
 import { toast } from "sonner";
+import ConvertToSeconds from "@/hooks/convertToSecond";
 
 interface Category {
   id: string;
@@ -139,43 +140,6 @@ export default function AddSeries() {
   const trailer = watch("trailer");
   const thumbnail = watch("thumbnailImg");
 
-  // send to the server
-  /* const uploadContent = useMutation({
-    mutationFn: async (data: Inputs) => {
-      try {
-        const formData = new FormData();
-        // Append file data
-        if (data.file) formData.append("file", data.file);
-        if (data.thumbnailImg) formData.append("thumbnail", data.thumbnailImg);
-
-        // Append other fields as regular form data
-        formData.append("title", data.title);
-        formData.append("description", data.description);
-        formData.append("genres", data.genres);
-        formData.append("category_id", data.category_id);
-        formData.append("type", data.contentType);
-
-        console.log("FormData Contents:");
-        formData.forEach((value, key) => {
-          console.log(`${key}: ${value}`);
-        });
-
-        // You can replace this with your actual API endpoint
-        const response = await privateAxios.post(`/uploads/video`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-
-        console.log(response.data);
-      } catch (error: any) {
-        const message =
-          error?.response?.data?.message || "Something went wrong!";
-        throw new Error(message);
-      }
-    },
-  }); */
-
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     // console.log("All File Data", data);
 
@@ -244,7 +208,8 @@ export default function AddSeries() {
         episode_number: episode.episode_number,
         title: episode.episode_name,
         description: episode.episode_description,
-        duration: episode.episode_duration,
+        // duration: episode.episode_duration,
+        duration: String(ConvertToSeconds(episode.episode_duration)),
       }));
 
       formData.append("episodes", JSON.stringify(episodeArray));
@@ -263,7 +228,7 @@ export default function AddSeries() {
       });
 
       // Print Form Data
-      /*  formData.forEach((value, key) => {
+      /*   formData.forEach((value, key) => {
         console.log(`${key}: ${value}`);
       });
 
@@ -730,6 +695,7 @@ export default function AddSeries() {
               <div>
                 <Label className="custom-label mb-3">Episode Number</Label>
                 <Input
+                  type="number"
                   placeholder="Episode number"
                   className="custom-content-input"
                   {...register(`series.${index}.episode_number`, {
@@ -744,9 +710,10 @@ export default function AddSeries() {
               </div>
 
               <div>
-                <Label className="custom-label mb-3">Duration (seconds)</Label>
+                <Label className="custom-label mb-3">Duration (minute)</Label>
                 <Input
                   type="number"
+                  step="any"
                   placeholder="Duration"
                   className="custom-content-input"
                   {...register(`series.${index}.episode_duration`, {

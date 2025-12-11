@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import { useQuery } from "@tanstack/react-query";
@@ -23,6 +23,14 @@ export default function EditSeriesPage() {
       }
     },
   });
+
+  // Redirect when no data found
+  useEffect(() => {
+    if (isLoading) return;
+    if (!data?.success) {
+      router.push("/dashboard/film-management");
+    }
+  }, [data, isLoading, router]);
 
   return (
     <EditSeries

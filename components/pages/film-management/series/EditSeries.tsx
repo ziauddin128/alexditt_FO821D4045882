@@ -31,6 +31,8 @@ import DeleteCast from "./DeleteCast";
 import DeleteEpisode from "./DeleteEpisode";
 import DeleteSeason from "./DeleteSeason";
 import Link from "next/link";
+import ConvertToMinute from "@/hooks/convertToMinute";
+import ConvertToSeconds from "@/hooks/convertToSecond";
 
 interface Category {
   id: string;
@@ -194,43 +196,6 @@ export default function EditSeries({
   const trailer = watch("trailer");
   const thumbnail = watch("thumbnailImg");
 
-  // send to the server
-  /* const uploadContent = useMutation({
-    mutationFn: async (data: Inputs) => {
-      try {
-        const formData = new FormData();
-        // Append file data
-        if (data.file) formData.append("file", data.file);
-        if (data.thumbnailImg) formData.append("thumbnail", data.thumbnailImg);
-
-        // Append other fields as regular form data
-        formData.append("title", data.title);
-        formData.append("description", data.description);
-        formData.append("genres", data.genres);
-        formData.append("category_id", data.category_id);
-        formData.append("type", data.contentType);
-
-        console.log("FormData Contents:");
-        formData.forEach((value, key) => {
-          console.log(`${key}: ${value}`);
-        });
-
-        // You can replace this with your actual API endpoint
-        const response = await privateAxios.post(`/uploads/video`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-
-        console.log(response.data);
-      } catch (error: any) {
-        const message =
-          error?.response?.data?.message || "Something went wrong!";
-        throw new Error(message);
-      }
-    },
-  }); */
-
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setSubmitLoading(true);
 
@@ -310,7 +275,7 @@ export default function EditSeries({
         (episode: any, i: number) => ({
           id: episode.id,
           title: episode.title,
-          duration: episode.duration,
+          duration: String(ConvertToSeconds(episode.duration)),
           description: episode.description,
           episode_number: episode.episode_number,
         })
@@ -391,19 +356,6 @@ export default function EditSeries({
     if (e.type === "dragleave") setDragActive(false);
   };
 
-  /* const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    const file = e.dataTransfer?.files?.[0];
-    if (file) {
-      setValue("thumbnailImg", file, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    }
-  }; */
-
   // File picker handler
   const handleFilePick: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const file = e.target.files?.[0] ?? null;
@@ -415,12 +367,6 @@ export default function EditSeries({
     const vidFile = e.target.files?.[0] ?? null;
     setValue("trailer", vidFile, { shouldValidate: true, shouldDirty: true });
   };
-
-  /* const handleVideoPick: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-    const vidFile = e.target.files?.[0] ?? null;
-
-    setValue("file", vidFile, { shouldValidate: true, shouldDirty: true });
-  }; */
 
   return (
     <>
@@ -651,7 +597,7 @@ export default function EditSeries({
                               field.onChange(file);
                             }}
                           />
-                          <p className="text-green-500 text-sm mt-1">
+                          <p className="text-gray-400 text-sm mt-1">
                             {(movieData?.director_thumbnail as string) || ""}
                           </p>
                         </div>
@@ -711,7 +657,7 @@ export default function EditSeries({
                                 className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
                               />
 
-                              <p className="text-green-500 text-sm mt-1">
+                              <p className="text-gray-400 text-sm mt-1">
                                 {cast?.cast_thumbnail as string}
                               </p>
                             </div>
@@ -805,10 +751,10 @@ export default function EditSeries({
               {/* Seasons with Episode */}
               {movieData?.seasons?.length > 0
                 ? movieData?.seasons.map((season, seasonIndex) => (
-                    <div className="p-2 border border-gray3-bg space-y-3">
+                    <div className="p-2 border-2 border-[#2d9dff7a] rounded-sm space-y-3">
                       <div
                         key={`season_info${seasonIndex}`}
-                        className="grid md:grid-cols-3 gap-4 relative border border-gray3-bg p-2"
+                        className="grid md:grid-cols-3 gap-4 relative border border-[#f1a10d42] p-2"
                       >
                         <Input
                           hidden
@@ -899,7 +845,7 @@ export default function EditSeries({
                                   className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
                                 />
 
-                                <p className="text-green-500 text-sm mt-1 break-all">
+                                <p className="text-gray-400 text-sm mt-1 break-all">
                                   {season?.season_thumbnail as string}
                                 </p>
                               </div>
@@ -952,6 +898,7 @@ export default function EditSeries({
                               Episode Number
                             </Label>
                             <Input
+                              type="number"
                               placeholder="Episode number"
                               className="custom-content-input"
                               {...register(
@@ -975,16 +922,19 @@ export default function EditSeries({
 
                           <div>
                             <Label className="custom-label mb-3">
-                              Duration (seconds)
+                              Duration (minute)
                             </Label>
                             <Input
                               type="number"
+                              step="any"
                               placeholder="Duration"
                               className="custom-content-input"
                               {...register(`episode_update.${index}.duration`, {
                                 required: "Duration is required",
                               })}
-                              defaultValue={item?.duration}
+                              defaultValue={ConvertToMinute(
+                                Number(item?.duration)
+                              )}
                             />
                             {errors?.episode_update?.[index]?.duration && (
                               <p className="error-msg">
@@ -1018,7 +968,7 @@ export default function EditSeries({
                                     className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
                                   />
 
-                                  <p className="text-green-500 text-sm mt-1 break-all">
+                                  <p className="text-gray-400 text-sm mt-1 break-all">
                                     {item?.episode_videos as string}
                                   </p>
                                 </div>
@@ -1047,7 +997,7 @@ export default function EditSeries({
                                     }}
                                     className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
                                   />
-                                  <p className="text-green-500 text-sm mt-1 break-all">
+                                  <p className="text-gray-400 text-sm mt-1 break-all">
                                     {item?.episode_thumbnails as string}
                                   </p>
                                 </div>
@@ -1074,7 +1024,7 @@ export default function EditSeries({
                       ))}
 
                       <Link
-                        href={`/dashboard/film-management/series/episode/${movieData?.id}`}
+                        href={`/dashboard/film-management/series/season/episode/${season?.id}`}
                         className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer w-fit"
                       >
                         <Plus className="w-5 h-5" />
@@ -1129,6 +1079,7 @@ export default function EditSeries({
                             Episode Number
                           </Label>
                           <Input
+                            type="number"
                             placeholder="Episode number"
                             className="custom-content-input"
                             {...register(
@@ -1151,16 +1102,19 @@ export default function EditSeries({
 
                         <div>
                           <Label className="custom-label mb-3">
-                            Duration (seconds)
+                            Duration (minute)
                           </Label>
                           <Input
                             type="number"
+                            step="any"
                             placeholder="Duration"
                             className="custom-content-input"
                             {...register(`episode_update.${index}.duration`, {
                               required: "Duration is required",
                             })}
-                            defaultValue={item?.duration}
+                            defaultValue={ConvertToMinute(
+                              Number(item?.duration)
+                            )}
                           />
                           {errors?.episode_update?.[index]?.duration && (
                             <p className="error-msg">
@@ -1194,7 +1148,7 @@ export default function EditSeries({
                                   className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
                                 />
 
-                                <p className="text-green-500 text-sm mt-1 break-all">
+                                <p className="text-gray-400 text-sm mt-1 break-all">
                                   {item?.episode_videos as string}
                                 </p>
                               </div>
@@ -1223,7 +1177,7 @@ export default function EditSeries({
                                   }}
                                   className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
                                 />
-                                <p className="text-green-500 text-sm mt-1 break-all">
+                                <p className="text-gray-400 text-sm mt-1 break-all">
                                   {item?.episode_thumbnails as string}
                                 </p>
                               </div>
@@ -1245,35 +1199,31 @@ export default function EditSeries({
 
                         <DeleteEpisode id={item?.id} refetch={refetch} />
                       </div>
-
-                      <Link
-                        href={`/dashboard/film-management/series/episode/${movieData?.id}`}
-                        className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer w-fit"
-                      >
-                        <Plus className="w-5 h-5" />
-                        {/* <span>Add New Episode</span> */}
-                      </Link>
                     </>
                   ))
                 : null}
 
               {/* Add New Season & Episode Button */}
               <div className="flex flex-wrap items-center gap-3">
-                <Link
-                  href={`/dashboard/film-management/series/season/${movieData?.id}`}
-                  className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer w-fit"
-                >
-                  <Plus className="w-5 h-5" />
-                  <span>Add New Season</span>
-                </Link>
+                {movieData?.seasons?.length > 0 && (
+                  <Link
+                    href={`/dashboard/film-management/series/season/${movieData?.id}`}
+                    className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer w-fit"
+                  >
+                    <Plus className="w-5 h-5" />
+                    <span>Add New Season</span>
+                  </Link>
+                )}
 
-                <Link
-                  href={`/dashboard/film-management/series/episode/${movieData?.id}`}
-                  className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer w-fit"
-                >
-                  <Plus className="w-5 h-5" />
-                  <span>Add New Episode</span>
-                </Link>
+                {movieData?.seasons?.length == 0 && (
+                  <Link
+                    href={`/dashboard/film-management/series/episode/${movieData?.id}`}
+                    className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer w-fit"
+                  >
+                    <Plus className="w-5 h-5" />
+                    <span>Add New Episode</span>
+                  </Link>
+                )}
               </div>
 
               {/* Trailer */}
@@ -1304,7 +1254,7 @@ export default function EditSeries({
                       </div>
                     </div>
                     <input type="hidden" {...register("trailer")} />
-                    <p className="text-green-500 text-sm mt-1">
+                    <p className="text-gray-400 text-sm mt-1">
                       {(movieData?.series_trailer as string) || ""}
                     </p>
                     {errors.trailer && (
@@ -1347,7 +1297,7 @@ export default function EditSeries({
                       </div>
                     </div>
                     <input type="hidden" {...register("series_thumbnail")} />
-                    <p className="text-green-500 text-sm mt-1">
+                    <p className="text-gray-400 text-sm mt-1">
                       {(movieData?.series_thumbnail as string) || ""}
                     </p>
                     {errors.series_thumbnail && (

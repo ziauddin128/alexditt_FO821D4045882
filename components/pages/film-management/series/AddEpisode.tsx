@@ -14,13 +14,14 @@ import { Trash2 } from "lucide-react";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { privateAxios } from "@/components/axiosInstance/axios";
+import ConvertToSeconds from "@/hooks/convertToSecond";
 
 type Inputs = {
   id: string;
   title: string;
   series: {
     episode_name: string;
-    episode_number: string;
+    episode_number: number;
     episode_duration: string;
     episode_file: File | null;
     episode_thumbnail: File | null;
@@ -37,7 +38,6 @@ export default function AddEpisode({
   isLoading: boolean;
   refetch: () => void;
 }) {
-  const [isSeries, setIsSeries] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const {
     register,
@@ -52,7 +52,7 @@ export default function AddEpisode({
       series: [
         {
           episode_name: "",
-          episode_number: "",
+          episode_number: undefined,
           episode_duration: "",
           episode_file: null,
           episode_thumbnail: null,
@@ -81,10 +81,10 @@ export default function AddEpisode({
       // Episodes
       const episodeArray = data.series.map((episode: any, i: number) => ({
         key: `ep${i}`,
-        episode_number: episode.episode_number,
+        episode_number: Number(episode.episode_number),
         title: episode.episode_name,
         description: episode.episode_description,
-        duration: episode.episode_duration,
+        duration: String(ConvertToSeconds(episode.episode_duration)),
       }));
 
       formData.append("episodes", JSON.stringify(episodeArray));
@@ -103,7 +103,7 @@ export default function AddEpisode({
       });
 
       // Print Form Data
-      /*  formData.forEach((value, key) => {
+      /* formData.forEach((value, key) => {
         console.log(`${key}: ${value}`);
       });
 
@@ -120,7 +120,7 @@ export default function AddEpisode({
       );
 
       reset();
-      toast.success(response.data?.message || "Series added successfully!");
+      toast.success("Episode added successfully!");
     } catch (error: any) {
       const message = error?.response?.data?.message || "Something went wrong!";
       throw new Error(message);
@@ -167,6 +167,7 @@ export default function AddEpisode({
                 <div>
                   <Label className="custom-label mb-3">Episode Number</Label>
                   <Input
+                    type="number"
                     placeholder="Episode number"
                     className="custom-content-input"
                     {...register(`series.${index}.episode_number`, {
@@ -181,11 +182,10 @@ export default function AddEpisode({
                 </div>
 
                 <div>
-                  <Label className="custom-label mb-3">
-                    Duration (seconds)
-                  </Label>
+                  <Label className="custom-label mb-3">Duration (minute)</Label>
                   <Input
                     type="number"
+                    step="any"
                     placeholder="Duration"
                     className="custom-content-input"
                     {...register(`series.${index}.episode_duration`, {
@@ -279,7 +279,7 @@ export default function AddEpisode({
               onClick={() =>
                 appendSeries({
                   episode_name: "",
-                  episode_number: "",
+                  episode_number: 0,
                   episode_duration: "",
                   episode_file: null,
                   episode_thumbnail: null,

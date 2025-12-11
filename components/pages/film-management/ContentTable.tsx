@@ -19,7 +19,8 @@ import Link from "next/link";
 import LoadingSpinner from "@/app/(dashboard)/loading";
 import convertDateStr from "@/hooks/convertDateStr";
 import FormatDuration from "@/hooks/formatDuration";
-import { Video } from "lucide-react";
+import { Search, Video } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 interface Content {
   id: string | number;
@@ -77,7 +78,13 @@ export default function ContentTable() {
     placeholderData: (prev) => prev,
   });
 
-  const videoDetailsList = data?.data || [];
+  const [search, setSearch] = useState("");
+
+  const filteredData = data?.data.filter((item: any) =>
+    JSON.stringify(item).toLowerCase().includes(search.toLowerCase())
+  );
+
+  // const videoDetailsList = data?.data || [];
 
   const columns: ColumnDef<Content>[] = [
     {
@@ -199,73 +206,90 @@ export default function ContentTable() {
   return (
     <>
       {/* Filter */}
-      <div className="mb-4 flex flex-wrap gap-4">
-        {/* Genre */}
-        <Select
-          value={selectedGenre}
-          onValueChange={(value) => setSelectedGenre(value)}
-        >
-          <SelectTrigger className="flex items-center gap-2 rounded border border-gray-black-50 bg-dark-bg px-5 py-2.5 !text-white cursor-pointer outline-none shadow-none focus-visible:ring-0 focus-visible:border-border-gray-black-50">
-            <SelectValue placeholder="Genre" />
-          </SelectTrigger>
-          <SelectContent className="border border-gray3-bg bg-dark-bg rounded">
-            <SelectGroup className="space-y-2">
-              {genre?.data.map((item: string, idx: number) => (
-                <SelectItem key={idx} className="selectOption" value={item}>
-                  {item}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+      <div className="mb-4 flex justify-between flex-wrap gap-4">
+        <div className="flex flex-wrap gap-4">
+          {/* Genre */}
+          <Select
+            value={selectedGenre}
+            onValueChange={(value) => setSelectedGenre(value)}
+          >
+            <SelectTrigger className="flex items-center gap-2 rounded border border-gray-black-50 bg-dark-bg px-5 py-2.5 !text-white cursor-pointer outline-none shadow-none focus-visible:ring-0 focus-visible:border-border-gray-black-50">
+              <SelectValue placeholder="Genre" />
+            </SelectTrigger>
+            <SelectContent className="border border-gray3-bg bg-dark-bg rounded">
+              <SelectGroup className="space-y-2">
+                {genre?.data.map((item: string, idx: number) => (
+                  <SelectItem key={idx} className="selectOption" value={item}>
+                    {item}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
 
-        {/* Category */}
-        <Select
-          value={selectedCategory}
-          onValueChange={(value) => setSelectedCategory(value)}
-        >
-          <SelectTrigger className="flex items-center gap-2 rounded border border-gray-black-50 bg-dark-bg px-5 py-2.5 !text-white cursor-pointer outline-none shadow-none focus-visible:ring-0 focus-visible:border-border-gray-black-50">
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent className="border border-gray3-bg bg-dark-bg rounded">
-            <SelectGroup className="space-y-2 ">
-              {category?.data?.map((item: Category, idx: number) => (
-                <SelectItem key={idx} className="selectOption" value={item?.id}>
-                  {item?.category_name}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+          {/* Category */}
+          <Select
+            value={selectedCategory}
+            onValueChange={(value) => setSelectedCategory(value)}
+          >
+            <SelectTrigger className="flex items-center gap-2 rounded border border-gray-black-50 bg-dark-bg px-5 py-2.5 !text-white cursor-pointer outline-none shadow-none focus-visible:ring-0 focus-visible:border-border-gray-black-50">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent className="border border-gray3-bg bg-dark-bg rounded">
+              <SelectGroup className="space-y-2 ">
+                {category?.data?.map((item: Category, idx: number) => (
+                  <SelectItem
+                    key={idx}
+                    className="selectOption"
+                    value={item?.id}
+                  >
+                    {item?.category_name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
 
-        {/* Status */}
-        <Select
-          value={selectedStatus}
-          onValueChange={(value) => setSelectedStatus(value)}
-        >
-          <SelectTrigger className="flex items-center gap-2 rounded border border-gray-black-50 bg-dark-bg px-5 py-2.5 !text-white cursor-pointer outline-none shadow-none focus-visible:ring-0 focus-visible:border-border-gray-black-50">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent className="border border-gray3-bg bg-dark-bg rounded">
-            <SelectGroup className="space-y-2">
-              <SelectItem className="selectOption" value="ALL">
-                All
-              </SelectItem>
-              <SelectItem className="selectOption" value="LIVE">
-                Live
-              </SelectItem>
-              <SelectItem className="selectOption" value="PUBLISHED">
-                Published
-              </SelectItem>
-              <SelectItem className="selectOption" value="UNPUBLISHED">
-                Unpublished
-              </SelectItem>
-              <SelectItem className="selectOption" value="DRAFT">
-                Draft
-              </SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+          {/* Status */}
+          <Select
+            value={selectedStatus}
+            onValueChange={(value) => setSelectedStatus(value)}
+          >
+            <SelectTrigger className="flex items-center gap-2 rounded border border-gray-black-50 bg-dark-bg px-5 py-2.5 !text-white cursor-pointer outline-none shadow-none focus-visible:ring-0 focus-visible:border-border-gray-black-50">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent className="border border-gray3-bg bg-dark-bg rounded">
+              <SelectGroup className="space-y-2">
+                <SelectItem className="selectOption" value="ALL">
+                  All
+                </SelectItem>
+                <SelectItem className="selectOption" value="LIVE">
+                  Live
+                </SelectItem>
+                <SelectItem className="selectOption" value="PUBLISHED">
+                  Published
+                </SelectItem>
+                <SelectItem className="selectOption" value="UNPUBLISHED">
+                  Unpublished
+                </SelectItem>
+                <SelectItem className="selectOption" value="DRAFT">
+                  Draft
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Search bar */}
+        <div className="relative max-w-[300px] w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search..."
+            className="pl-10 bg-dark-bg border border-gray-black-50 text-white shadow-none outline-0 focus-visible:ring-0 focus-visible:border-border-gray-black-50"
+          />
+        </div>
       </div>
 
       {/* table */}
@@ -276,7 +300,7 @@ export default function ContentTable() {
           <div>
             <DataTable
               columns={columns}
-              data={videoDetailsList}
+              data={filteredData}
               page={page}
               pageSize={pageSize}
               total={total}
