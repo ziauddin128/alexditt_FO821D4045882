@@ -145,27 +145,17 @@ export default function EditUser({
                   />
                 ) : userDetails?.avatar ? (
                   <>
-                    {/* Future ey ata uncomment kore dile real image asbe */}
-                    {/* <Image
+                    <img
                       src={userDetails.avatar}
                       alt="Admin"
-                      className="h-[100px] w-[100px]"
-                      width={100}
-                      height={100}
-                    /> */}
-                    <Image
-                      src="/images/user.svg"
-                      alt="Admin"
-                      className="h-[100px] w-[100px]"
-                      width={100}
-                      height={100}
+                      className="h-[100px] w-[100px] object-cover rounded-full"
                     />
                   </>
                 ) : (
                   <Image
                     src="/images/user.svg"
                     alt="Admin"
-                    className="h-[100px] w-[100px]"
+                    className="h-[100px] w-[100px] object-cover rounded-full"
                     width={100}
                     height={100}
                   />

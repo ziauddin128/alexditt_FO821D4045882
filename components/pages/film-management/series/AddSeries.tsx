@@ -20,7 +20,7 @@ import {
   useFieldArray,
   Controller,
 } from "react-hook-form";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -60,9 +60,7 @@ type Inputs = {
 
 export default function AddSeries() {
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
   const [isSeries, setIsSeries] = useState(false);
-  const queryClient = useQueryClient();
 
   // Genre
   const { data: allGenre, isLoading: isGenreLoading } = useQuery({
@@ -250,14 +248,6 @@ export default function AddSeries() {
     } finally {
       setSubmitLoading(false);
     }
-  };
-
-  // Drag handlers
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") setDragActive(true);
-    if (e.type === "dragleave") setDragActive(false);
   };
 
   // File picker handler
@@ -529,7 +519,6 @@ export default function AddSeries() {
                   name={`casts.${index}.cast_img`}
                   control={control}
                   rules={{
-                    required: "Cast image is required",
                     validate: {
                       isImage: (file: File | null) =>
                         file

@@ -109,11 +109,6 @@ export default function AddMovie() {
     name: "casts",
   });
 
-  const genres = watch("genres");
-  const category_id = watch("category_id");
-  const contentType = watch("contentType");
-  const kids_mode = watch("kids_mode");
-  const director_thumbnail = watch("director_thumbnail");
   const trailer = watch("trailer");
   const thumbnail = watch("movie_thumbnail");
   const vidFile = watch("file");
@@ -208,7 +203,6 @@ export default function AddMovie() {
   };
 
   // File picker handler
-
   const handleFilePick: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const file = e.target.files?.[0] ?? null;
 
@@ -552,7 +546,6 @@ export default function AddMovie() {
                   name={`casts.${index}.cast_img`}
                   control={control}
                   rules={{
-                    required: "Cast image is required",
                     validate: {
                       isImage: (file: File | null) =>
                         file
@@ -574,9 +567,7 @@ export default function AddMovie() {
                         className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
                       />
                       {fieldState.error && (
-                        <p className="text-red-500">
-                          {fieldState.error.message}
-                        </p>
+                        <p className="error-msg">{fieldState.error.message}</p>
                       )}
                     </div>
                   )}

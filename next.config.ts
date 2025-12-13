@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     optimizeCss: false,
   },
   images: {
-    domains: ["localhost", "randomuser.me"], // your allowed domains here
+    domains: ["localhost", "randomuser.me"],  
   },
   async redirects() {
     return [

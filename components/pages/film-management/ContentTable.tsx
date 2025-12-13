@@ -68,8 +68,10 @@ export default function ContentTable() {
         params: {
           page,
           perPage: pageSize,
-          ...(selectedGenre && { genres: selectedGenre }),
-          ...(selectedCategory && { category: selectedCategory }),
+          ...(selectedGenre &&
+            selectedGenre != "ALL" && { genres: selectedGenre }),
+          ...(selectedCategory &&
+            selectedCategory != "ALL" && { category: selectedCategory }),
           ...(selectedStatus !== "ALL" && { status: selectedStatus }),
         },
       });
@@ -207,7 +209,7 @@ export default function ContentTable() {
     <>
       {/* Filter */}
       <div className="mb-4 flex justify-between flex-wrap gap-4">
-        <div className="flex flex-wrap gap-4">
+        <div className="mb-4 flex flex-wrap gap-4">
           {/* Genre */}
           <Select
             value={selectedGenre}
@@ -218,6 +220,9 @@ export default function ContentTable() {
             </SelectTrigger>
             <SelectContent className="border border-gray3-bg bg-dark-bg rounded">
               <SelectGroup className="space-y-2">
+                <SelectItem className="selectOption" value="ALL">
+                  All
+                </SelectItem>
                 {genre?.data.map((item: string, idx: number) => (
                   <SelectItem key={idx} className="selectOption" value={item}>
                     {item}
@@ -237,11 +242,14 @@ export default function ContentTable() {
             </SelectTrigger>
             <SelectContent className="border border-gray3-bg bg-dark-bg rounded">
               <SelectGroup className="space-y-2 ">
+                <SelectItem className="selectOption" value="ALL">
+                  All
+                </SelectItem>
                 {category?.data?.map((item: Category, idx: number) => (
                   <SelectItem
                     key={idx}
                     className="selectOption"
-                    value={item?.id}
+                    value={item?.category_name}
                   >
                     {item?.category_name}
                   </SelectItem>
@@ -281,13 +289,13 @@ export default function ContentTable() {
         </div>
 
         {/* Search bar */}
-        <div className="relative max-w-[300px] w-full">
+        <div className="relative max-w-[300px] w-full h-fit ">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search..."
-            className="pl-10 bg-dark-bg border border-gray-black-50 text-white shadow-none outline-0 focus-visible:ring-0 focus-visible:border-border-gray-black-50"
+            className="pl-10 bg-dark-bg  border border-gray-black-50 text-white shadow-none outline-0 focus-visible:ring-0 focus-visible:border-border-gray-black-50"
           />
         </div>
       </div>

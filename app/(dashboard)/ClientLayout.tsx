@@ -1,8 +1,6 @@
 "use client";
-import React, { ReactNode, useEffect, useRef, useState } from "react";
-import logo from "@/public/logo.svg";
+import React, { ReactNode, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 
 import {
@@ -13,25 +11,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 // Importing Lucide Icons
-import { Menu, MessageCircleQuestionMark } from "lucide-react";
+import { Menu } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
-import SearchIcon from "@/components/icons/SearchIcon";
-import BellIcon from "@/components/icons/BellIcon";
 import Dashboard from "@/components/icons/Dashboard";
-import Content from "@/components/icons/Content";
 import Categories from "@/components/icons/Categories";
 import Users from "@/components/icons/Users";
-import Subscription from "@/components/icons/Subscription";
-import Setting from "@/components/icons/Setting";
 import Logout from "@/components/icons/Logout";
 import { useAuth } from "@/provider/AuthProvider";
-import { useQuery } from "@tanstack/react-query";
-import { privateAxios } from "@/components/axiosInstance/axios";
-import useGetDifference from "@/hooks/useGetDifference";
-import NotificationIcon from "@/components/icons/NotificationIcon";
 import FilmManagement from "@/components/icons/FilmManagement";
-import LiveTbIcon from "@/components/icons/LiveTvIcon";
 
 // Menu and Bottom items
 const menuItems = [
@@ -55,16 +42,6 @@ const menuItems = [
     icon: <Users className="w-5 h-5 text-white" />,
     label: "User Management",
   },
-  /*  {
-    href: "/dashboard/liveTv",
-    icon: <LiveTbIcon className="w-5 h-5 text-white" />,
-    label: "Live TV",
-  }, */
-  /*   {
-    href: "/dashboard/setting",
-    icon: <Setting className="w-5 h-5 text-white" />,
-    label: "Setting",
-  }, */
 ];
 
 const bottomMenu = [
@@ -77,62 +54,19 @@ const bottomMenu = [
 
 export default function ClientLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [notificationOpen, setNotificationOpen] = useState(false);
 
-  const { logout, isNotification, user } = useAuth();
+  const { logout, user } = useAuth();
   const pathname = usePathname();
-
-  // Fake user data (since we're not fetching real data)
-
-  /* const user = {
-    data: {
-      avatar_url: "/dashboard/profile.png",
-      name: "John Doe",
-      email: "john.doe@example.com",
-    },
-  }; */
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  // Last 4 Notification
-  /* const {
-    isLoading,
-    error,
-    data: notificationData = [],
-  } = useQuery({
-    queryKey: ["notificationData"],
-    queryFn: async () => {
-      const res = await privateAxios.get("/users/getAllNotifications");
-      return res.data.data;
-    },
-  }); */
-
   const isLoading = false;
   const error = false;
 
-  const notificationData = [
-    {
-      id: 1,
-      text: "Hello",
-    },
-  ];
-
-  const [page, setPage] = useState(1);
-  const pageSize = 4; // Number of items per page
-  const lastFourNotifications = notificationData.slice(
-    (page - 1) * pageSize,
-    page * pageSize
-  );
-
   if (isLoading) return null;
   if (error) return null;
-
-  // Toggle the notification modal
-  const toggleNotification = () => {
-    setNotificationOpen((prev) => !prev);
-  };
 
   // Handle Logout
   const router = useRouter();
@@ -152,82 +86,14 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
         </div>
 
         <div className="flex items-center ">
-          {/* <div className="relative mr-8 hidden sm:block">
-            <Input
-              className="flex w-auto lg:w-[330px] justify-between items-center border border-[color:var(--Line-Color,#1B202C)] px-4 py-[9px] rounded-lg border-solid h-[44px] shadow-none outline-none focus-visible:ring-0 focus-visible:border-primary-color"
-              placeholder="Search"
-            />
-            <SearchIcon className="absolute bottom-[12.5px] right-4" />
-          </div> */}
-          {/* Notification */}
-          {/* <div className="mr-4 relative">
-            <DropdownMenu>
-              <DropdownMenuTrigger className="shadow-none outline-0 cursor-pointer">
-                <div className="relative flex w-12 h-12 items-center gap-2.5  justify-center rounded-3xl cursor-pointer">
-                  <NotificationIcon />
-                  {isNotification && (
-                    <div className="absolute top-3 right-3 h-[8px] w-[8px] rounded-full "></div>
-                  )}
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="bg-gray3-bg border-gray3-border text-white mr-2 sm:mr-14"
-                style={{ width: "300px" }}
-              >
-                <div className="flex justify-between gap-2 p-4 border-b border-[#1F2430]">
-                  <h1 className="text-base font-semibold">Notification</h1>
-                </div>
-                <div>
-                  {lastFourNotifications.map((notification: any) => {
-                    return (
-                      <div
-                        key={notification.id}
-                        className="p-4 flex items-center justify-between border-b border-[#1F2430]"
-                      >
-                        <div className="flex flex-col gap-1">
-                          <h1 className="text-sm font-medium">
-                            {notification.text}
-                          </h1>
-                          <p className="text-xs mt-1">
-                            {useGetDifference(notification.created_at)}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="p-4">
-                  <Link
-                    href="/dashboard/setting/notification"
-                    className="bg-[#2D9DFF] text-sm font-medium py-3 px-3 rounded w-full block text-center"
-                  >
-                    View All Notifications
-                  </Link>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div> */}
-
           {/* User Profile */}
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger className="shadow-none outline-0 cursor-pointer">
               <div>
                 <div className="flex-shrink-0 rounded-full">
-                  {/* Ata Uncomment kore dile real admin er image asbe */}
-
-                  {/* <Image
+                  <img
                     className="w-12 h-12 rounded-full object-cover"
-                    src={user?.avatar_url || "/dashboard/profile.png"}
-                    width={48}
-                    height={48}
-                    alt="User"
-                  /> */}
-
-                  <Image
-                    className="w-12 h-12 rounded-full object-cover"
-                    src={"/dashboard/profile.png"}
-                    width={48}
-                    height={48}
+                    src={user?.avatar_url}
                     alt="Admin"
                   />
                 </div>
@@ -321,22 +187,6 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
               </div>
             );
           })}
-
-          {/* <div className="flex items-center p-4">
-            <div className="flex-shrink-0">
-              <Image
-                className="w-10 h-10 rounded-full"
-                src={user?.data?.avatar_url || "/images/profile.png"}
-                width={40}
-                height={40}
-                alt="User"
-              />
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium">{user?.data?.name}</p>
-              <p className="text-xs text-gray-500">{user?.data?.email}</p>
-            </div>
-          </div> */}
         </div>
       </div>
 

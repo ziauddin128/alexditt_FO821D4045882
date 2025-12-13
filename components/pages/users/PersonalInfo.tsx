@@ -7,7 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import Link from "next/link";
 import EditIcons from "@/components/icons/EditIcons";
-import Image from "next/image";
 import LoadingSpinner from "@/app/(dashboard)/loading";
 import convertDateStr from "@/hooks/convertDateStr";
 import { privateAxios } from "@/components/axiosInstance/axios";
@@ -94,12 +93,10 @@ export default function PersonalInfo({
           {/* Profile Area */}
           <div className="bg-[#131824] rounded-sm p-6 flex flex-wrap sm:flex-nowrap items-center gap-6">
             <div>
-              <Image
-                src="/images/profiles.png"
-                height={300}
-                width={300}
-                alt="User Profile"
-                className="h-[100px] min-w-[100px] w-[100px] rounded-full border-1 border-[#2D9DFF]"
+              <img
+                src={userDet.avatar || "/images/profiles.png"}
+                alt="Admin"
+                className="h-[100px] w-[100px] object-cover rounded-full"
               />
             </div>
 

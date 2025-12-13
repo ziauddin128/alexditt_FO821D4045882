@@ -3,7 +3,7 @@ import { privateAxios } from "@/components/axiosInstance/axios";
 import { DataTable } from "@/components/reusable/data-table";
 import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import { Plus, ToggleRight } from "lucide-react";
+import { Plus } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import {
@@ -113,14 +113,6 @@ export default function UserTable() {
           >
             <EyeIcon className="text-[#0CAF60] h-5 w-5" />
           </Link>
-
-          {/*   <Link
-            href="#"
-            className="bg-[#FFECD2] rounded-full h-9 w-9 flex items-center justify-center"
-            title="Active/Deactive"
-          >
-            <ToggleRight className="text-[#FFA21D] h-5 w-5" />
-          </Link> */}
 
           <Link
             href={`/dashboard/users/edit/${row.original.id}`}
