@@ -62,35 +62,7 @@ export function DataTable<TData, TValue>({
       <div className="rounded-md bg-[#131824] text-white ">
         {/* table top bar */}
         {children && <div className="px-4 pt-4 mb-2">{children}</div>}
-        {/* <div className="flex flex-col md:flex-row items-start md:items-center justify-between rounded-md px-6 pt-4 gap-3"> */}
-        {/* <h2 className="text-lg font-semibold text-white">
-          {tableTitle}
-        </h2> */}
-        <>
-          {/* {addDataButton || (
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-100">
-                  <Search className="w-4 h-4" />
-                </span>
-                <Input
-                  type="text"
-                  placeholder="Search anything here"
-                  className="pl-9 pr-4 py-2 w-56 rounded-md  border border-gray-100 focus:outline-none focus:ring-2 focus:ring-[#5E17EB] text-sm"
-                />
-              </div>
-              <Button
-                onClick={() => setOpen && setOpen(!open)}
-                variant="outline"
-                className="flex items-center gap-2  text-gray-200 font-medium cursor-pointer"
-              >
-                <SlidersHorizontal className="w-4 h-4" />
-                Filters
-              </Button>
-            </div>       
-          )} */}
-        </>
-        {/* </div> */}
+
         <div className="mx-4  overflow-hidden ">
           <Table className="">
             <TableHeader className=" ">

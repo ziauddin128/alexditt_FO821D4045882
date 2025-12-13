@@ -7,10 +7,11 @@ import Subscription from "@/components/pages/users/Subscription";
 import Payments from "@/components/pages/users/Payments";
 import { useQuery } from "@tanstack/react-query";
 import { privateAxios } from "@/components/axiosInstance/axios";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
-export default function UserDetails({ params }: { params: any }) {
-  const id = params?.id;
+export default function UserDetails() {
+  const params = useParams();
+  const id = params.id;
 
   const router = useRouter();
 

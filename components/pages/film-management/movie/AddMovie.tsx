@@ -20,10 +20,13 @@ import {
   useFieldArray,
   Controller,
 } from "react-hook-form";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { privateAxios } from "@/components/axiosInstance/axios";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import ReactSelect from "react-select";
+import { toast } from "sonner";
+import ConvertToSeconds from "@/hooks/convertToSecond";
 
 interface Category {
   id: string;
@@ -32,13 +35,15 @@ interface Category {
 
 type Inputs = {
   title: string;
-  genre: string;
+  genres: string;
+  release_date: string;
+  duration: string;
   kids_mode: boolean;
   description: string;
   category_id: string;
   contentType: string;
   director_name: string;
-  director_thumbnail: string;
+  director_thumbnail: File | null;
   file: File | null;
   movie_thumbnail: File | null;
   trailer: File | null;
@@ -46,6 +51,7 @@ type Inputs = {
 };
 
 export default function AddMovie() {
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
   // Genre
@@ -57,6 +63,11 @@ export default function AddMovie() {
     },
   });
 
+  const genreOption = allGenre?.data?.map((item: string) => ({
+    value: item,
+    label: item,
+  }));
+
   // Category
   const { data: allCategory, isLoading: isCategoryLoading } = useQuery({
     queryKey: ["category"],
@@ -66,8 +77,6 @@ export default function AddMovie() {
     },
   });
 
-  const queryClient = useQueryClient();
-
   const {
     register,
     handleSubmit,
@@ -75,16 +84,18 @@ export default function AddMovie() {
     watch,
     control,
     formState: { errors },
+    reset,
   } = useForm<Inputs>({
     defaultValues: {
       title: "",
       description: "",
       category_id: "",
-      genre: "",
+      genres: "",
       contentType: "",
       file: null,
       movie_thumbnail: null,
       trailer: null,
+      director_thumbnail: null,
       casts: [{ cast: "", cast_img: null }],
     },
   });
@@ -98,103 +109,81 @@ export default function AddMovie() {
     name: "casts",
   });
 
-  const genre = watch("genre");
+  const genres = watch("genres");
   const category_id = watch("category_id");
   const contentType = watch("contentType");
   const kids_mode = watch("kids_mode");
+  const director_thumbnail = watch("director_thumbnail");
   const trailer = watch("trailer");
   const thumbnail = watch("movie_thumbnail");
   const vidFile = watch("file");
 
-  // send to the server
-  const uploadContent = useMutation({
-    mutationFn: async (data: Inputs) => {
-      try {
-        const formData = new FormData();
+  // Form Submission
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    setSubmitLoading(true);
 
-        // Append Movie, Thumbnail, Trailer File
-        if (data.file) formData.append("video", data.file);
-        if (data.movie_thumbnail)
-          formData.append("movie_thumbnail", data.movie_thumbnail);
-        if (data.trailer) formData.append("movie_trailer", data.trailer);
+    try {
+      const formData = new FormData();
 
-        // Form Data
-        formData.append("title", data.title);
-        formData.append("genre", data.genre);
-        formData.append("kids_mode", data.kids_mode ? "true" : "false");
-        formData.append("description", data.description);
-        formData.append("category_id", data.category_id);
+      // Append Movie, Thumbnail, Trailer File
+      if (data.file) formData.append("video", data.file);
+      if (data.movie_thumbnail)
+        formData.append("movie_thumbnail", data.movie_thumbnail);
+      if (data.trailer) formData.append("movie_trailer", data.trailer);
 
-        //formData.append("type", data.contentType);
+      // Form Data
+      formData.append("title", data.title);
 
-        formData.append("director_name", data.director_name);
+      const genresArray = data.genres as unknown as { value: string }[];
+      const genreString = genresArray?.map((g) => g.value).join(", ");
+
+      formData.append("genres", genreString);
+
+      const releaseDate = new Date(data.release_date);
+      formData.append("release_date", releaseDate.toISOString());
+
+      formData.append("duration", String(ConvertToSeconds(data.duration)));
+      formData.append("kids_mode", data.kids_mode ? "true" : "false");
+      formData.append("description", data.description);
+      formData.append("category_id", data.category_id);
+
+      formData.append("director_name", data.director_name);
+
+      if (data.director_thumbnail) {
         formData.append("director_thumbnail", data.director_thumbnail);
+      }
 
-        console.log("FormData Contents:");
-        formData.forEach((value, key) => {
-          console.log(`${key}: ${value}`);
-        });
+      // Casts
+      const castArray = data.casts.map((cast: any, i: number) => ({
+        key: `cast_member_${i}`,
+        name: cast.cast,
+      }));
 
-        return;
+      formData.append("cast", JSON.stringify(castArray));
 
-        // You can replace this with your actual API endpoint
-        const response = await privateAxios.post(`/uploads/video`, formData, {
+      data.casts.forEach((cast, i) => {
+        if (cast.cast_img instanceof File) {
+          formData.append(`cast_member_${i}`, cast.cast_img);
+        }
+      });
+
+      const response = await privateAxios.post(
+        `/admin/movie/create`,
+        formData,
+        {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        });
-
-        console.log(response.data);
-      } catch (error: any) {
-        const message =
-          error?.response?.data?.message || "Something went wrong!";
-        throw new Error(message);
-      }
-    },
-  });
-
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
-    console.log("All File Data", data);
-
-    return;
-
-    // New approach for get cast
-    /* const formData = new FormData();
-    data.casts.forEach((cast: any, i: number) => {
-      formData.append(`casts[${i}][cast]`, cast.cast);
-      formData.append(`casts[${i}][cast_img]`, cast.cast_img[0]);
-    });
-
-    data.series.forEach((tv: any, i: number) => {
-      formData.append(`series[${i}][series_name]`, tv.series_name);
-      formData.append(`series[${i}][episode_name]`, tv.episode_name);
-      formData.append(`series[${i}][episode_number]`, tv.episode_number);
-      formData.append(`series[${i}][episode_file]`, tv.episode_file[0]);
-      formData.append(
-        `series[${i}][episode_thumbnail]`,
-        tv.episode_thumbnail[0]
+        }
       );
-    });
-
-    for (let [key, value] of formData.entries()) {
-      if (value instanceof File) {
-        console.log(key, value); // Full File object
-      } else {
-        console.log(key, value); // Normal string
-      }
-    } */
-
-    uploadContent.mutate(data, {
-      onSuccess: () => {
-        console.log("UPdate done");
-        // toast.success("Content Updated Successfully!");
-        // Optional: Reset form or redirect
-      },
-      onError: (error: Error) => {
-        // toast.error(error.message || "Failed to upload content");
-        console.log("Error form update content");
-      },
-    });
+      reset();
+      toast.success(response.data?.message || "Movie updated successfully!");
+    } catch (error: any) {
+      const message = error?.response?.data?.message || "Something went wrong!";
+      throw new Error(message);
+    } finally {
+      setSubmitLoading(false);
+    }
   };
 
   // Drag handlers
@@ -219,6 +208,7 @@ export default function AddMovie() {
   };
 
   // File picker handler
+
   const handleFilePick: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const file = e.target.files?.[0] ?? null;
 
@@ -235,7 +225,6 @@ export default function AddMovie() {
 
   const handleVideoPick: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const vidFile = e.target.files?.[0] ?? null;
-
     setValue("file", vidFile, { shouldValidate: true, shouldDirty: true });
   };
 
@@ -280,6 +269,19 @@ export default function AddMovie() {
                   className="hidden"
                 />
               </label>
+
+              <input
+                type="hidden"
+                // {...register("file", { required: "Movie file is required" })}
+                {...register("file", {
+                  required: "Movie file is required",
+                  validate: {
+                    isVideo: (file: File | null) =>
+                      file?.type?.startsWith("video/") ||
+                      "Only video files are allowed",
+                  },
+                })}
+              />
 
               {vidFile && (
                 <p className="text-sm text-gray-black-200">
@@ -327,44 +329,61 @@ export default function AddMovie() {
             {/* Genre */}
             <div>
               <Label className="custom-label mb-3">Genre</Label>
-
               <Controller
-                name="genre"
+                name="genres"
                 control={control}
-                defaultValue=""
-                rules={{
-                  validate: (value) => value !== "" || "Genre is required",
-                }}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
-                    <SelectTrigger className="custom-content-input cursor-pointer">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
-                      <SelectGroup className="space-y-2">
-                        <SelectGroup className="space-y-2">
-                          {allGenre?.data.map((item: string, idx: number) => (
-                            <SelectItem
-                              key={idx}
-                              className="selectOption !justify-start"
-                              value={item}
-                            >
-                              {item}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+                rules={{ required: "Select at least one genre" }}
+                render={({ field, fieldState }) => (
+                  <div>
+                    <ReactSelect
+                      isMulti
+                      options={genreOption}
+                      className="basic-multi-select custom-multi-select"
+                      classNamePrefix="select"
+                      onChange={(selected) => field.onChange(selected)}
+                    />
+
+                    {fieldState.error && (
+                      <p className="error-msg">{fieldState.error.message}</p>
+                    )}
+                  </div>
                 )}
               />
+            </div>
 
-              {errors.genre && (
-                <p className="error-msg">{errors.genre.message}</p>
+            {/* Release Date */}
+            <div>
+              <Label className="custom-label mb-3">Release Date</Label>
+              <div className="relative">
+                <Input
+                  type="date"
+                  placeholder="Type your movie name"
+                  className="custom-content-input white-calendar"
+                  {...register("release_date", {
+                    required: "Release Date is required",
+                  })}
+                />
+              </div>
+
+              {errors.release_date && (
+                <p className="error-msg">{errors.release_date.message}</p>
+              )}
+            </div>
+
+            {/* Duration */}
+            <div>
+              <Label className="custom-label mb-3">Duration (minute)</Label>
+              <Input
+                type="number"
+                step="any"
+                placeholder="Duration"
+                className="custom-content-input"
+                {...register("duration", {
+                  required: "Duration Date is required",
+                })}
+              />
+              {errors.duration && (
+                <p className="error-msg">{errors.duration.message}</p>
               )}
             </div>
           </div>
@@ -398,7 +417,6 @@ export default function AddMovie() {
               className="custom-content-input"
               {...register("description", {
                 required: "Description is required",
-                minLength: { value: 10, message: "Min 10 characters" },
               })}
             />
             {errors.description && (
@@ -407,7 +425,7 @@ export default function AddMovie() {
           </div>
 
           {/* Content Type */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1  gap-4">
             {/* Content Type */}
             <div>
               <Label className="custom-label mb-3">Content Category</Label>
@@ -452,64 +470,6 @@ export default function AddMovie() {
                 <p className="error-msg">{errors.category_id.message}</p>
               )}
             </div>
-
-            {/* Content Status */}
-            <div>
-              <Label className="custom-label mb-3">Content Status</Label>
-
-              <Controller
-                name="contentType"
-                control={control}
-                defaultValue=""
-                rules={{
-                  validate: (value) =>
-                    value !== "" || "Content type is required",
-                }}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
-                    <SelectTrigger className="custom-content-input cursor-pointer">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent className="border border-gray3-bg bg-dark-bg rounded text-white">
-                      <SelectGroup className="space-y-2">
-                        <SelectItem
-                          value="published"
-                          className="selectOption !justify-start"
-                        >
-                          Published
-                        </SelectItem>
-                        <SelectItem
-                          value="draft"
-                          className="selectOption !justify-start"
-                        >
-                          Draft
-                        </SelectItem>
-                        <SelectItem
-                          value="private"
-                          className="selectOption !justify-start"
-                        >
-                          Private
-                        </SelectItem>
-                        <SelectItem
-                          value="scheduled"
-                          className="selectOption !justify-start"
-                        >
-                          Scheduled
-                        </SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-
-              {errors.contentType && (
-                <p className="error-msg">{errors.contentType.message}</p>
-              )}
-            </div>
           </div>
 
           {/* Director */}
@@ -530,18 +490,37 @@ export default function AddMovie() {
 
             <div>
               <Label className="custom-label mb-3">Director Image</Label>
-              <div>
-                <input
-                  type="file"
-                  className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white  file:px-2"
-                  {...register("director_thumbnail", {
-                    required: "Director image is required",
-                  })}
-                />
-              </div>
-              {errors.director_thumbnail && (
-                <p className="error-msg">{errors.director_thumbnail.message}</p>
-              )}
+              <Controller
+                control={control}
+                name="director_thumbnail"
+                rules={{
+                  required: "Director image is required",
+                  validate: {
+                    isImage: (file: File | null) =>
+                      file
+                        ? file.type.startsWith("image/")
+                          ? true
+                          : "Only image files are allowed"
+                        : true,
+                  },
+                }}
+                render={({ field, fieldState }) => (
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="custom-content-input file:!h-auto !p-2.5 file:cursor-pointer cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] ?? null;
+                        field.onChange(file);
+                      }}
+                    />
+                    {fieldState.error && (
+                      <p className="error-msg">{fieldState.error.message}</p>
+                    )}
+                  </div>
+                )}
+              />
             </div>
           </div>
 
@@ -569,18 +548,39 @@ export default function AddMovie() {
 
               <div>
                 <Label className="custom-label mb-3">Cast Image</Label>
-                <input
-                  type="file"
-                  className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
-                  {...register(`casts.${index}.cast_img`, {
+                <Controller
+                  name={`casts.${index}.cast_img`}
+                  control={control}
+                  rules={{
                     required: "Cast image is required",
-                  })}
+                    validate: {
+                      isImage: (file: File | null) =>
+                        file
+                          ? file.type.startsWith("image/")
+                            ? true
+                            : "Only image files are allowed"
+                          : true,
+                    },
+                  }}
+                  render={({ field: controllerField, fieldState }) => (
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] ?? null;
+                          controllerField.onChange(file);
+                        }}
+                        className="custom-content-input file:!h-auto !p-2.5 cursor-pointer file:bg-primary-color file:text-white file:px-2"
+                      />
+                      {fieldState.error && (
+                        <p className="text-red-500">
+                          {fieldState.error.message}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 />
-                {errors?.casts?.[index]?.cast_img && (
-                  <p className="error-msg">
-                    {errors.casts[index].cast_img?.message as string}
-                  </p>
-                )}
               </div>
 
               {index > 0 && (
@@ -635,6 +635,11 @@ export default function AddMovie() {
                   type="hidden"
                   {...register("trailer", {
                     required: "Trailer is required",
+                    validate: {
+                      isVideo: (file: File | null) =>
+                        file?.type?.startsWith("video/") ||
+                        "Only video files are allowed",
+                    },
                   })}
                 />
                 {errors.trailer && (
@@ -676,6 +681,11 @@ export default function AddMovie() {
                   type="hidden"
                   {...register("movie_thumbnail", {
                     required: "Thumbnail image is required",
+                    validate: {
+                      isImage: (file: File | null) =>
+                        file?.type?.startsWith("image/") ||
+                        "Only image files are allowed",
+                    },
                   })}
                 />
                 {errors.movie_thumbnail && (
@@ -690,18 +700,10 @@ export default function AddMovie() {
           <div>
             <Button
               type="submit"
-              className={`w-full px-6 py-6 ${
-                uploadContent.isError
-                  ? "bg-red-600 hover:bg-red-700"
-                  : "bg-primary-color hover:bg-primary-color"
-              } cursor-pointer rounded text-base font-medium`}
-              disabled={uploadContent.isPending}
+              className={`w-full px-6 py-6 bg-primary-color hover:bg-primary-color cursor-pointer rounded text-base font-medium`}
+              disabled={submitLoading}
             >
-              {uploadContent.isPending
-                ? "Uploading..."
-                : uploadContent.isError
-                ? "Try Again"
-                : "Submit"}
+              {submitLoading ? "Uploading..." : "Submit"}
             </Button>
           </div>
         </div>
