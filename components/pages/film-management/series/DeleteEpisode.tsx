@@ -19,9 +19,11 @@ import { toast } from "sonner";
 export default function DeleteEpisode({
   id,
   refetch,
+  onSuccess,
 }: {
   id: string;
   refetch: () => void;
+  onSuccess: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -34,6 +36,7 @@ export default function DeleteEpisode({
 
       if (response.data) {
         toast.success(response?.data?.message);
+        onSuccess();
         refetch();
       }
     } catch (error: any) {

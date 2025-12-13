@@ -157,10 +157,10 @@ export default function EditSeries({
   const {
     register,
     handleSubmit,
+    getValues,
     setValue,
     watch,
     control,
-    reset,
     formState: { errors },
   } = useForm<Inputs>({
     defaultValues: {
@@ -199,7 +199,7 @@ export default function EditSeries({
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setSubmitLoading(true);
 
-    console.log("Submitted data", data);
+    // console.log("Submitted data", data);
 
     try {
       const formData = new FormData();
@@ -324,7 +324,7 @@ export default function EditSeries({
       }
 
       // Print Form Data
-      /*   formData.forEach((value, key) => {
+      /* formData.forEach((value, key) => {
         console.log(`${key}: ${value}`);
       });
 
@@ -339,6 +339,7 @@ export default function EditSeries({
           },
         }
       );
+      // refetch();
       toast.success(response.data?.message || "Series updated successfully!");
     } catch (error: any) {
       const message = error?.response?.data?.message || "Something went wrong!";
@@ -366,6 +367,30 @@ export default function EditSeries({
   const handleTrailerPick: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const vidFile = e.target.files?.[0] ?? null;
     setValue("trailer", vidFile, { shouldValidate: true, shouldDirty: true });
+  };
+
+  // Remove cast deleted value
+  const removeCastFromForm = (castId: string) => {
+    const current = getValues("cast_update") || [];
+
+    const next = current.filter((c: any) => c && c.id !== castId);
+
+    setValue("cast_update", next, {
+      shouldDirty: true,
+      shouldTouch: true,
+    });
+  };
+
+  // Remove Episode deleted value
+  const removeEpisodeFromForm = (episodeId: string) => {
+    const current = getValues("episode_update") || [];
+
+    const next = current.filter((ep: any) => ep && ep.id !== episodeId);
+
+    setValue("episode_update", next, {
+      shouldDirty: true,
+      shouldTouch: true,
+    });
   };
 
   return (
@@ -707,6 +732,7 @@ export default function EditSeries({
                         movieId={movieData?.id || ""}
                         id={cast?.id}
                         refetch={refetch}
+                        onSuccess={() => removeCastFromForm(cast.id)}
                       />
                     </div>
                   ))
@@ -1118,7 +1144,11 @@ export default function EditSeries({
                             />
                           </div>
 
-                          <DeleteEpisode id={item?.id} refetch={refetch} />
+                          <DeleteEpisode
+                            id={item?.id}
+                            refetch={refetch}
+                            onSuccess={() => removeEpisodeFromForm(item.id)}
+                          />
                         </div>
                       ))}
 
@@ -1127,7 +1157,6 @@ export default function EditSeries({
                         className="flex items-center gap-1 bg-primary-color text-white text-base py-2 px-2.5 rounded cursor-pointer w-fit"
                       >
                         <Plus className="w-5 h-5" />
-                        {/* <span>Add New Episode</span> */}
                       </Link>
                     </div>
                   ))
@@ -1330,7 +1359,11 @@ export default function EditSeries({
                           />
                         </div>
 
-                        <DeleteEpisode id={item?.id} refetch={refetch} />
+                        <DeleteEpisode
+                          id={item?.id}
+                          refetch={refetch}
+                          onSuccess={() => removeEpisodeFromForm(item.id)}
+                        />
                       </div>
                     </>
                   ))
